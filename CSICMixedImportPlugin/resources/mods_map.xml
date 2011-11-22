@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<map>
+	<metadata logical="true">
+		<name>CatalogIDDigital</name>
+		<xpath>/mods:mods/mods:recordInfo/mods:recordIdentifier</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>TitleDocMain</name>
+		<xpath>/mods:mods/mods:titleInfo[not(@type='alternative')]/mods:nonSort
+		</xpath>
+		<xpath>/mods:mods/mods:titleInfo[not(@type='alternative')]/mods:title
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>TitleDocSub1</name>
+		<xpath>/mods:mods/mods:titleInfo/mods:subTitle</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>TitleDocParallel</name>
+		<xpath>/mods:mods/mods:titleInfo[@type='alternative']/mods:title
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>ISBN</name>
+		<xpath>/mods:mods/mods:identifier[@type='ISBN' or @type='isbn']
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>ISSN</name>
+		<xpath>/mods:mods/mods:identifier[@type='ISSN' or @type='issn']
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>LCCN</name>
+		<xpath>/mods:mods/mods:identifier[@type='LCCN' or @type='lccn']
+		</xpath>
+	</metadata>
+	<metadata logical="true" physical="true">
+		<name>shelfmarksource</name>
+		<xpath>/mods:mods/mods:location/mods:shelfLocator</xpath>
+	</metadata>
+	<metadata logical="true" physical="true">
+		<name>physicallocation</name>
+		<xpath>/mods:mods/mods:location/mods:physicalLocation</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>SizeSourcePrint</name>
+		<xpath>/mods:mods/mods:physicalDescription/mods:extent</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>DocLanguage</name>
+		<xpath>/mods:mods/mods:language/mods:languageTerm[@type='code'][@authority='iso639-2b']
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>PublicationYear</name>
+		<xpath>/mods:mods/mods:originInfo/mods:dateCreated
+        </xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>PublicationYear</name>
+		<xpath>/mods:mods/mods:originInfo/mods:dateIssued
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>PublicationStart</name>
+		<xpath>/mods:mods/mods:originInfo/mods:dateIssued[@point='start']
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>PublicationEnd</name>
+		<xpath>/mods:mods/mods:originInfo/mods:dateIssued[@point='end']
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>PublisherName</name>
+		<xpath>/mods:mods/mods:originInfo/mods:publisher</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>PlaceOfPublication</name>
+		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='text']
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>Author</name>
+		<xpath>/mods:mods/mods:name[@type='personal']/mods:namePart[not(@type)]
+		</xpath>
+		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
+		</xpath>
+		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
+		</xpath>
+	</metadata>
+</map>

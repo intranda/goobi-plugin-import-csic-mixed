@@ -1,0 +1,62 @@
+
+<collection>
+	<record>
+		<leader>00790cam 2200181 45 0</leader>
+		<controlfield tag="008">071208s1867 enk 000 0 eng u</controlfield>
+		<datafield tag="082" ind1="1" ind2="4">
+			<subfield code="a">746.43204109034</subfield>
+		</datafield>
+		<datafield tag="100" ind1="1" ind2=" ">
+			<subfield code="a">Riego de la Branchardiere,</subfield>
+			<subfield code="c">Mlle.</subfield>
+		</datafield>
+		<datafield tag="245" ind1="1" ind2="0">
+			<subfield code="a">The Abergeldie winter book /</subfield>
+			<subfield code="c">by Mlle. Riego de la Branchardiere.</subfield>
+		</datafield>
+		<datafield tag="260" ind1=" " ind2=" ">
+			<subfield code="a">London :</subfield>
+			<subfield code="b">Simpkin, Marshall and co.,</subfield>
+			<subfield code="c">1867.</subfield>
+		</datafield>
+		<datafield tag="300" ind1=" " ind2=" ">
+			<subfield code="a">28 p. :</subfield>
+			<subfield code="b">ill. ;</subfield>
+			<subfield code="c">12 x 16 cm.</subfield>
+		</datafield>
+		<datafield tag="509" ind1=" " ind2=" ">
+			<subfield code="a">Also available as an e-book: full text
+				available when logged into Webcat.</subfield>
+		</datafield>
+		<datafield tag="590" ind1="0" ind2="0">
+			<subfield code="a">Rutt</subfield>
+		</datafield>
+		<datafield tag="590" ind1="0" ind2="0">
+			<subfield code="a">Manuals</subfield>
+		</datafield>
+		<datafield tag="596" ind1=" " ind2=" ">
+			<subfield code="a">5</subfield>
+		</datafield>
+		<datafield tag="696" ind1="0" ind2="0">
+			<subfield code="a">KNITTING - PATTERNS - 19TH CENTURY - TEXTILE
+				DESIGN</subfield>
+		</datafield>
+		<datafield tag="856" ind1="4" ind2=" ">
+			<subfield code="u">http://www.dd.library.soton.ac.uk/WSA/Knitting-manuals/00376326.pdf</subfield>
+			<subfield code="z">Access to the knitting manual.</subfield>
+		</datafield>
+		<datafield tag="999" ind1=" " ind2=" ">
+			<subfield code="a">KRL 746.43204109034 RIE</subfield>
+			<subfield code="w">DEWEY</subfield>
+			<subfield code="c">1</subfield>
+			<subfield code="i">00376326</subfield>
+			<subfield code="l">KRL</subfield>
+			<subfield code="m">WSA</subfield>
+			<subfield code="r">N</subfield>
+			<subfield code="s">Y</subfield>
+			<subfield code="t">REF-ONLY</subfield>
+			<subfield code="u">8/12/2007</subfield>
+			<subfield code="x">PRINT</subfield>
+		</datafield>
+	</record>
+</collection>

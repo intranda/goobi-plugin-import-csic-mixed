@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection>
+  <record>
+    <leader>00538cam 2200157 45c0</leader>
+    <controlfield tag="001">500960</controlfield>
+    <controlfield tag="003">SIRSI</controlfield>
+    <controlfield tag="008">000000s1994 xxu 000 eng u</controlfield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">0672305836 (pbk)</subfield>
+    </datafield>
+    <datafield tag="050" ind1="0" ind2="0">
+      <subfield code="a">QA76.55U5</subfield>
+    </datafield>
+    <datafield tag="100" ind1="1" ind2=" ">
+      <subfield code="a">Husain, Kamran.</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">Teach yourself UNIX Shell programming in 14 days /</subfield>
+      <subfield code="c">Kamran Husain.</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">Indianapolis :</subfield>
+      <subfield code="b">SAMS,</subfield>
+      <subfield code="c">1994.</subfield>
+    </datafield>
+    <datafield tag="509" ind1="0" ind2="0">
+      <subfield code="a">Shadowed copy, for Mike Chisholm's use</subfield>
+    </datafield>
+    <datafield tag="596" ind1=" " ind2=" ">
+      <subfield code="a">1</subfield>
+    </datafield>
+    <datafield tag="999" ind1=" " ind2=" ">
+      <subfield code="a">MC's Office QA 76.55U5 HUS</subfield>
+      <subfield code="w">LC</subfield>
+      <subfield code="c">1</subfield>
+      <subfield code="i">00044167</subfield>
+      <subfield code="d">2/3/1998</subfield>
+      <subfield code="l">HARTLEY</subfield>
+      <subfield code="m">HARTLEY</subfield>
+      <subfield code="p">20.36</subfield>
+      <subfield code="r">N</subfield>
+      <subfield code="s">Y</subfield>
+      <subfield code="t">REF-ONLY</subfield>
+      <subfield code="u">26/2/1998</subfield>
+      <subfield code="x">PRINT</subfield>
+    </datafield>
+  </record>
+</collection>

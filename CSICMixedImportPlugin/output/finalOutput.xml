@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:marc="http://www.loc.gov/MARC21/slim"
+	xmlns:mix="http://www.loc.gov/standards/mix/" xmlns:xlink="http://www.w3.org/1999/xlink"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:premis="http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd"
+	xmlns:rts="http://cosimo.stanford.edu/sdr/metsrights/" TYPE="BOOK"
+	LABEL="La renegada de Valladolid :" OBJID="MAD01_000927879"
+	xsi:schemaLocation="http://www.loc.gov/METS/  http://www.loc.gov/standards/mets/mets.xsd  http://www.loc.gov/MARC21/slim  http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd  http://www.loc.gov/mix/v20  http://www.loc.gov/standards/mix/mix.xsd  info:lc/xmlns/premis-v2  http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd  http://cosimo.stanford.edu/sdr/metsrights/  http://cosimo.stanford.edu/sdr/metsrights.xsd">
+	<mets:metsHdr CREATEDATE="2011-09-14T13:21:20">
+		<mets:agent ROLE="CREATOR" TYPE="ORGANIZATION">
+			<mets:name>CSIC, Libraries Coordination Unit, Spain</mets:name>
+		</mets:agent>
+		<mets:altRecordID TYPE="CSIC Call number">FL_COL_PLIEGOS-21-01</mets:altRecordID>
+	</mets:metsHdr>
+	<mets:dmdSec ID="DMD_0001" GROUPID="G_DMD">
+		<mets:mdWrap MDTYPE="MODS">
+			<mets:xmlData>
+				<mods:mods xmlns:mods="http://www.loc.gov/mods/v3">
+					<mods:extension>
+						<goobi:goobi xmlns:goobi="http://meta.goobi.org/v1.5.1/">
+							<goobi:metadata name="CatalogIDDigital">CSIC000927879
+							</goobi:metadata>
+							<goobi:metadata name="TitleDocMain">La renegada de Valladolid
+							</goobi:metadata>
+							<goobi:metadata name="TitleDocSub1">primera parte
+							</goobi:metadata>
+							<goobi:metadata name="SizeSourcePrint">4 p. ; 23 cm.
+							</goobi:metadata>
+							<goobi:metadata name="DocLanguage">spa</goobi:metadata>
+							<goobi:metadata name="PublicationYear">s.a.]</goobi:metadata>
+							<goobi:metadata name="PublisherName">s.n.</goobi:metadata>
+							<goobi:metadata name="PlaceOfPublication">Barcelona</goobi:metadata>
+						</goobi:goobi>
+					</mods:extension>
+				</mods:mods>
+			</mets:xmlData>
+		</mets:mdWrap>
+	</mets:dmdSec>
+	<mets:amdSec ID="AMD_0001">
+		<mets:techMD ID="techMD_0001">
+			<mets:mdWrap MDTYPE="PREMIS:OBJECT">
+				<mets:xmlData>
+					<premis:object>
+						<premis:objectIdentifier>
+							<premis:objectIdentifierType>CSIC</premis:objectIdentifierType>
+							<premis:objectIdentifierValue>M_000927879_100267_V00_00001
+							</premis:objectIdentifierValue>
+						</premis:objectIdentifier>
+						<premis:preservationLevel>
+							<premis:preservationLevelValue>full
+							</premis:preservationLevelValue>
+							<premis:preservationLevelRole>required
+							</premis:preservationLevelRole>
+							<premis:preservationLevelDateAssigned>20110914
+							</premis:preservationLevelDateAssigned>
+						</premis:preservationLevel>
+						<premis:objectCharacteristics>
+							<premis:compositionLevel>0</premis:compositionLevel>
+							<premis:size>28070864</premis:size>
+							<premis:format>
+								<premis:formatDesignation>
+									<premis:formatName>image/tiff</premis:formatName>
+									<premis:formatVersion>6.0</premis:formatVersion>
+								</premis:formatDesignation>
+								<premis:formatRegistry>
+									<premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+									<premis:formatRegistryKey>FMT/10</premis:formatRegistryKey>
+								</premis:formatRegistry>
+							</premis:format>
+							<premis:creatingApplication>
+								<premis:creatingApplicationName>Omniscan
+								</premis:creatingApplicationName>
+								<premis:creatingApplicationVersion>12.2
+								</premis:creatingApplicationVersion>
+								<premis:dateCreatedByApplication>2011-09-14T12:44:31
+								</premis:dateCreatedByApplication>
+							</premis:creatingApplication>
+							<premis:objectCharacteristicsExtension>
+								<mix:mix>
+									<mix:BasicDigitalObjectInformation>
+										<mix:byteOrder>little_endian</mix:byteOrder>
+										<mix:Compression>
+											<mix:compressionScheme>uncompressed</mix:compressionScheme>
+										</mix:Compression>
+									</mix:BasicDigitalObjectInformation>
+									<mix:BasicImageInformation>
+										<mix:BasicImageCharacteristics>
+											<mix:imageWidth>2619</mix:imageWidth>
+											<mix:imageHeight>3569</mix:imageHeight>
+											<mix:PhotometricInterpretation>
+												<mix:colorSpace>sRGB</mix:colorSpace>
+											</mix:PhotometricInterpretation>
+										</mix:BasicImageCharacteristics>
+									</mix:BasicImageInformation>
+									<mix:ImageCaptureMetadata>
+										<mix:ScannerCapture>
+											<mix:scannerManufacturer>Zeutschel</mix:scannerManufacturer>
+											<mix:ScannerModel>
+												<mix:scannerModelName>OS 12000 HQ</mix:scannerModelName>
+												<mix:scannerModelSerialNo>54559</mix:scannerModelSerialNo>
+												<mix:maximumOpticalResolution>400p.p.i
+												</mix:maximumOpticalResolution>
+											</mix:ScannerModel>
+										</mix:ScannerCapture>
+									</mix:ImageCaptureMetadata>
+									<mix:ImageAssessmentMetadata>
+										<mix:ImageColorEncoding>
+											<mix:BitsPerSample>
+												<mix:bitsPerSampleValue>8</mix:bitsPerSampleValue>
+											</mix:BitsPerSample>
+											<mix:samplesPerPixel>3</mix:samplesPerPixel>
+										</mix:ImageColorEncoding>
+									</mix:ImageAssessmentMetadata>
+								</mix:mix>
+							</premis:objectCharacteristicsExtension>
+						</premis:objectCharacteristics>
+						<premis:originalName>M_000927879_100267_V00_00001.tif
+						</premis:originalName>
+						<premis:environment>
+							<premis:environmentCharacteristic>know to work
+							</premis:environmentCharacteristic>
+							<premis:environmentPurpose>render</premis:environmentPurpose>
+							<premis:environmentPurpose>edit</premis:environmentPurpose>
+							<premis:software>
+								<premis:swName>Adobe Photoshop</premis:swName>
+								<premis:swVersion>CS4</premis:swVersion>
+								<premis:swType>renderer</premis:swType>
+							</premis:software>
+							<premis:software>
+								<premis:swName>Windows</premis:swName>
+								<premis:swVersion>XP</premis:swVersion>
+								<premis:swType>operatingSystem</premis:swType>
+							</premis:software>
+							<premis:hardware>
+								<premis:hwName>Intel x86</premis:hwName>
+								<premis:hwType>processor</premis:hwType>
+								<premis:hwOtherInformation>100 mhz minimum
+								</premis:hwOtherInformation>
+							</premis:hardware>
+							<premis:hardware>
+								<premis:hwName>2 GB RAM</premis:hwName>
+								<premis:hwType>memory</premis:hwType>
+								<premis:hwOtherInformation>256 MB minimum
+								</premis:hwOtherInformation>
+							</premis:hardware>
+						</premis:environment>
+					</premis:object>
+				</mets:xmlData>
+			</mets:mdWrap>
+		</mets:techMD>
+		<mets:techMD ID="techMD_0002">
+			<mets:mdWrap MDTYPE="PREMIS:OBJECT">
+				<mets:xmlData>
+					<premis:object>
+						<premis:objectIdentifier>
+							<premis:objectIdentifierType>CSIC</premis:objectIdentifierType>
+							<premis:objectIdentifierValue>M_000927879_100267_V00_00002
+							</premis:objectIdentifierValue>
+						</premis:objectIdentifier>
+						<premis:preservationLevel>
+							<premis:preservationLevelValue>full
+							</premis:preservationLevelValue>
+							<premis:preservationLevelRole>required
+							</premis:preservationLevelRole>
+							<premis:preservationLevelDateAssigned>20110914
+							</premis:preservationLevelDateAssigned>
+						</premis:preservationLevel>
+						<premis:objectCharacteristics>
+							<premis:compositionLevel>0</premis:compositionLevel>
+							<premis:size>28256070</premis:size>
+							<premis:format>
+								<premis:formatDesignation>
+									<premis:formatName>image/tiff</premis:formatName>
+									<premis:formatVersion>6.0</premis:formatVersion>
+								</premis:formatDesignation>
+								<premis:formatRegistry>
+									<premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+									<premis:formatRegistryKey>FMT/10</premis:formatRegistryKey>
+								</premis:formatRegistry>
+							</premis:format>
+							<premis:creatingApplication>
+								<premis:creatingApplicationName>Omniscan
+								</premis:creatingApplicationName>
+								<premis:creatingApplicationVersion>12.2
+								</premis:creatingApplicationVersion>
+								<premis:dateCreatedByApplication>2011-09-14T12:44:33
+								</premis:dateCreatedByApplication>
+							</premis:creatingApplication>
+							<premis:objectCharacteristicsExtension>
+								<mix:mix>
+									<mix:BasicDigitalObjectInformation>
+										<mix:byteOrder>little_endian</mix:byteOrder>
+										<mix:Compression>
+											<mix:compressionScheme>uncompressed</mix:compressionScheme>
+										</mix:Compression>
+									</mix:BasicDigitalObjectInformation>
+									<mix:BasicImageInformation>
+										<mix:BasicImageCharacteristics>
+											<mix:imageWidth>2640</mix:imageWidth>
+											<mix:imageHeight>3564</mix:imageHeight>
+											<mix:PhotometricInterpretation>
+												<mix:colorSpace>sRGB</mix:colorSpace>
+											</mix:PhotometricInterpretation>
+										</mix:BasicImageCharacteristics>
+									</mix:BasicImageInformation>
+									<mix:ImageCaptureMetadata>
+										<mix:ScannerCapture>
+											<mix:scannerManufacturer>Zeutschel</mix:scannerManufacturer>
+											<mix:ScannerModel>
+												<mix:scannerModelName>OS 12000 HQ</mix:scannerModelName>
+												<mix:scannerModelSerialNo>54559</mix:scannerModelSerialNo>
+												<mix:maximumOpticalResolution>400p.p.i
+												</mix:maximumOpticalResolution>
+											</mix:ScannerModel>
+										</mix:ScannerCapture>
+									</mix:ImageCaptureMetadata>
+									<mix:ImageAssessmentMetadata>
+										<mix:ImageColorEncoding>
+											<mix:BitsPerSample>
+												<mix:bitsPerSampleValue>8</mix:bitsPerSampleValue>
+											</mix:BitsPerSample>
+											<mix:samplesPerPixel>3</mix:samplesPerPixel>
+										</mix:ImageColorEncoding>
+									</mix:ImageAssessmentMetadata>
+								</mix:mix>
+							</premis:objectCharacteristicsExtension>
+						</premis:objectCharacteristics>
+						<premis:originalName>M_000927879_100267_V00_00002.tif
+						</premis:originalName>
+						<premis:environment>
+							<premis:environmentCharacteristic>know to work
+							</premis:environmentCharacteristic>
+							<premis:environmentPurpose>render</premis:environmentPurpose>
+							<premis:environmentPurpose>edit</premis:environmentPurpose>
+							<premis:software>
+								<premis:swName>Adobe Photoshop</premis:swName>
+								<premis:swVersion>CS4</premis:swVersion>
+								<premis:swType>renderer</premis:swType>
+							</premis:software>
+							<premis:software>
+								<premis:swName>Windows</premis:swName>
+								<premis:swVersion>XP</premis:swVersion>
+								<premis:swType>operatingSystem</premis:swType>
+							</premis:software>
+							<premis:hardware>
+								<premis:hwName>Intel x86</premis:hwName>
+								<premis:hwType>processor</premis:hwType>
+								<premis:hwOtherInformation>100 mhz minimum
+								</premis:hwOtherInformation>
+							</premis:hardware>
+							<premis:hardware>
+								<premis:hwName>2 GB RAM</premis:hwName>
+								<premis:hwType>memory</premis:hwType>
+								<premis:hwOtherInformation>256 MB minimum
+								</premis:hwOtherInformation>
+							</premis:hardware>
+						</premis:environment>
+					</premis:object>
+				</mets:xmlData>
+			</mets:mdWrap>
+		</mets:techMD>
+		<mets:techMD ID="techMD_0003">
+			<mets:mdWrap MDTYPE="PREMIS:OBJECT">
+				<mets:xmlData>
+					<premis:object>
+						<premis:objectIdentifier>
+							<premis:objectIdentifierType>CSIC</premis:objectIdentifierType>
+							<premis:objectIdentifierValue>M_000927879_100267_V00_00003
+							</premis:objectIdentifierValue>
+						</premis:objectIdentifier>
+						<premis:preservationLevel>
+							<premis:preservationLevelValue>full
+							</premis:preservationLevelValue>
+							<premis:preservationLevelRole>required
+							</premis:preservationLevelRole>
+							<premis:preservationLevelDateAssigned>20110914
+							</premis:preservationLevelDateAssigned>
+						</premis:preservationLevel>
+						<premis:objectCharacteristics>
+							<premis:compositionLevel>0</premis:compositionLevel>
+							<premis:size>28271508</premis:size>
+							<premis:format>
+								<premis:formatDesignation>
+									<premis:formatName>image/tiff</premis:formatName>
+									<premis:formatVersion>6.0</premis:formatVersion>
+								</premis:formatDesignation>
+								<premis:formatRegistry>
+									<premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+									<premis:formatRegistryKey>FMT/10</premis:formatRegistryKey>
+								</premis:formatRegistry>
+							</premis:format>
+							<premis:creatingApplication>
+								<premis:creatingApplicationName>Omniscan
+								</premis:creatingApplicationName>
+								<premis:creatingApplicationVersion>12.2
+								</premis:creatingApplicationVersion>
+								<premis:dateCreatedByApplication>2011-09-14T12:44:34
+								</premis:dateCreatedByApplication>
+							</premis:creatingApplication>
+							<premis:objectCharacteristicsExtension>
+								<mix:mix>
+									<mix:BasicDigitalObjectInformation>
+										<mix:byteOrder>little_endian</mix:byteOrder>
+										<mix:Compression>
+											<mix:compressionScheme>uncompressed</mix:compressionScheme>
+										</mix:Compression>
+									</mix:BasicDigitalObjectInformation>
+									<mix:BasicImageInformation>
+										<mix:BasicImageCharacteristics>
+											<mix:imageWidth>2637</mix:imageWidth>
+											<mix:imageHeight>3570</mix:imageHeight>
+											<mix:PhotometricInterpretation>
+												<mix:colorSpace>sRGB</mix:colorSpace>
+											</mix:PhotometricInterpretation>
+										</mix:BasicImageCharacteristics>
+									</mix:BasicImageInformation>
+									<mix:ImageCaptureMetadata>
+										<mix:ScannerCapture>
+											<mix:scannerManufacturer>Zeutschel</mix:scannerManufacturer>
+											<mix:ScannerModel>
+												<mix:scannerModelName>OS 12000 HQ</mix:scannerModelName>
+												<mix:scannerModelSerialNo>54559</mix:scannerModelSerialNo>
+												<mix:maximumOpticalResolution>400p.p.i
+												</mix:maximumOpticalResolution>
+											</mix:ScannerModel>
+										</mix:ScannerCapture>
+									</mix:ImageCaptureMetadata>
+									<mix:ImageAssessmentMetadata>
+										<mix:ImageColorEncoding>
+											<mix:BitsPerSample>
+												<mix:bitsPerSampleValue>8</mix:bitsPerSampleValue>
+											</mix:BitsPerSample>
+											<mix:samplesPerPixel>3</mix:samplesPerPixel>
+										</mix:ImageColorEncoding>
+									</mix:ImageAssessmentMetadata>
+								</mix:mix>
+							</premis:objectCharacteristicsExtension>
+						</premis:objectCharacteristics>
+						<premis:originalName>M_000927879_100267_V00_00003.tif
+						</premis:originalName>
+						<premis:environment>
+							<premis:environmentCharacteristic>know to work
+							</premis:environmentCharacteristic>
+							<premis:environmentPurpose>render</premis:environmentPurpose>
+							<premis:environmentPurpose>edit</premis:environmentPurpose>
+							<premis:software>
+								<premis:swName>Adobe Photoshop</premis:swName>
+								<premis:swVersion>CS4</premis:swVersion>
+								<premis:swType>renderer</premis:swType>
+							</premis:software>
+							<premis:software>
+								<premis:swName>Windows</premis:swName>
+								<premis:swVersion>XP</premis:swVersion>
+								<premis:swType>operatingSystem</premis:swType>
+							</premis:software>
+							<premis:hardware>
+								<premis:hwName>Intel x86</premis:hwName>
+								<premis:hwType>processor</premis:hwType>
+								<premis:hwOtherInformation>100 mhz minimum
+								</premis:hwOtherInformation>
+							</premis:hardware>
+							<premis:hardware>
+								<premis:hwName>2 GB RAM</premis:hwName>
+								<premis:hwType>memory</premis:hwType>
+								<premis:hwOtherInformation>256 MB minimum
+								</premis:hwOtherInformation>
+							</premis:hardware>
+						</premis:environment>
+					</premis:object>
+				</mets:xmlData>
+			</mets:mdWrap>
+		</mets:techMD>
+		<mets:techMD ID="techMD_0004">
+			<mets:mdWrap MDTYPE="PREMIS:OBJECT">
+				<mets:xmlData>
+					<premis:object>
+						<premis:objectIdentifier>
+							<premis:objectIdentifierType>CSIC</premis:objectIdentifierType>
+							<premis:objectIdentifierValue>M_000927879_100267_V00_00004
+							</premis:objectIdentifierValue>
+						</premis:objectIdentifier>
+						<premis:preservationLevel>
+							<premis:preservationLevelValue>full
+							</premis:preservationLevelValue>
+							<premis:preservationLevelRole>required
+							</premis:preservationLevelRole>
+							<premis:preservationLevelDateAssigned>20110914
+							</premis:preservationLevelDateAssigned>
+						</premis:preservationLevel>
+						<premis:objectCharacteristics>
+							<premis:compositionLevel>0</premis:compositionLevel>
+							<premis:size>28092878</premis:size>
+							<premis:format>
+								<premis:formatDesignation>
+									<premis:formatName>image/tiff</premis:formatName>
+									<premis:formatVersion>6.0</premis:formatVersion>
+								</premis:formatDesignation>
+								<premis:formatRegistry>
+									<premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+									<premis:formatRegistryKey>FMT/10</premis:formatRegistryKey>
+								</premis:formatRegistry>
+							</premis:format>
+							<premis:creatingApplication>
+								<premis:creatingApplicationName>Omniscan
+								</premis:creatingApplicationName>
+								<premis:creatingApplicationVersion>12.2
+								</premis:creatingApplicationVersion>
+								<premis:dateCreatedByApplication>2011-09-14T12:44:36
+								</premis:dateCreatedByApplication>
+							</premis:creatingApplication>
+							<premis:objectCharacteristicsExtension>
+								<mix:mix>
+									<mix:BasicDigitalObjectInformation>
+										<mix:byteOrder>little_endian</mix:byteOrder>
+										<mix:Compression>
+											<mix:compressionScheme>uncompressed</mix:compressionScheme>
+										</mix:Compression>
+									</mix:BasicDigitalObjectInformation>
+									<mix:BasicImageInformation>
+										<mix:BasicImageCharacteristics>
+											<mix:imageWidth>2624</mix:imageWidth>
+											<mix:imageHeight>3565</mix:imageHeight>
+											<mix:PhotometricInterpretation>
+												<mix:colorSpace>sRGB</mix:colorSpace>
+											</mix:PhotometricInterpretation>
+										</mix:BasicImageCharacteristics>
+									</mix:BasicImageInformation>
+									<mix:ImageCaptureMetadata>
+										<mix:ScannerCapture>
+											<mix:scannerManufacturer>Zeutschel</mix:scannerManufacturer>
+											<mix:ScannerModel>
+												<mix:scannerModelName>OS 12000 HQ</mix:scannerModelName>
+												<mix:scannerModelSerialNo>54559</mix:scannerModelSerialNo>
+												<mix:maximumOpticalResolution>400p.p.i
+												</mix:maximumOpticalResolution>
+											</mix:ScannerModel>
+										</mix:ScannerCapture>
+									</mix:ImageCaptureMetadata>
+									<mix:ImageAssessmentMetadata>
+										<mix:ImageColorEncoding>
+											<mix:BitsPerSample>
+												<mix:bitsPerSampleValue>8</mix:bitsPerSampleValue>
+											</mix:BitsPerSample>
+											<mix:samplesPerPixel>3</mix:samplesPerPixel>
+										</mix:ImageColorEncoding>
+									</mix:ImageAssessmentMetadata>
+								</mix:mix>
+							</premis:objectCharacteristicsExtension>
+						</premis:objectCharacteristics>
+						<premis:originalName>M_000927879_100267_V00_00004.tif
+						</premis:originalName>
+						<premis:environment>
+							<premis:environmentCharacteristic>know to work
+							</premis:environmentCharacteristic>
+							<premis:environmentPurpose>render</premis:environmentPurpose>
+							<premis:environmentPurpose>edit</premis:environmentPurpose>
+							<premis:software>
+								<premis:swName>Adobe Photoshop</premis:swName>
+								<premis:swVersion>CS4</premis:swVersion>
+								<premis:swType>renderer</premis:swType>
+							</premis:software>
+							<premis:software>
+								<premis:swName>Windows</premis:swName>
+								<premis:swVersion>XP</premis:swVersion>
+								<premis:swType>operatingSystem</premis:swType>
+							</premis:software>
+							<premis:hardware>
+								<premis:hwName>Intel x86</premis:hwName>
+								<premis:hwType>processor</premis:hwType>
+								<premis:hwOtherInformation>100 mhz minimum
+								</premis:hwOtherInformation>
+							</premis:hardware>
+							<premis:hardware>
+								<premis:hwName>2 GB RAM</premis:hwName>
+								<premis:hwType>memory</premis:hwType>
+								<premis:hwOtherInformation>256 MB minimum
+								</premis:hwOtherInformation>
+							</premis:hardware>
+						</premis:environment>
+					</premis:object>
+				</mets:xmlData>
+			</mets:mdWrap>
+		</mets:techMD>
+		<mets:rightsMD ID="rightsMD_0001">
+			<mets:mdWrap MDTYPE="OTHER" OTHERMDTYPE="METSRights">
+				<mets:xmlData>
+					<rts:RightsDeclarationMD RIGHTSCATEGORY="PUBLIC DOMAIN">
+						<rts:RightsHolder>
+							<rts:RightsHolderName>None</rts:RightsHolderName>
+						</rts:RightsHolder>
+						<rts:Context CONTEXTCLASS="GENERAL PUBLIC">
+							<rts:Constraints>
+								<rts:ConstraintDescription>Public Domain
+								</rts:ConstraintDescription>
+							</rts:Constraints>
+						</rts:Context>
+					</rts:RightsDeclarationMD>
+				</mets:xmlData>
+			</mets:mdWrap>
+		</mets:rightsMD>
+		<mets:digiprovMD ID="digiprovMD_0001">
+			<mets:mdWrap MDTYPE="PREMIS:EVENT">
+				<mets:xmlData>
+					<premis:event>
+						<premis:eventIdentifier>
+							<eventIdentifierType>CSIC</eventIdentifierType>
+							<eventIdentifierValue>ECR01</eventIdentifierValue>
+						</premis:eventIdentifier>
+						<premis:eventType>creation</premis:eventType>
+					</premis:event>
+				</mets:xmlData>
+			</mets:mdWrap>
+		</mets:digiprovMD>
+		<mets:digiprovMD ID="digiprovMD_0002">
+			<mets:mdWrap MDTYPE="PREMIS:EVENT">
+				<mets:xmlData>
+					<premis:event>
+						<premis:eventIdentifier>
+							<eventIdentifierType>CSIC</eventIdentifierType>
+							<eventIdentifierValue>EVA03</eventIdentifierValue>
+						</premis:eventIdentifier>
+						<premis:eventType>validation</premis:eventType>
+						<premis:eventDateTime>2011-09-14T13:21:20</premis:eventDateTime>
+						<premis:eventOutcomeInformation>
+							<premis:eventOutcome>successful</premis:eventOutcome>
+							<premis:eventOutcomeDetail>
+								<premis:eventOutcomeDetailNote>Well-formed and valid (JHove)
+								</premis:eventOutcomeDetailNote>
+							</premis:eventOutcomeDetail>
+						</premis:eventOutcomeInformation>
+					</premis:event>
+				</mets:xmlData>
+			</mets:mdWrap>
+		</mets:digiprovMD>
+	</mets:amdSec>
+	<mets:fileSec ID="FILE_0001">
+		<mets:fileGrp USE="Image/Master Image">
+			<mets:file MIMETYPE="image/tiff" GROUPID="FG1"
+				ID="M_000927879_100267_V00_00001" ADMID="techMD_0001 rightsMD_0001 digiprovMD_0001 digiprovMD_0002"
+				SEQ="1" CHECKSUM="7c6e7080e3bf0a3a3f75e0aee92fddbc" CHECKSUMTYPE="MD5">
+				<mets:FLocat
+					xlink:href="M_000927879_100267_V00/M_000927879_100267_V00_00001.tif"
+					LOCTYPE="OTHER"></mets:FLocat>
+			</mets:file>
+			<mets:file MIMETYPE="image/tiff" GROUPID="FG2"
+				ID="M_000927879_100267_V00_00002" ADMID="techMD_0002 rightsMD_0001 digiprovMD_0001 digiprovMD_0002"
+				SEQ="2" CHECKSUM="d3cf7b205a48e7cefeb17b0bae62691c" CHECKSUMTYPE="MD5">
+				<mets:FLocat
+					xlink:href="M_000927879_100267_V00/M_000927879_100267_V00_00002.tif"
+					LOCTYPE="OTHER"></mets:FLocat>
+			</mets:file>
+			<mets:file MIMETYPE="image/tiff" GROUPID="FG3"
+				ID="M_000927879_100267_V00_00003" ADMID="techMD_0003 rightsMD_0001 digiprovMD_0001 digiprovMD_0002"
+				SEQ="3" CHECKSUM="916ebc32fe7633cbb1eb04deda1f585d" CHECKSUMTYPE="MD5">
+				<mets:FLocat
+					xlink:href="M_000927879_100267_V00/M_000927879_100267_V00_00003.tif"
+					LOCTYPE="OTHER"></mets:FLocat>
+			</mets:file>
+			<mets:file MIMETYPE="image/tiff" GROUPID="FG4"
+				ID="M_000927879_100267_V00_00004" ADMID="techMD_0004 rightsMD_0001 digiprovMD_0001 digiprovMD_0002"
+				SEQ="4" CHECKSUM="781a25dc796dd73317be2f29df3f57e1" CHECKSUMTYPE="MD5">
+				<mets:FLocat
+					xlink:href="M_000927879_100267_V00/M_000927879_100267_V00_00004.tif"
+					LOCTYPE="OTHER"></mets:FLocat>
+			</mets:file>
+		</mets:fileGrp>
+	</mets:fileSec>
+
+
+
+	<mets:structMap ID="LOG_0000" TYPE="LOGICAL"
+		LABEL="División lógica del libro">
+		<mets:div ID="LOG_0001" ADMID="AMD_0001" DMDID="DMD_0001"
+			LABEL="La renegada de Valladolid :" TYPE="Monograph"></mets:div>
+	</mets:structMap>
+	<mets:structMap ID="STRM_0000" TYPE="PHYSICAL"
+		LABEL="Orden secuencial de páginas">
+		<mets:div ID="STRM_0001" TYPE="BoundBook" LABEL="La renegada de Valladolid :">
+			<mets:div ID="PHYS_0001" TYPE="page" LABEL="Portada" ORDER="1"
+				ORDERLABEL="-.-">
+				<mets:fptr FILEID="M_000927879_100267_V00_00001"></mets:fptr>
+			</mets:div>
+
+			<mets:div ID="PHYS_0002" TYPE="page" LABEL="Página sin Numerar"
+				ORDER="2" ORDERLABEL="-.-">
+				<mets:fptr FILEID="M_000927879_100267_V00_00002"></mets:fptr>
+			</mets:div>
+
+			<mets:div ID="PHYS_0003" TYPE="page" LABEL="Página sin Numerar"
+				ORDER="3" ORDERLABEL="-.-">
+				<mets:fptr FILEID="M_000927879_100267_V00_00003"></mets:fptr>
+			</mets:div>
+
+			<mets:div ID="PHYS_0004" TYPE="page" LABEL="Página sin Numerar"
+				ORDER="4" ORDERLABEL="-.-">
+				<mets:fptr FILEID="M_000927879_100267_V00_00004"></mets:fptr>
+			</mets:div>
+
+		</mets:div>
+	</mets:structMap>
+	<mets:structLink>
+		<mets:smLink xlink:to="PHYS_0001" xlink:from="LOG_0001"></mets:smLink>
+		<mets:smLink xlink:to="PHYS_0002" xlink:from="LOG_0001"></mets:smLink>
+		<mets:smLink xlink:to="PHYS_0003" xlink:from="LOG_0001"></mets:smLink>
+		<mets:smLink xlink:to="PHYS_0004" xlink:from="LOG_0001"></mets:smLink>
+	</mets:structLink>
+</mets:mets>
