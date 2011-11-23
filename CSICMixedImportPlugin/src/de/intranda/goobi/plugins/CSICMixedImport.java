@@ -21,7 +21,6 @@
 package de.intranda.goobi.plugins;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,22 +33,15 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -92,7 +84,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "0.0.10000000";
+	private static final String VERSION = "0.0.20000000";
 	// private static final String XSLT_PATH = "jar:file:/" +
 	// ConfigMain.getParameter("pluginFolder")
 	// + "import/SotonImportPlugins.jar!/resources/MARC21slim2MODS3.xsl";
@@ -118,7 +110,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private List<String> currentCollectionList;
 	private String encoding = "utf-8";
 
-	private File exportFolder = new File("samples/0008_PCTN");
+	private File exportFolder = new File("/home/florian/0008_PCTN");
 
 	public CSICMixedImport() {
 		map.put("?monographic", "Monograph");
@@ -137,6 +129,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		map.put("?mixed material", null);
 	}
 
+	/**
+	 * Sets the namespace of all Elements within Element root to Namespace ns
+	 * 
+	 * @param root
+	 * @param ns
+	 * @return
+	 */
 	public static Element setNamespaceRecursive(Element root, Namespace ns) {
 		List<Element> current = new ArrayList<Element>();
 		current.add(root);
@@ -152,12 +151,18 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return root;
 	}
 
-	public Fileformat convertData(String inString) {
+	/**
+	 * 
+	 * Specialized convertData to convert only the specified String inString from marc to mods
+	 * 
+	 * @param inString
+	 * @return
+	 */
+	private Fileformat convertData(String inString) {
 		Fileformat ff = null;
 		Document doc;
 		try {
 			doc = new SAXBuilder().build(new StringReader(inString));
-			// doc = new SAXBuilder().build(new File("test.xml"));
 
 			// remove namespaces
 			Element docRoot = doc.getRootElement();
@@ -179,16 +184,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			docRoot.detach();
 			doc.setRootElement(newRecord);
 
-			logger.debug(new XMLOutputter().outputString(doc));
+//			logger.debug(new XMLOutputter().outputString(doc));
 			if (doc != null && doc.hasRootElement()) {
 				XSLTransformer transformer = new XSLTransformer(XSLT_PATH);
-				// InputStream in =
-				// getClass().getResourceAsStream("/MARC21slim2MODS3.xsl");
-				// XSLTransformer transformer = new XSLTransformer(in);
-				// in.close();
 				Document docMods = transformer.transform(doc);
-
-				logger.debug(new XMLOutputter().outputString(docMods));
+				
+//				logger.debug(new XMLOutputter().outputString(docMods));
 				ff = new MetsMods(prefs);
 				DigitalDocument dd = new DigitalDocument();
 				ff.setDigitalDocument(dd);
@@ -261,6 +262,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			}
 		} catch (JDOMException e) {
 			logger.error(e.getMessage(), e);
+			return null;
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		} catch (PreferencesException e) {
@@ -274,133 +276,24 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return ff;
 	}
 
+	/**
+	 * not used
+	 */
 	@Override
 	public Fileformat convertData() {
-		Fileformat ff = null;
-		Document doc;
-		try {
-			doc = new SAXBuilder().build(new StringReader(data));
-			// doc = new SAXBuilder().build(new File("test.xml"));
-
-			// remove namespaces
-			Element docRoot = doc.getRootElement();
-			docRoot = setNamespaceRecursive(docRoot, null);
-			Element newRecord = new Element("record");
-			List<Element> eleList = new ArrayList<Element>();
-			for (Object obj : docRoot.getChildren()) {
-				Element child = (Element) obj;
-				eleList.add(child);
-			}
-			for (Element element : eleList) {
-				element.detach();
-			}
-			newRecord.setContent(eleList);
-			for (Object obj : newRecord.getChildren()) {
-				Element child = (Element) obj;
-				child.setNamespace(null);
-			}
-			docRoot.detach();
-			doc.setRootElement(newRecord);
-
-			logger.debug(new XMLOutputter().outputString(doc));
-			if (doc != null && doc.hasRootElement()) {
-				XSLTransformer transformer = new XSLTransformer(XSLT_PATH);
-				// InputStream in =
-				// getClass().getResourceAsStream("/MARC21slim2MODS3.xsl");
-				// XSLTransformer transformer = new XSLTransformer(in);
-				// in.close();
-				Document docMods = transformer.transform(doc);
-
-				logger.debug(new XMLOutputter().outputString(docMods));
-				ff = new MetsMods(prefs);
-				DigitalDocument dd = new DigitalDocument();
-				ff.setDigitalDocument(dd);
-
-				Element eleMods = docMods.getRootElement();
-				if (eleMods.getName().equals("modsCollection")) {
-					eleMods = eleMods.getChild("mods", null);
-				}
-
-				// Determine the root docstruct type
-				String dsType = "Monograph";
-				if (eleMods.getChild("originInfo", null) != null) {
-					Element eleIssuance = eleMods.getChild("originInfo", null)
-							.getChild("issuance", null);
-					if (eleIssuance != null
-							&& map.get("?" + eleIssuance.getTextTrim()) != null) {
-						dsType = map.get("?" + eleIssuance.getTextTrim());
-					}
-				}
-				Element eleTypeOfResource = eleMods.getChild("typeOfResource",
-						null);
-				if (eleTypeOfResource != null
-						&& map.get("?" + eleTypeOfResource.getTextTrim()) != null) {
-					dsType = map.get("?" + eleTypeOfResource.getTextTrim());
-				}
-				logger.debug("Docstruct type: " + dsType);
-
-				DocStruct dsRoot = dd.createDocStruct(prefs
-						.getDocStrctTypeByName(dsType));
-				dd.setLogicalDocStruct(dsRoot);
-
-				DocStruct dsBoundBook = dd.createDocStruct(prefs
-						.getDocStrctTypeByName("BoundBook"));
-				dd.setPhysicalDocStruct(dsBoundBook);
-				// Collect MODS metadata
-				ModsUtils.parseModsSection(MODS_MAPPING_FILE, prefs, dsRoot,
-						dsBoundBook, eleMods);
-				currentIdentifier = ModsUtils.getIdentifier(prefs, dsRoot);
-				currentTitle = ModsUtils.getTitle(prefs, dsRoot);
-				currentAuthor = ModsUtils.getAuthor(prefs, dsRoot);
-				logger.debug("Author:" + currentAuthor + ", Title: "
-						+ currentTitle);
-
-				// Add 'pathimagefiles'
-				try {
-					Metadata mdForPath = new Metadata(
-							prefs.getMetadataTypeByName("pathimagefiles"));
-					mdForPath.setValue("./" + currentIdentifier);
-					dsBoundBook.addMetadata(mdForPath);
-				} catch (MetadataTypeNotAllowedException e1) {
-					logger.error(
-							"MetadataTypeNotAllowedException while reading images",
-							e1);
-				} catch (DocStructHasNoTypeException e1) {
-					logger.error(
-							"DocStructHasNoTypeException while reading images",
-							e1);
-				}
-
-				// Add collection names attached to the current record
-				if (currentCollectionList != null) {
-					MetadataType mdTypeCollection = prefs
-							.getMetadataTypeByName("singleDigCollection");
-					for (String collection : currentCollectionList) {
-						Metadata mdCollection = new Metadata(mdTypeCollection);
-						mdCollection.setValue(collection);
-						dsRoot.addMetadata(mdCollection);
-					}
-				}
-			}
-		} catch (JDOMException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		} catch (PreferencesException e) {
-			logger.error(e.getMessage(), e);
-		} catch (TypeNotAllowedForParentException e) {
-			logger.error(e.getMessage(), e);
-		} catch (MetadataTypeNotAllowedException e) {
-			logger.error(e.getMessage(), e);
-		}
-
-		return ff;
+		return null;
 	}
 
+	/**
+	 * 
+	 * generate mets files and copy image files from record list
+	 * 
+	 */
 	@Override
 	public HashMap<String, ImportReturnValue> generateFiles(List<Record> records) {
 		HashMap<String, ImportReturnValue> ret = new HashMap<String, ImportReturnValue>();
-
+		
+		int invalidImports = 0;
 		int i = 0;
 		for (Record record : records) {
 			logger.info("parsing record " + ++i);
@@ -420,13 +313,20 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					ret.put(getProcessTitle(), ImportReturnValue.WriteError);
 				}
 			} else {
+				currentIdentifier = record.getId();
 				ret.put(getProcessTitle(), ImportReturnValue.InvalidData);
+				invalidImports++;
 			}
 		}
-
+		if(invalidImports>0)
+			logger.warn(invalidImports + " of " + i + " imports did not succeed");
 		return ret;
 	}
 
+	/**
+	 * generate list of records
+	 * 
+	 */
 	@Override
 	public List<Record> generateRecordsFromFile() {
 		List<Record> ret = new ArrayList<Record>();
@@ -439,6 +339,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			writer = new StringWriter();
 			IOUtils.copy(input, writer, encoding);
 			record.setData(writer.toString());
+			record.setId(importFile.getName().split("_")[0]);
 			ret.add(record);
 
 		} catch (FileNotFoundException e) {
@@ -465,52 +366,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return ret;
 	}
 
+	/**
+	 * not used - records are split on import
+	 */
 	@Override
 	public List<Record> splitRecords(String records) {
-		List<Record> ret = new ArrayList<Record>();
-
-		// Split strings
-		List<String> recordStrings = new ArrayList<String>();
-		BufferedReader inputStream = new BufferedReader(new StringReader(
-				records));
-
-		StringBuilder sb = new StringBuilder();
-		String l;
-		try {
-			while ((l = inputStream.readLine()) != null) {
-				if (l.length() > 0) {
-					if (l.startsWith("=LDR")) {
-						if (sb.length() > 0) {
-							recordStrings.add(sb.toString());
-						}
-						sb = new StringBuilder();
-					}
-					sb.append(l + "\n");
-				}
-			}
-			if (sb.length() > 0) {
-				recordStrings.add(sb.toString());
-			}
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-
-		// Convert strings to MARCXML records and add them to Record objects
-		for (String s : recordStrings) {
-			String data;
-			try {
-				data = convertTextToMarcXml(s);
-				if (data != null) {
-					Record rec = new Record();
-					rec.setData(data);
-					ret.add(rec);
-				}
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-
-		return ret;
+		
+		return null;
 	}
 
 	@Override
@@ -584,74 +446,17 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	}
 
 	/**
+	 * Extract marc section from import document and return it as its own document
 	 * 
-	 * @param text
+	 * @param inDoc
 	 * @return
-	 * @throws IOException
 	 */
-	private String convertTextToMarcXml(String text) throws IOException {
-		if (StringUtils.isNotEmpty(text)) {
-			Document doc = new Document();
-			text = text.replace((char) 0x1E, ' ');
-			BufferedReader reader = new BufferedReader(new StringReader(text));
-			Element eleRoot = new Element("collection");
-			doc.setRootElement(eleRoot);
-			Element eleRecord = new Element("record");
-			eleRoot.addContent(eleRecord);
-			String str;
-			while ((str = reader.readLine()) != null) {
-				if (str.toUpperCase().startsWith("=LDR")) {
-					// Leader
-					Element eleLeader = new Element("leader");
-					eleLeader.setText(str.substring(7));
-					eleRecord.addContent(eleLeader);
-				} else if (str.length() > 2) {
-					String tag = str.substring(1, 4);
-					if (tag.startsWith("00") && str.length() > 6) {
-						// Control field
-						str = str.substring(6);
-						Element eleControlField = new Element("controlfield");
-						eleControlField.setAttribute("tag", tag);
-						eleControlField.addContent(str);
-						eleRecord.addContent(eleControlField);
-					} else if (str.length() > 6) {
-						// Data field
-						String ind1 = str.substring(6, 7);
-						String ind2 = str.substring(7, 8);
-						str = str.substring(8);
-						Element eleDataField = new Element("datafield");
-						eleDataField.setAttribute("tag", tag);
-						eleDataField.setAttribute("ind1",
-								!ind1.equals("\\") ? ind1 : "");
-						eleDataField.setAttribute("ind2",
-								!ind2.equals("\\") ? ind2 : "");
-						Pattern p = Pattern.compile("[$]+[^$]+");
-						Matcher m = p.matcher(str);
-						while (m.find()) {
-							String sub = str.substring(m.start(), m.end());
-							Element eleSubField = new Element("subfield");
-							eleSubField.setAttribute("code",
-									sub.substring(1, 2));
-							eleSubField.addContent(sub.substring(2));
-							eleDataField.addContent(eleSubField);
-						}
-						eleRecord.addContent(eleDataField);
-					}
-				}
-			}
-			return new XMLOutputter().outputString(doc);
-		}
-
-		return null;
-	}
-
 	private Document getMarcDocument(Document inDoc) {
 		Element marcRecord = null;
 
 		// getting document elements
 		Element root = inDoc.getRootElement();
 
-		Element header = root.getChild("metsHdr", mets);
 		logger.debug("getting document elements");
 		if (root != null) {
 			if (root.getChildren().isEmpty())
@@ -660,8 +465,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				marcRecord = root.getChild("dmdSec", mets)
 						.getChild("mdWrap", mets).getChild("xmlData", mets)
 						.getChild("marc", marc).getChild("record", marc);
-				logger.debug("Name of marcRecord = " + (marcRecord == null ? "null"
-						: marcRecord.getName()));
 			}
 		} else
 			logger.warn("Root element not found");
@@ -669,6 +472,11 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return new Document(marcRecord);
 	}
 
+	/**
+	 * Get the namespaces using Element root
+	 * 
+	 * @param root
+	 */
 	private void getNamespaces(Element root) {
 		mets = root.getNamespace("mets");
 		logger.debug("Namespace mets: Prefix = " + mets.getPrefix()
@@ -708,6 +516,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return docString;
 	}
 
+	/**
+	 * Load a jDOM document from an xml file
+	 * 
+	 * @param file
+	 * @return
+	 */
 	private Document getDocumentFromFile(File file) {
 		SAXBuilder builder = new SAXBuilder(false);
 		Document document = null;
@@ -724,6 +538,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return document;
 	}
 
+	/**
+	 * Create a jDOM document from an xml string
+	 * 
+	 * @param string
+	 * @return
+	 */
 	private Document getDocumentFromString(String string) {
 		byte[] byteArray = null;
 		try {
@@ -748,6 +568,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return document;
 	}
 
+	/**
+	 * Gets the "TYPE" of the logical structmap in Document doc
+	 * 
+	 * @param doc
+	 * @return
+	 */
 	private String getLogicalType(Document doc) {
 		List<Element> structMaps = doc.getRootElement().getChildren(
 				"structMap", mets);
@@ -762,6 +588,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return type;
 	}
 
+	/**
+	 * Gets the "TYPE" of the physical structmap in Document doc
+	 * 
+	 * @param doc
+	 * @return
+	 */
 	private String getPhysicalType(Document doc) {
 		List<Element> structMaps = doc.getRootElement().getChildren(
 				"structMap", mets);
@@ -776,14 +608,21 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return type;
 	}
 
-	private Document convertDocument() {
+	/**
+	 * replaces convertData() - returns a jDOM document rather than a Fileformat
+	 * 
+	 * @return
+	 */
+	public Document convertDocument() {
 		if (data == null || data.isEmpty()) {
 			logger.warn("Attempting to convert empty data. Aborting.");
 			return null;
 		}
+		
 		Document modsDoc = null;
 		Document marcDoc = null;
 		Document doc = null;
+		File tempFile = new File("temp_" + System.currentTimeMillis());
 		try {
 			doc = getDocumentFromString(data);
 			getNamespaces(doc.getRootElement());
@@ -791,8 +630,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			String marcString = getStringFromDocument(marcDoc, encoding);
 			Fileformat ff = convertData(marcString);
 			if(ff!=null)
-				ff.write("tempDoc.xml");
-			modsDoc = getDocumentFromFile(new File("tempDoc.xml"));
+				ff.write(tempFile.getAbsolutePath());
+			else
+			{
+				logger.error("Failed to convert marc doc");
+				return null;
+			}
+			
+			modsDoc = getDocumentFromFile(tempFile);
 
 		} catch (WriteException e) {
 			logger.error(e.toString(), e);
@@ -803,24 +648,38 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		doc = replaceXmlData(doc, modsDoc);
 		doc = exchangeStructData(doc);
 		doc = replaceStructData(doc, modsDoc);
-
+		
+		tempFile.delete();
+		
 //		logger.info("writing output file");
 //		File outputFile = new File("output/finalOutput.xml");
-//		getFileFromDocument(outputFile, doc);
+//		getFileFromDocument(outputFile, doc);		
 		
 		return doc;
 	}
 
+	/**
+	 * Writes the Document doc into an xml File file
+	 * 
+	 * @param file
+	 * @param doc
+	 * @throws IOException
+	 */
 	private void getFileFromDocument(File file, Document doc) throws IOException {
 		writeTextFile(getStringFromDocument(doc, encoding), file);
 	}
 
+	/**
+	 * 
+	 * Copy the files in exportFolder corresponding to the current record into the importFolder
+	 * 
+	 * @param exportFolder
+	 */
 	private void copyImageFiles(File exportFolder) {
 
 		String id = currentIdentifier.replace("CSIC", "");
 
 		List<File> folders = Arrays.asList(exportFolder.listFiles());
-		List<File> imageFiles = null;
 		File tiffDir = null, jpegDir = null, imageDir = null;
 		for (File file : folders) {
 			if (file.isDirectory() && file.getName().contentEquals("Tiff")) {
@@ -878,6 +737,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		File tempDir = new File(importFolder, getProcessTitle().replace(".xml",
 				""));
 		tempDir.mkdir();
+		
+		//parse all image Files and write them into new Files in the import directory
 		List<File> images = Arrays.asList(imageDir.listFiles(ImageFilter));
 		for (File imageFile : images) {
 			try {
@@ -903,6 +764,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		}
 	}
 
+	/**
+	 * Simply write a String into a text file
+	 * 
+	 * @param string
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
 	public static File writeTextFile(String string, File file) throws IOException {
 
 		FileWriter writer = null;
@@ -1052,13 +921,24 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			logger.error(e.getMessage(), e);
 		}
 
+//		Document testDoc = converter.getDocumentFromFile(new File("test.xml"));
+//		converter.data = converter.getStringFromDocument(testDoc, "utf-8");
+//		logger.debug(converter.data);
+//		converter.convertData();
+		
+		
 		converter.setImportFolder("output/");
 		List<Record> records = new ArrayList<Record>();
 		for (File file : converter.exportFolder.listFiles(XmlFilter)) {
 			converter.setFile(file);
 			records.addAll(converter.generateRecordsFromFile());
 		}
-		converter.generateFiles(records);
+		
+		HashMap<String, ImportReturnValue> results	= converter.generateFiles(records);
+		
+		for (String key : results.keySet()) {
+			System.out.println(key + " \t \t " + results.get(key));
+		}
 	}
 
 	public static FilenameFilter ImageFilter = new FilenameFilter() {

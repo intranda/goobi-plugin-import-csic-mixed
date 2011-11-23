@@ -264,7 +264,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 		
 		<xsl:for-each select="datafield[@tag='720'][not(subfield[@code='t'])]">
 		<name>
-		<xsl:if test="@ind1=1">
+		<xsl:if test="@ind1='1'">
 		<xsl:attribute name="type">
 		<xsl:text>personal</xsl:text>
 		</xsl:attribute>
@@ -777,17 +777,17 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 					</copyrightDate>
 				</xsl:if>
 			</xsl:if>
-			<xsl:for-each select="datafield[@tag=033][@ind1=0 or @ind1=1]/subfield[@code='a']">
+			<xsl:for-each select="datafield[@tag=033][@ind1='0' or @ind1='1']/subfield[@code='a']">
 				<dateCaptured encoding="iso8601">
 					<xsl:value-of select="."/>
 				</dateCaptured>
 			</xsl:for-each>
-			<xsl:for-each select="datafield[@tag=033][@ind1=2]/subfield[@code='a'][1]">
+			<xsl:for-each select="datafield[@tag=033][@ind1='2']/subfield[@code='a'][1]">
 				<dateCaptured encoding="iso8601" point="start">
 					<xsl:value-of select="."/>
 				</dateCaptured>
 			</xsl:for-each>
-			<xsl:for-each select="datafield[@tag=033][@ind1=2]/subfield[@code='a'][2]">
+			<xsl:for-each select="datafield[@tag=033][@ind1='2']/subfield[@code='a'][2]">
 				<dateCaptured encoding="iso8601" point="end">
 					<xsl:value-of select="."/>
 				</dateCaptured>
@@ -1649,7 +1649,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 			<xsl:call-template name="createLocationFrom856"/>
 		</xsl:for-each>
 
-		<xsl:for-each select="datafield[@tag=490][@ind1=0]">
+		<xsl:for-each select="datafield[@tag=490][@ind1='0']">
 			<xsl:call-template name="createRelatedItemFrom490"/>
 		</xsl:for-each>
 
@@ -1818,7 +1818,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 				<xsl:call-template name="relatedIdentifierISSN"/>
 			</relatedItem>
 		</xsl:for-each>
-		<xsl:for-each select="datafield[@tag=730][@ind2=2]">
+		<xsl:for-each select="datafield[@tag=730][@ind2='2']">
 			<relatedItem>
 				<xsl:call-template name="constituentOrRelatedType"/>
 				<titleInfo>
@@ -1839,7 +1839,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 		</xsl:for-each>
 
 
-		<xsl:for-each select="datafield[@tag=740][@ind2=2]">
+		<xsl:for-each select="datafield[@tag=740][@ind2='2']">
 			<relatedItem>
 				<xsl:call-template name="constituentOrRelatedType"/>
 				<titleInfo>
@@ -2203,7 +2203,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 			</xsl:if>
 		</xsl:for-each>
 
-		<xsl:for-each select="datafield[@tag=024][@ind1=1]">
+		<xsl:for-each select="datafield[@tag=024][@ind1='1']">
 			<identifier type="upc">
 				<xsl:value-of select="subfield[@code='a']"/>
 			</identifier>
@@ -2237,7 +2237,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 		</xsl:for-each>
 
 
-		<xsl:for-each select="datafield[@tag=856][@ind2=2][subfield[@code='u']]">
+		<xsl:for-each select="datafield[@tag=856][@ind2='2'][subfield[@code='u']]">
 			<relatedItem>
 				<location>
 					<url>
@@ -2590,7 +2590,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 		</namePart>
 	</xsl:template>
 	<xsl:template name="constituentOrRelatedType">
-		<xsl:if test="@ind2=2">
+		<xsl:if test="@ind2='2'">
 			<xsl:attribute name="type">constituent</xsl:attribute>
 		</xsl:if>
 	</xsl:template>
@@ -2709,20 +2709,20 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 		</xsl:for-each>
 	</xsl:template>
 	<xsl:template name="subjectAuthority">
-		<xsl:if test="@ind2!=4">
+		<xsl:if test="@ind2!='4'">
 			<xsl:if test="@ind2!=' '">
-				<xsl:if test="@ind2!=8">
-					<xsl:if test="@ind2!=9">
+				<xsl:if test="@ind2!='8'">
+					<xsl:if test="@ind2!='9'">
 						<xsl:attribute name="authority">
 							<xsl:choose>
-								<xsl:when test="@ind2=0">lcsh</xsl:when>
-								<xsl:when test="@ind2=1">lcshac</xsl:when>
-								<xsl:when test="@ind2=2">mesh</xsl:when>
+								<xsl:when test="@ind2='0'">lcsh</xsl:when>
+								<xsl:when test="@ind2='1'">lcshac</xsl:when>
+								<xsl:when test="@ind2='2'">mesh</xsl:when>
 								<!-- 1/04 fix -->
-								<xsl:when test="@ind2=3">nal</xsl:when>
-								<xsl:when test="@ind2=5">csh</xsl:when>
-								<xsl:when test="@ind2=6">rvm</xsl:when>
-								<xsl:when test="@ind2=7">
+								<xsl:when test="@ind2='3'">nal</xsl:when>
+								<xsl:when test="@ind2='5'">csh</xsl:when>
+								<xsl:when test="@ind2='6'">rvm</xsl:when>
+								<xsl:when test="@ind2='7'">
 									<xsl:value-of select="subfield[@code='2']"/>
 								</xsl:when>
 							</xsl:choose>
@@ -3882,7 +3882,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 	<xsl:template name="createNameFrom720">
 		<xsl:if test="datafield[@tag='720'][not(subfield[@code='t'])]">
 			<name>
-				<xsl:if test="@ind1=1">
+				<xsl:if test="@ind1='1'">
 					<xsl:attribute name="type">
 						<xsl:text>personal</xsl:text>
 					</xsl:attribute>
@@ -4734,19 +4734,19 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 		</classification>
 	</xsl:template>
 	<xsl:template name="createClassificationFrom086">
-		<xsl:for-each select="datafield[@tag=086][@ind1=0]">
+		<xsl:for-each select="datafield[@tag=086][@ind1='0']">
 			<classification authority="sudocs">
 				<xsl:call-template name="xxx880"/>
 				<xsl:value-of select="subfield[@code='a']"/>
 			</classification>
 		</xsl:for-each>
-		<xsl:for-each select="datafield[@tag=086][@ind1=1]">
+		<xsl:for-each select="datafield[@tag=086][@ind1='1']">
 			<classification authority="candoc">
 				<xsl:call-template name="xxx880"/>
 				<xsl:value-of select="subfield[@code='a']"/>
 			</classification>
 		</xsl:for-each>
-		<xsl:for-each select="datafield[@tag=086][@ind1!=1 and @ind1!=0]">
+		<xsl:for-each select="datafield[@tag=086][@ind1!='1' and @ind1!='0']">
 			<classification>
 				<xsl:call-template name="xxx880"/>
 				<xsl:attribute name="authority">
@@ -4759,7 +4759,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 
 	<!-- identifier 020 024 022 028 010 037 UNDO Nov 23 2010 RG SM-->
 
-	<!-- createRelatedItemFrom490 <xsl:for-each select="datafield[@tag=490][@ind1=0]"> -->
+	<!-- createRelatedItemFrom490 <xsl:for-each select="datafield[@tag=490][@ind1='0']"> -->
 
 	<xsl:template name="createRelatedItemFrom490">
 		<relatedItem type="series">
@@ -4810,17 +4810,17 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 	</xsl:template>
 
 	<xsl:template name="createLocationFrom856">
-		<xsl:if test="//datafield[@tag=856][@ind2!=2][subfield[@code='u']]">
+		<xsl:if test="//datafield[@tag=856][@ind2!='2'][subfield[@code='u']]">
 			<location>
 				<url displayLabel="electronic resource">
 					<!-- 1.41 tmee AQ1.9 added choice protocol for @usage="primary display" -->
 					<xsl:variable name="primary">
 						<xsl:choose>
-							<xsl:when test="@ind2=0 and count(preceding-sibling::datafield[@tag=856] [@ind2=0])=0">true</xsl:when>
+							<xsl:when test="@ind2='0' and count(preceding-sibling::datafield[@tag=856] [@ind2='0'])=0">true</xsl:when>
 
-							<xsl:when test="@ind2=1 and         count(ancestor::record//datafield[@tag=856][@ind2=0])=0 and         count(preceding-sibling::datafield[@tag=856][@ind2=1])=0">true</xsl:when>
+							<xsl:when test="@ind2='1' and         count(ancestor::record//datafield[@tag=856][@ind2='0'])=0 and         count(preceding-sibling::datafield[@tag=856][@ind2='1'])=0">true</xsl:when>
 
-							<xsl:when test="@ind2!=1 and @ind2!=0 and         @ind2!=2 and count(ancestor::record//datafield[@tag=856 and         @ind2=0])=0 and count(ancestor::record//datafield[@tag=856 and         @ind2=1])=0 and         count(preceding-sibling::datafield[@tag=856][@ind2])=0">true</xsl:when>
+							<xsl:when test="@ind2!='1' and @ind2!='0' and         @ind2!='2' and count(ancestor::record//datafield[@tag=856 and         @ind2='0'])=0 and count(ancestor::record//datafield[@tag=856 and         @ind2='1'])=0 and         count(preceding-sibling::datafield[@tag=856][@ind2])=0">true</xsl:when>
 							<xsl:otherwise>false</xsl:otherwise>
 						</xsl:choose>
 					</xsl:variable>
