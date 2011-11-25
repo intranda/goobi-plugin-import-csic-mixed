@@ -21,15 +21,18 @@
 package de.intranda.goobi.plugins;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -39,6 +42,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
@@ -51,7 +56,6 @@ import org.goobi.production.enums.ImportType;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IImportPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
-import org.jdom.Attribute;
 import org.jdom.Namespace;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -61,12 +65,8 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.transform.XSLTransformer;
 
-import com.mchange.v1.identicator.Identicator;
-
-import ugh.dl.ContentFile;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
-import ugh.dl.FileSet;
 import ugh.dl.Fileformat;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
@@ -88,10 +88,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "0.0.34000000";
-	// private static final String XSLT_PATH = "jar:file:/" +
-	// ConfigMain.getParameter("pluginFolder")
-	// + "import/SotonImportPlugins.jar!/resources/MARC21slim2MODS3.xsl";
+	private static final String VERSION = "0.0.35000000";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
 	private static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
 
@@ -114,9 +111,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private List<String> currentCollectionList;
 	private String encoding = "utf-8";
 
-	private File exportFolder = new File("/opt/digiverso/goobi/0008_PCTN");
+	/**
+	 * Directory containing the image files (possibly in TIFF/JPEG subfolders)
+	 */
+	public File exportFolder = new File("/opt/digiverso/goobi/0008_PCTN");
 
-//	 private File exportFolder = new File("samples/testFolder");
+	// private File exportFolder = new File("samples/");
 
 	public CSICMixedImport() {
 		map.put("?monographic", "Monograph");
@@ -136,27 +136,232 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	}
 
 	/**
-	 * Sets the namespace of all Elements within Element root to Namespace ns
+	 * not used
+	 */
+	@Override
+	public Fileformat convertData() {
+		return null;
+	}
+	
+	/**
+	 * replaces convertData() - returns a jDOM document rather than a Fileformat
 	 * 
-	 * @param root
-	 * @param ns
 	 * @return
 	 */
-	public static Element setNamespaceRecursive(Element root, Namespace ns) {
-		List<Element> current = new ArrayList<Element>();
-		current.add(root);
-		do {
-			List<Element> children = new ArrayList<Element>();
-			for (Element element : current) {
-				element.setNamespace(ns);
-				children.addAll(element.getChildren());
-			}
-			current = children;
-		} while (!current.isEmpty());
+	public Document convertDocument() {
+		if (data == null || data.isEmpty()) {
+			logger.warn("Attempting to convert empty data. Aborting.");
+			return null;
+		}
 
-		return root;
+		Document modsDoc = null;
+		Document marcDoc = null;
+		Document doc = null;
+		File tempFile = new File("temp_" + System.currentTimeMillis() + ".xml");
+		try {
+			doc = getDocumentFromString(data);
+			getNamespaces(doc.getRootElement());
+			marcDoc = getMarcDocument(doc);
+			String marcString = getStringFromDocument(marcDoc, encoding);
+			Fileformat ff = convertData(marcString);
+			if (ff != null)
+				ff.write(tempFile.getAbsolutePath());
+			else {
+				logger.error("Failed to convert marc doc");
+				return null;
+			}
+
+			modsDoc = getDocumentFromFile(tempFile);
+			getNamespaces(modsDoc.getRootElement());
+
+		} catch (WriteException e) {
+			logger.error(e.toString(), e);
+		} catch (PreferencesException e) {
+			logger.error(e.toString(), e);
+		}
+
+		doc = replaceXmlData(doc, modsDoc);
+		doc = exchangeStructData(doc);
+		doc = replaceStructData(doc, modsDoc);
+		
+		if(tempFile.exists())
+			tempFile.delete();
+
+		return doc;
 	}
 
+	/**
+	 * 
+	 * generate mets files and copy image files from record list
+	 * 
+	 */
+	@Override
+	public HashMap<String, ImportReturnValue> generateFiles(List<Record> records) {
+		HashMap<String, ImportReturnValue> ret = new HashMap<String, ImportReturnValue>();
+
+		int invalidImports = 0;
+		int i = 0;
+		for (Record record : records) {
+			logger.info("parsing record " + ++i);
+			data = record.getData();
+			Document doc = convertDocument();
+			logger.info("converted document " + getProcessTitle());
+			if (doc != null) {
+				try {
+					File hotFile = new File(importFolder, getProcessTitle());
+					logger.debug("Writing '" + hotFile.getAbsolutePath() + "' into hotfolder...");
+					getFileFromDocument(hotFile, doc);
+					logger.debug("copying image files...");
+					copyImageFiles(exportFolder);
+					ret.put(getProcessTitle(), ImportReturnValue.ExportFinished);
+				} catch (IOException e) {
+					logger.error(e.getMessage(), e);
+					ret.put(getProcessTitle(), ImportReturnValue.WriteError);
+				}
+			} else {
+				currentIdentifier = record.getId();
+				ret.put(getProcessTitle(), ImportReturnValue.InvalidData);
+				invalidImports++;
+			}
+		}
+		if (invalidImports > 0)
+			logger.warn(invalidImports + " of " + i + " imports did not succeed");
+		return ret;
+	}
+
+	/**
+	 * generate list of records
+	 * 
+	 */
+	@Override
+	public List<Record> generateRecordsFromFile() {
+		List<Record> ret = new ArrayList<Record>();
+
+		if (importFile.getName().endsWith("zip")) {
+			logger.info("Extracting zip archive");
+			ArrayList<String> recordStrings = unzipFile(importFile);
+
+			int count = 0;
+			for (String string : recordStrings) {
+				logger.debug("Extracting record " + ++count);
+				Record rec = new Record();
+				rec.setData(string);
+				ret.add(rec);
+			}
+		} else {
+			logger.info("Importing single record file");
+			InputStream input = null;
+			StringWriter writer = null;
+			try {
+				logger.debug("loaded file: " + importFile.getAbsolutePath());
+				input = new FileInputStream(importFile);
+				Record record = new Record();
+				writer = new StringWriter();
+				IOUtils.copy(input, writer, encoding);
+				record.setData(writer.toString());
+				record.setId(importFile.getName().split("_")[0]);
+				ret.add(record);
+
+			} catch (FileNotFoundException e) {
+				logger.error(e.getMessage(), e);
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+			} finally {
+				if (input != null) {
+					try {
+						if (writer != null)
+							writer.close();
+						input.close();
+					} catch (IOException e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+				if (ret != null && importFile != null)
+					logger.info("Extracted " + ret.size() + " records from '" + importFile.getName() + "'.");
+				else
+					logger.error("No record extracted from importFile");
+			}
+		}
+
+		return ret;
+	}
+
+	/**
+	 * not used - records are split on import
+	 */
+	@Override
+	public List<Record> splitRecords(String records) {
+
+		return null;
+	}
+
+	@Override
+	public List<String> splitIds(String ids) {
+		return null;
+	}
+
+	@Override
+	public String getProcessTitle() {
+		if (StringUtils.isNotBlank(currentTitle)) {
+			return new ImportOpac().createAtstsl(currentTitle, currentAuthor).toLowerCase() + "_" + currentIdentifier + ".xml";
+		}
+		return currentIdentifier + ".xml";
+	}
+
+	@Override
+	public void setData(Record r) {
+		this.data = r.getData();
+	}
+
+	@Override
+	public String getImportFolder() {
+		return importFolder;
+	}
+
+	@Override
+	public void setImportFolder(String folder) {
+		this.importFolder = folder;
+	}
+
+	@Override
+	public void setFile(File importFile) {
+		this.importFile = importFile;
+	}
+
+	@Override
+	public void setPrefs(Prefs prefs) {
+		this.prefs = prefs;
+
+	}
+
+	@Override
+	public List<ImportType> getImportTypes() {
+		List<ImportType> answer = new ArrayList<ImportType>();
+		answer.add(ImportType.FILE);
+
+		return answer;
+	}
+
+	@Override
+	public PluginType getType() {
+		return PluginType.Import;
+	}
+
+	@Override
+	public String getTitle() {
+		return getDescription();
+	}
+
+	@Override
+	public String getId() {
+		return getDescription();
+	}
+
+	@Override
+	public String getDescription() {
+		return NAME + " v" + VERSION;
+	}
+	
 	/**
 	 * 
 	 * Specialized convertData to convert only the specified String inString from marc to mods
@@ -266,172 +471,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		}
 
 		return ff;
-	}
-
-	/**
-	 * not used
-	 */
-	@Override
-	public Fileformat convertData() {
-		return null;
-	}
-
-	/**
-	 * 
-	 * generate mets files and copy image files from record list
-	 * 
-	 */
-	@Override
-	public HashMap<String, ImportReturnValue> generateFiles(List<Record> records) {
-		HashMap<String, ImportReturnValue> ret = new HashMap<String, ImportReturnValue>();
-
-		int invalidImports = 0;
-		int i = 0;
-		for (Record record : records) {
-			logger.info("parsing record " + ++i);
-			data = record.getData();
-			Document doc = convertDocument();
-			logger.info("converted document " + getProcessTitle());
-			if (doc != null) {
-				try {
-					File hotFile = new File(importFolder, getProcessTitle());
-					logger.debug("Writing '" + hotFile.getAbsolutePath() + "' into hotfolder...");
-					getFileFromDocument(hotFile, doc);
-					logger.debug("copying image files...");
-					copyImageFiles(exportFolder);
-					ret.put(getProcessTitle(), ImportReturnValue.ExportFinished);
-				} catch (IOException e) {
-					logger.error(e.getMessage(), e);
-					ret.put(getProcessTitle(), ImportReturnValue.WriteError);
-				}
-			} else {
-				currentIdentifier = record.getId();
-				ret.put(getProcessTitle(), ImportReturnValue.InvalidData);
-				invalidImports++;
-			}
-		}
-		if (invalidImports > 0)
-			logger.warn(invalidImports + " of " + i + " imports did not succeed");
-		return ret;
-	}
-
-	/**
-	 * generate list of records
-	 * 
-	 */
-	@Override
-	public List<Record> generateRecordsFromFile() {
-		List<Record> ret = new ArrayList<Record>();
-		InputStream input = null;
-		StringWriter writer = null;
-		try {
-			logger.debug("loaded file: " + importFile.getAbsolutePath());
-			input = new FileInputStream(importFile);
-			Record record = new Record();
-			writer = new StringWriter();
-			IOUtils.copy(input, writer, encoding);
-			record.setData(writer.toString());
-			record.setId(importFile.getName().split("_")[0]);
-			ret.add(record);
-
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		} finally {
-			if (input != null) {
-				try {
-					if (writer != null)
-						writer.close();
-					input.close();
-				} catch (IOException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-			if (ret != null && importFile != null)
-				logger.info("Extracted " + ret.size() + " records from '" + importFile.getName() + "'.");
-			else
-				logger.error("No record extracted from importFile");
-		}
-
-		return ret;
-	}
-
-	/**
-	 * not used - records are split on import
-	 */
-	@Override
-	public List<Record> splitRecords(String records) {
-
-		return null;
-	}
-
-	@Override
-	public List<String> splitIds(String ids) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getProcessTitle() {
-		if (StringUtils.isNotBlank(currentTitle)) {
-			return new ImportOpac().createAtstsl(currentTitle, currentAuthor).toLowerCase() + "_" + currentIdentifier + ".xml";
-		}
-		return currentIdentifier + ".xml";
-	}
-
-	@Override
-	public void setData(Record r) {
-		this.data = r.getData();
-	}
-
-	@Override
-	public String getImportFolder() {
-		return importFolder;
-	}
-
-	@Override
-	public void setImportFolder(String folder) {
-		this.importFolder = folder;
-	}
-
-	@Override
-	public void setFile(File importFile) {
-		this.importFile = importFile;
-	}
-
-	@Override
-	public void setPrefs(Prefs prefs) {
-		this.prefs = prefs;
-
-	}
-
-	@Override
-	public List<ImportType> getImportTypes() {
-		List<ImportType> answer = new ArrayList<ImportType>();
-		answer.add(ImportType.FILE);
-
-		return answer;
-	}
-
-	@Override
-	public PluginType getType() {
-		return PluginType.Import;
-	}
-
-	@Override
-	public String getTitle() {
-		return getDescription();
-	}
-
-	@Override
-	public String getId() {
-		return getDescription();
-	}
-
-	@Override
-	public String getDescription() {
-		return NAME + " v" + VERSION;
 	}
 
 	/**
@@ -597,55 +636,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return type;
 	}
 
-	/**
-	 * replaces convertData() - returns a jDOM document rather than a Fileformat
-	 * 
-	 * @return
-	 */
-	public Document convertDocument() {
-		if (data == null || data.isEmpty()) {
-			logger.warn("Attempting to convert empty data. Aborting.");
-			return null;
-		}
 
-		Document modsDoc = null;
-		Document marcDoc = null;
-		Document doc = null;
-		File tempFile = new File("temp_" + System.currentTimeMillis() + ".xml");
-		try {
-			doc = getDocumentFromString(data);
-			getNamespaces(doc.getRootElement());
-			marcDoc = getMarcDocument(doc);
-			String marcString = getStringFromDocument(marcDoc, encoding);
-			Fileformat ff = convertData(marcString);
-			if (ff != null)
-				ff.write(tempFile.getAbsolutePath());
-			else {
-				logger.error("Failed to convert marc doc");
-				return null;
-			}
-
-			modsDoc = getDocumentFromFile(tempFile);
-			getNamespaces(modsDoc.getRootElement());
-
-		} catch (WriteException e) {
-			logger.error(e.toString(), e);
-		} catch (PreferencesException e) {
-			logger.error(e.toString(), e);
-		}
-
-		doc = replaceXmlData(doc, modsDoc);
-		doc = exchangeStructData(doc);
-		doc = replaceStructData(doc, modsDoc);
-
-		tempFile.delete();
-
-		// logger.info("writing output file");
-		// File outputFile = new File("output/finalOutput.xml");
-		// getFileFromDocument(outputFile, doc);
-
-		return doc;
-	}
 
 	/**
 	 * Writes the Document doc into an xml File file
@@ -748,25 +739,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				logger.error(e.getMessage(), e);
 			}
 		}
-	}
-
-	/**
-	 * Simply write a String into a text file
-	 * 
-	 * @param string
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
-	public static File writeTextFile(String string, File file) throws IOException {
-
-		FileWriter writer = null;
-		writer = new FileWriter(file);
-		writer.write(string);
-		if (writer != null)
-			writer.close();
-
-		return file;
 	}
 
 	/**
@@ -891,9 +863,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private Document replaceXmlData(Document doc, Document marcDoc) {
 
 		String dmdID = " ";
-		
+
 		// get old and new Dmd sections
-		Element origDmdSec = doc.getRootElement().getChild("dmdSec", mets);
 		List<Element> newDmdSecs = marcDoc.getRootElement().getChildren("dmdSec", mets);
 
 		// remove all Children of rootElement and save them as list
@@ -923,9 +894,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			} else {
 				// all other elements, just reattach
 				doc.getRootElement().addContent(element);
-				//and set imagepath id for first child in physStructMap
-				if(element.getName().contentEquals("structMap") && element.getAttributeValue("TYPE").contentEquals("PHYSICAL"))
-				{
+				// and set imagepath id for first child in physStructMap
+				if (element.getName().contentEquals("structMap") && element.getAttributeValue("TYPE").contentEquals("PHYSICAL")) {
 					logger.debug("adding reference DMDID=" + dmdID + " to physical structMap");
 					Element book = element.getChild("div", mets);
 					book.setAttribute("DMDID", dmdID);
@@ -935,12 +905,113 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return doc;
 	}
 
-	private void setAttribute(Element element, String attributeName, String newAttrValue) {
-		Attribute attr = element.getAttribute(attributeName);
-		if (attr != null) {
-			logger.debug("replacing occurance of DMDID");
-			attr.setValue(newAttrValue);
+	/**
+	 * Unzip a zip archive and write results into Array of Strings
+	 * 
+	 * @param source
+	 * @return
+	 */
+	private ArrayList<String> unzipFile(File source) {
+		ArrayList<String> stringList = new ArrayList<String>();
+		ArrayList<String> filenames = new ArrayList<String>();
+
+		try {
+			ZipInputStream in = new ZipInputStream(new BufferedInputStream(new FileInputStream(source)));
+			ZipEntry entry;
+			while ((entry = in.getNextEntry()) != null) {
+				filenames.add(entry.getName());
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));  
+				StringBuffer sb = new StringBuffer();  
+				String line;  
+				while ((line = br.readLine()) != null) {  
+				  sb.append(line).append("\n");  
+				}  
+				stringList.add(sb.toString());
+			}
+		} catch (IOException e) {
+			logger.error(e.toString(), e);
 		}
+
+		return stringList;
+	}
+	
+	/**
+	 * Sets the namespace of all Elements within Element root to Namespace ns
+	 * 
+	 * @param root
+	 * @param ns
+	 * @return
+	 */
+	public static Element setNamespaceRecursive(Element root, Namespace ns) {
+		List<Element> current = new ArrayList<Element>();
+		current.add(root);
+		do {
+			List<Element> children = new ArrayList<Element>();
+			for (Element element : current) {
+				element.setNamespace(ns);
+				children.addAll(element.getChildren());
+			}
+			current = children;
+		} while (!current.isEmpty());
+
+		return root;
+	}
+
+	/**
+	 * Read a text file and return content as String
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static String readTextFile(File file) {
+		String result = "";
+		FileReader fileReader = null;
+		BufferedReader reader = null;
+
+		try {
+			fileReader = new FileReader(file);
+			reader = new BufferedReader(fileReader);
+
+			String zeile = null;
+
+			while ((zeile = reader.readLine()) != null) {
+				// logger.debug("Reading line: " + zeile);
+				result = result.concat(zeile + "\n");
+			}
+		} catch (FileNotFoundException e) {
+			logger.error(e.toString(), e);
+			return null;
+		} catch (IOException e) {
+			logger.error(e.toString(), e);
+			return null;
+		} finally {
+			try {
+				if (reader != null)
+					reader.close();
+			} catch (IOException e) {
+				System.err.println("ERROR: " + e.toString());
+			}
+		}
+		return result.trim();
+	}
+	
+	/**
+	 * Simply write a String into a text file
+	 * 
+	 * @param string
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public static File writeTextFile(String string, File file) throws IOException {
+
+		FileWriter writer = null;
+		writer = new FileWriter(file);
+		writer.write(string);
+		if (writer != null)
+			writer.close();
+
+		return file;
 	}
 
 	public static void main(String[] args) throws PreferencesException, WriteException {
@@ -959,26 +1030,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			logger.warn("No export directory found. Aborting");
 			return;
 		}
-		for (File file : converter.exportFolder.listFiles(XmlFilter)) {
 
-			// Fileformat ff = new MetsMods(converter.prefs);
-			// DigitalDocument dd = new DigitalDocument();
-			// try {
-			// dd.readXStreamXml(file.getAbsolutePath(), converter.prefs);
-			// } catch (FileNotFoundException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// } catch (UnsupportedEncodingException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
-			//
-			// List<ContentFile> contentFiles =
-			// dd.getPhysicalDocStruct().getAllContentFiles();
-			// for (ContentFile contentFile : contentFiles) {
-			// System.out.println(contentFile.getLocation());
-			//
-			// }
+		for (File file : converter.exportFolder.listFiles(zipFilter)) {
 
 			converter.setFile(file);
 			records.addAll(converter.generateRecordsFromFile());
@@ -1014,6 +1067,18 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		public boolean accept(File dir, String name) {
 			boolean validImage = false;
 			if (name.endsWith("xml") || name.endsWith("XML")) {
+				validImage = true;
+			}
+
+			return validImage;
+		}
+	};
+
+	public static FilenameFilter zipFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			boolean validImage = false;
+			if (name.endsWith("zip") || name.endsWith("ZIP")) {
 				validImage = true;
 			}
 
