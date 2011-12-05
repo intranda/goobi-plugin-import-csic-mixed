@@ -88,9 +88,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "0.0.35000000";
+	private static final String VERSION = "0.0.36000000";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
 	private static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
+	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
 
 	// Namespaces
 	private Namespace mets;
@@ -157,7 +158,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		Document modsDoc = null;
 		Document marcDoc = null;
 		Document doc = null;
-		File tempFile = new File("temp_" + System.currentTimeMillis() + ".xml");
+		File tempFile = new File(TEMP_DIRECTORY, "temp_" + System.currentTimeMillis() + ".xml");
+		logger.debug("Creating temporary file " + tempFile.getAbsolutePath());
 		try {
 			doc = getDocumentFromString(data);
 			getNamespaces(doc.getRootElement());
@@ -165,7 +167,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			String marcString = getStringFromDocument(marcDoc, encoding);
 			Fileformat ff = convertData(marcString);
 			if (ff != null)
+			{
 				ff.write(tempFile.getAbsolutePath());
+			}
 			else {
 				logger.error("Failed to convert marc doc");
 				return null;
