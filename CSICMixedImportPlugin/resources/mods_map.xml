@@ -90,4 +90,45 @@
 		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
 		</xpath>
 	</metadata>
+
+	<metadata physical="true">
+		<name>datedigit</name>
+		<xpath>/mods:mods/mods:recordInfo/mods:recordCreationDate</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>AdditionalInformation</name>
+		<xpath>/mods:mods/mods:note</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>relatedSeries</name>
+		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo/mods:title</xpath>
+	</metadata>
+	<metadata logical="true" physical="true">
+		<name>subLocation</name>
+		<xpath>/mods:mods/mods:location/mods:simpleHolding/mods:copyInformation/mods:subLocation</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>CountryCode</name>
+		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='code']</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>CountryCode</name>
+		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='code']</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>recordContentSource</name>
+		<xpath>/mods:mods/mods:recordInfo/mods:recordContentSource</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>CatalogLanguage</name>
+		<xpath>/mods:mods/mods:originInfo/mods:languageOfCataloging/mods:languageTerm</xpath>
+	</metadata>
+		<metadata physical="true">
+		<name>pieceDesignation</name>
+		<xpath>/mods:mods/mods:location/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>CountryCode</name>
+		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='code']</xpath>
+	</metadata>
 </map>

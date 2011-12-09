@@ -89,8 +89,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 	private static final String NAME = "CSICMixedImport";
 	private static final String VERSION = "0.0.36000000";
-	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
-	private static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
+//	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
+	private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
+	private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
+//	private static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
 	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
 
 	// Namespaces
@@ -115,9 +117,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	/**
 	 * Directory containing the image files (possibly in TIFF/JPEG subfolders)
 	 */
-	public File exportFolder = new File("/opt/digiverso/goobi/0008_PCTN");
+//	public File exportFolder = new File("/opt/digiverso/goobi/0008_PCTN");
 
-	// private File exportFolder = new File("samples/");
+	 private File exportFolder = new File("samples/test");
 
 	public CSICMixedImport() {
 		map.put("?monographic", "Monograph");
@@ -396,6 +398,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				Element child = (Element) obj;
 				child.setNamespace(null);
 			}
+			newRecord = removeDuplicateChildren(newRecord);
 			docRoot.detach();
 			doc.setRootElement(newRecord);
 
@@ -403,7 +406,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			if (doc != null && doc.hasRootElement()) {
 				XSLTransformer transformer = new XSLTransformer(XSLT_PATH);
 				Document docMods = transformer.transform(doc);
-
+				
 				// logger.debug(new XMLOutputter().outputString(docMods));
 				ff = new MetsMods(prefs);
 				DigitalDocument dd = new DigitalDocument();
@@ -439,6 +442,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				currentTitle = ModsUtils.getTitle(prefs, dsRoot);
 				currentAuthor = ModsUtils.getAuthor(prefs, dsRoot);
 				logger.debug("Author:" + currentAuthor + ", Title: " + currentTitle);
+				
+				//saving Mods file for debugging
+				getFileFromDocument(new File("output/" + currentIdentifier + ".xml"), docMods);
 
 				// Add 'pathimagefiles'
 				try {
@@ -475,6 +481,27 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		}
 
 		return ff;
+	}
+
+	private Element removeDuplicateChildren(Element newRecord) {
+		Element newnewRecord = new Element(newRecord.getName());
+		List<Element> children = newRecord.getChildren();
+		List<String> tags = new ArrayList<String>();
+		logger.debug("Cecking for duplicate datafields in " + children.size() + " fields");
+		for (Element child : children) {
+			if(child.getAttribute("tag")!=null && tags.contains(child.getAttributeValue("tag")))
+			{
+				logger.debug("Found duplicate MARC field with tag " + child.getAttributeValue("tag"));
+			}
+			else
+			{
+				logger.debug("Added tag " + child.getAttributeValue("tag") + " to tag list");
+				newnewRecord.addContent((Element)child.clone());
+				tags.add(child.getAttributeValue("tag"));
+			}
+		}
+		
+		return newnewRecord;
 	}
 
 	/**
@@ -819,7 +846,15 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				ele = (Element) obj;
 				String value = ele.getAttributeValue("TYPE");
 				if (value != null && value.contentEquals("PAGE"))
+				{
+					//Exchange values of LABEL and ORDERLABEL
+//					String label = ele.getAttributeValue("LABEL");
+//					String orderLabel = ele.getAttributeValue("ORDERLABEL");
+//					ele.setAttribute("LABEL", orderLabel);
+//					ele.setAttribute("ORDERLABEL", label);
+					
 					ele.setAttribute("TYPE", "page");
+				}
 			}
 
 		}
@@ -1021,7 +1056,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	public static void main(String[] args) throws PreferencesException, WriteException {
 		CSICMixedImport converter = new CSICMixedImport();
 		converter.prefs = new Prefs();
-
+		
 		try {
 			converter.prefs.loadPrefs("resources/ruleset1.xml");
 		} catch (PreferencesException e) {
@@ -1035,7 +1070,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			return;
 		}
 
-		for (File file : converter.exportFolder.listFiles(zipFilter)) {
+		for (File file : converter.exportFolder.listFiles(XmlFilter)) {
 
 			converter.setFile(file);
 			records.addAll(converter.generateRecordsFromFile());

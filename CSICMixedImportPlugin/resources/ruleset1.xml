@@ -218,6 +218,11 @@
     <language name="de">Größe der Vorlage</language>
     <language name="en">size of source</language>
   </MetadataType>
+    <MetadataType>
+    <Name>physicallocation</Name>
+    <language name="de">Aufbewahrungsort</language>
+    <language name="en">Physical location</language>
+  </MetadataType>
   <MetadataType>
     <Name>shelfmarksource</Name>
     <language name="de">Signatur der Quelle</language>

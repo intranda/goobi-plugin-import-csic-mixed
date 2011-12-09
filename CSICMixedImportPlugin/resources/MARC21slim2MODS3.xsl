@@ -6,6 +6,10 @@
 	<!-- Maintenance note: For each revision, change the content of <recordInfo><recordOrigin> to reflect the new revision number.
 	MARC21slim2MODS3-4 (Revision 1.70) 2010227
 	
+Revision 1.73 - Added conversion for "simpleHolding" within "createLocationFrom852"
+Revision 1.72 - Mapping to <shelfLocator> instead of <shelfLocation>, as expected by mods V3
+Revision 1.71 - Surrounded all calls to integer variables with single quotes to perform integer check before assigning
+	
 Revision 1.70 - Added mapping for OCLC numbers in 035s to go into <identifier type="oclc"> 2011/02/27 - tmee 	
 Revision 1.69 - Added mapping for untyped identifiers for 024 - 2011/02/27 tmee 
 Revision 1.68 - Added <subject><titleInfo> mapping for 600/610/611 subfields t,p,n - 2010/12/22 tmee
@@ -3675,7 +3679,6 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 			<xsl:call-template name="subtitle"/>
 		</titleInfo>
 	</xsl:template>
-
 	<xsl:template name="createTitleInfoFrom245">
 		<titleInfo>
 			<xsl:call-template name="xxx880"/>
@@ -4786,6 +4789,13 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 		<location>
 			<xsl:if test="subfield[@code='a' or @code='b' or @code='e']">
 				<physicalLocation>
+					<xsl:if test="subfield[@code='3']">
+						<xsl:attribute name="displayLabel">
+							<xsl:call-template name="subfieldSelect">
+								<xsl:with-param name="codes">3</xsl:with-param>
+							</xsl:call-template>
+						</xsl:attribute>
+					</xsl:if>
 					<xsl:call-template name="subfieldSelect">
 						<xsl:with-param name="codes">abe</xsl:with-param>
 					</xsl:call-template>
@@ -4800,12 +4810,61 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 				</physicalLocation>
 			</xsl:if>
 			<xsl:if test="subfield[@code='h' or @code='i' or @code='j' or @code='k' or @code='l' or @code='m' or @code='t']">
-				<shelfLocation>
+				<shelfLocator>
 					<xsl:call-template name="subfieldSelect">
 						<xsl:with-param name="codes">hijklmt</xsl:with-param>
 					</xsl:call-template>
-				</shelfLocation>
+				</shelfLocator>
 			</xsl:if>
+			<holdingSimple>
+				<copyInformation>
+					<xsl:if test="subfield[@code='b' or @code='c' or @code='e']">
+						<subLocation>
+							<xsl:call-template name="subfieldSelect">
+								<xsl:with-param name="codes">
+									bce
+								</xsl:with-param>
+							</xsl:call-template>
+						</subLocation>
+					</xsl:if>
+					<xsl:if test="subfield[@code='h' or @code='i' or @code='j' or @code='k' or @code='l' or @code='m' or @code='t']">
+						<shelfLocator>
+							<xsl:call-template name="subfieldSelect">
+								<xsl:with-param name="codes">
+									hijklmt
+								</xsl:with-param>
+							</xsl:call-template>
+						</shelfLocator>
+					</xsl:if>
+					<xsl:if test="subfield[@code='x']">
+						<note type="nonpublic">
+							<xsl:call-template name="subfieldSelect">
+								<xsl:with-param name="codes">
+									x
+								</xsl:with-param>
+							</xsl:call-template>
+						</note>
+					</xsl:if>
+					<xsl:if test="subfield[@code='z']">
+						<note type="public">
+							<xsl:call-template name="subfieldSelect">
+								<xsl:with-param name="codes">
+									z
+								</xsl:with-param>
+							</xsl:call-template>
+						</note>
+					</xsl:if>
+					<xsl:if test="subfield[@code='p']">
+						<pieceDesignation>
+							<xsl:call-template name="subfieldSelect">
+								<xsl:with-param name="codes">
+									p
+								</xsl:with-param>
+							</xsl:call-template>
+						</pieceDesignation>
+					</xsl:if>
+				</copyInformation>
+			</holdingSimple>	
 		</location>
 	</xsl:template>
 
