@@ -204,7 +204,7 @@ public class ModsUtils {
 					XPath xpath = XPath.newInstance(query);
 					xpath.addNamespace(NS_MODS);
 					List<Element> eleValueList = xpath.selectNodes(doc);
-					if (eleValueList != null) {
+					if (eleValueList != null && !eleValueList.isEmpty()) {
 						List<String> values = new ArrayList<String>();
 						for (Element eleValue : eleValueList) {
 							// logger.debug("Value: " + eleValue.getTextTrim());
@@ -227,8 +227,6 @@ public class ModsUtils {
 						logger.debug("related Series = " + seriesName);
 						String seriesID = seriesInfo.get(seriesName);
 						if (seriesID == null) {
-							// seriesID = new ImportOpac().createAtstsl(seriesName, null).toLowerCase() + "_" + "CSIC" +
-							// System.currentTimeMillis();
 							seriesID = "CSIC" + System.currentTimeMillis();
 							logger.debug("Series not found. creating new one: " + seriesID);
 							seriesInfo.put(seriesName, seriesID);

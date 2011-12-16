@@ -40,7 +40,7 @@
 		<name>shelfmarksource</name>
 		<xpath>/mods:mods/mods:location/mods:shelfLocator</xpath>
 	</metadata>
-	<metadata physical="true">
+	<metadata logical="true" physical="true">
 		<name>physicalLocation</name>
 		<xpath>/mods:mods/mods:location/mods:physicalLocation</xpath>
 	</metadata>

@@ -22,21 +22,17 @@ package de.intranda.goobi.plugins;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,6 +54,7 @@ import org.goobi.production.enums.ImportType;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IImportPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
+import org.jdom.Content;
 import org.jdom.Namespace;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -97,13 +94,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "0.0.43100000";
+	private static final String VERSION = "0.0.43300000";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
 	// private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
 	// private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
 	private static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
 	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
-	private boolean isSeriesVolume = false;
 
 	// Namespaces
 	private Namespace mets;
@@ -123,13 +119,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private String currentAuthor;
 	private List<String> currentCollectionList;
 	private String encoding = "utf-8";
+	private boolean isSeriesVolume = false;
 
 	/**
 	 * Directory containing the image files (possibly in TIFF/JPEG subfolders)
 	 */
-	 public File exportFolder = new File("/opt/digiverso/goobi/0008_PCTN");
+//	 public File exportFolder = new File("/opt/digiverso/goobi/0008_PCTN");
 
-//	private File exportFolder = new File("samples/test");
+	private File exportFolder = new File("samples/test");
 
 	public CSICMixedImport() {
 		map.put("?monographic", "Monograph");
@@ -149,7 +146,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	}
 
 	/**
-	 * not used
+	 * Generates FileFormat from current data
 	 */
 	@Override
 	public Fileformat convertData() {
@@ -196,7 +193,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		File tempFile = new File(TEMP_DIRECTORY, "temp_" + System.currentTimeMillis() + ".xml");
 		logger.debug("Creating temporary file " + tempFile.getAbsolutePath());
 		try {
-			doc = getDocumentFromString(data);
+			doc = CommonUtils.getDocumentFromString(data);
 			getNamespaces(doc.getRootElement());
 			marcDoc = getMarcDocument(doc);
 			String marcString = getStringFromDocument(marcDoc, encoding);
@@ -208,7 +205,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				logger.error("Failed to convert marc doc");
 				return null;
 			}
-			modsDoc = getDocumentFromFile(tempFile);
+			modsDoc = CommonUtils.getDocumentFromFile(tempFile);
 			getNamespaces(modsDoc.getRootElement());
 
 		} catch (WriteException e) {
@@ -256,6 +253,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					String fileName = getImportFolder() + getProcessTitle();
 					logger.debug("Writing '" + fileName + "' into hotfolder...");
 					mm.write(fileName);
+					logger.debug("copying image files...");
+					copyImageFiles(exportFolder);
 					ret.put(getProcessTitle(), ImportReturnValue.ExportFinished);
 				} catch (PreferencesException e) {
 					logger.error(e.getMessage(), e);
@@ -279,8 +278,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	public List<Record> generateRecordsFromFile() {
 		List<Record> ret = new ArrayList<Record>();
 
-		// debugDir = new File(TEMP_DIRECTORY, "debug");
-		// debugDir.mkdir();
 		if (importFile.getName().endsWith("zip")) {
 			logger.info("Extracting zip archive");
 			HashMap<String, String> recordStrings = unzipFile(importFile);
@@ -292,15 +289,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				logger.debug("Extracting record " + ++count);
 				Record rec = new Record();
 				rec.setData(importData);
-				rec.setId(importFileName.split("_")[0]);
-				// ret.add(rec);
+				rec.setId(importFileName.split("_")[0]);;
 				// check for old records
 				File oldFile = searchForExistingData("CSIC" + rec.getId());
 				if (oldFile != null) {
 					logger.info("Found existing record. Updating.");
 					updateOldRecord(rec, oldFile);
-					// logger.info("Found existing record. Deleting.");
-					// DeleteExistingData("CSIC" + rec.getId());
 				} else {
 					ret.add(rec);
 				}
@@ -317,18 +311,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				IOUtils.copy(input, writer, encoding);
 				record.setData(writer.toString());
 				record.setId(importFile.getName().split("_")[0]);
-				// ret.add(record);
 				// check for old records
 				File oldFile = searchForExistingData("CSIC" + record.getId());
 				if (oldFile != null) {
 					logger.info("Found existing record. Updating.");
 					updateOldRecord(record, oldFile);
-					// logger.info("Found existing record. Deleting.");
-					// DeleteExistingData("CSIC" + record.getId());
 				} else {
 					ret.add(record);
 				}
-
 			} catch (FileNotFoundException e) {
 				logger.error(e.getMessage(), e);
 			} catch (IOException e) {
@@ -349,8 +339,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					logger.error("No record extracted from importFile");
 			}
 		}
-
-		// CommonUtils.deleteDir(debugDir);
 
 		return ret;
 	}
@@ -517,6 +505,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				// Check if we are part of a series, and if so, create logical DocStruct accordingly
 				try {
 					List<? extends Metadata> seriesIDList = dsRoot.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital"));
+					for (Metadata metadata : seriesIDList) {
+						System.out.println("SeriesID = " + metadata.getValue());
+					}
 					if (seriesIDList != null && !seriesIDList.isEmpty()) {
 						logger.debug("Record is part of a series");
 						isSeriesVolume = true;
@@ -530,9 +521,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				} catch (TypeNotAllowedAsChildException e) {
 					logger.error("Child Type not allowed", e);
 				}
-
-				// saving Mods file for debugging
-				// getFileFromDocument(new File("temp/" + currentIdentifier + ".xml"), docMods);
 
 				// Add 'pathimagefiles'
 				try {
@@ -581,12 +569,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private File searchForExistingData(String processTitle) {
 		String metsFilePath, processDataDirectory;
 		ProzessDAO dao = new ProzessDAO();
-		// String processTitleOld = processTitle.split("_")[1];
 
 		try {
 			List<Prozess> processList = dao.search("from Prozess where titel LIKE '%" + processTitle + "'");
-			// List<Prozess> additionalProcessList = dao.search("from Prozess where titel = '" + processTitleOld + "'");
-			// processList.addAll(additionalProcessList);
 
 			if (processList != null && !processList.isEmpty()) {
 				Prozess p = processList.get(0);
@@ -620,7 +605,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		String processDataDirectory = null;
 		ProzessDAO dao = new ProzessDAO();
 
-		// String processTitleOld = processTitle.split("_")[1];
 		try {
 			List<Prozess> processList = dao.search("from Prozess where titel LIKE '%" + processTitle + "%'");
 
@@ -645,6 +629,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return null;
 	}
 
+	/**
+	 * Deletes all goobi metadata directories contianing prozesses oft the given identifier
+	 * 
+	 * @param parentDir
+	 * @param identifier
+	 */
 	private static void deleteOldDirs(File parentDir, String identifier) {
 		File[] dirs = parentDir.listFiles(DirFilter);
 		boolean delete = false;
@@ -696,7 +686,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			}
 			String fileName = newMetaFileName;
 			logger.debug("Writing '" + fileName + "' into existing folder...");
-			getFileFromDocument(new File(fileName), newDoc);
+			CommonUtils.getFileFromDocument(new File(fileName), newDoc);
 
 			// getting anchor file
 			File importDir = new File(importFolder);
@@ -725,6 +715,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 	}
 	
+	/**
+	 * Removes all duplicate occurences of marc datafields with the same same tag
+	 * 
+	 * @param newRecord
+	 * @return
+	 */
 	@SuppressWarnings({"unchecked", "unused"})
 	private Element removeDuplicateChildren(Element newRecord) {
 		Element newnewRecord = new Element(newRecord.getName());
@@ -818,62 +814,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 		return docString;
 	}
-
-	/**
-	 * Load a jDOM document from an xml file
-	 * 
-	 * @param file
-	 * @return
-	 */
-	private Document getDocumentFromFile(File file) {
-		SAXBuilder builder = new SAXBuilder(false);
-		Document document = null;
-
-		try {
-			FileInputStream fis = new FileInputStream(file);
-			BufferedReader bis = new BufferedReader(new InputStreamReader(fis, encoding));
-
-			document = builder.build(bis);
-		} catch (JDOMException e) {
-			logger.error(e.toString(), e);
-			return null;
-		} catch (IOException e) {
-			logger.error(e.toString(), e);
-			return null;
-		}
-		return document;
-	}
-
-	/**
-	 * Create a jDOM document from an xml string
-	 * 
-	 * @param string
-	 * @return
-	 */
-	private Document getDocumentFromString(String string) {
-		byte[] byteArray = null;
-		try {
-			byteArray = string.getBytes(encoding);
-		} catch (UnsupportedEncodingException e1) {
-		}
-		ByteArrayInputStream baos = new ByteArrayInputStream(byteArray);
-
-		// Reader reader = new StringReader(hOCRText);
-		SAXBuilder builder = new SAXBuilder(false);
-		Document document = null;
-
-		try {
-			document = builder.build(baos);
-		} catch (JDOMException e) {
-			System.err.println("error " + e.toString());
-			return null;
-		} catch (IOException e) {
-			System.err.println(e.toString());
-			return null;
-		}
-		return document;
-	}
-
+	
 	/**
 	 * Gets the "TYPE" of the logical structmap in Document doc
 	 * 
@@ -932,17 +873,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			}
 		}
 		return type;
-	}
-
-	/**
-	 * Writes the Document doc into an xml File file
-	 * 
-	 * @param file
-	 * @param doc
-	 * @throws IOException
-	 */
-	private void getFileFromDocument(File file, Document doc) throws IOException {
-		writeTextFile(getStringFromDocument(doc, encoding), file);
 	}
 
 	/**
@@ -1015,9 +945,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		// directory
 		List<File> images = Arrays.asList(imageDir.listFiles(ImageFilter));
 		for (File imageFile : images) {
-			// String filename = imageFile.getName();
-			// File destFile = new File(tempDir, filename);
-			// imageFile.renameTo(destFile);
 			try {
 				InputStream inStream = new FileInputStream(imageFile);
 				BufferedInputStream bis = new BufferedInputStream(inStream);
@@ -1049,6 +976,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 * @param modsDoc
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private Document replaceStructData(Document doc, Document modsDoc) {
 
 		Element physStruct = null, logStruct = null;
@@ -1105,7 +1033,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 		// integrate logical structMaps
 		if (isSeriesVolume) {
-			List logicalChildren = logStruct.removeContent();
+			List<Content> logicalChildren = logStruct.removeContent();
 			logStruct.addContent(modsLogStruct.removeContent());
 			Element seriesElement = logStruct.getChild("div", mets);
 			seriesElement.removeChildren("div", mets);
@@ -1129,7 +1057,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		physRoot.setContent(volumeChildren);
 
 		// rename PAGE->page
-		Iterator descendant = physRoot.getDescendants();
+		Iterator<Content> descendant = physRoot.getDescendants();
 		while (descendant.hasNext()) {
 			Element ele = null;
 			Object obj = descendant.next();
@@ -1157,6 +1085,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 * @param doc
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private Document exchangeStructData(Document doc) {
 
 		List<Element> structMaps = doc.getRootElement().getChildren("structMap", mets);
@@ -1188,6 +1117,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 * @param marcDoc
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private Document replaceXmlData(Document doc, Document marcDoc) {
 
 		String dmdID = " ";
@@ -1196,11 +1126,11 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		List<Element> newDmdSecs = marcDoc.getRootElement().getChildren("dmdSec", mets);
 
 		// remove all Children of rootElement and save them as list
-		List objects = doc.getRootElement().removeContent();
+		List<Content> objects = doc.getRootElement().removeContent();
 		List<Element> elements = new ArrayList<Element>();
-		for (Object object : objects) {
-			if (object instanceof Element) {
-				elements.add((Element) object);
+		for (Content content : objects) {
+			if (content instanceof Element) {
+				elements.add((Element) content);
 				logger.debug("adding Element to new root children list");
 			}
 		}
@@ -1272,6 +1202,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 * @param ns
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static Element setNamespaceRecursive(Element root, Namespace ns) {
 		List<Element> current = new ArrayList<Element>();
 		current.add(root);
@@ -1287,118 +1218,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return root;
 	}
 
-	/**
-	 * Read a text file and return content as String
-	 * 
-	 * @param file
-	 * @return
-	 */
-	public static String readTextFile(File file) {
-		String result = "";
-		FileReader fileReader = null;
-		BufferedReader reader = null;
-
-		try {
-			fileReader = new FileReader(file);
-			reader = new BufferedReader(fileReader);
-
-			String zeile = null;
-
-			while ((zeile = reader.readLine()) != null) {
-				// logger.debug("Reading line: " + zeile);
-				result = result.concat(zeile + "\n");
-			}
-		} catch (FileNotFoundException e) {
-			logger.error(e.toString(), e);
-			return null;
-		} catch (IOException e) {
-			logger.error(e.toString(), e);
-			return null;
-		} finally {
-			try {
-				if (reader != null)
-					reader.close();
-			} catch (IOException e) {
-				System.err.println("ERROR: " + e.toString());
-			}
-		}
-		return result.trim();
-	}
-
-	private Element removeChild(Element root, String elementName, String type) {
-		Element result = null;
-		List<Element> children = root.getChildren();
-		for (Element child : children) {
-			logger.debug("Checking element " + child.getName() + " (TYPE=" + child.getAttributeValue("TYPE") + ")");
-			if (child.getName().contentEquals(elementName) && child.getAttributeValue("TYPE").contentEquals(type)) {
-				result = child;
-				break;
-			}
-		}
-		if (result == null)
-			logger.warn("Could not find child element to detach");
-		else {
-			result.removeContent();
-		}
-		return result;
-	}
-
-	private Fileformat createFileformat(File file) {
-		File jFile = new File("temp", "jDoc.xml");
-		File outerFFFile = new File("temp", "outerFF.xml");
-		File marcFFFile = new File("temp", "marcFF.xml");
-
-		String preprocessString = CommonUtils.readTextFile(file);
-		// preprocessString = preprocessString.replaceAll("BOOK", "BoundBook");
-		Document jDoc = CommonUtils.getDocumentFromString(preprocessString);
-		Document jMarcDoc = getMarcDocument(jDoc);
-		Fileformat marcFF = convertData(CommonUtils.getStringFromDocument(jMarcDoc, encoding));
-		Element logStruct = removeChild(jDoc.getRootElement(), "structMap", "LOGICAL");
-		Element physStruct = removeChild(jDoc.getRootElement(), "structMap", "PHYSICAL");
-
-		try {
-			CommonUtils.getFileFromDocument(jFile, jDoc);
-			Fileformat outerFF = new MetsMods(prefs);
-			outerFF.read(jFile.getAbsolutePath());
-			jFile.delete();
-			outerFF.write(outerFFFile.getAbsolutePath());
-			marcFF.write(marcFFFile.getAbsolutePath());
-		} catch (PreferencesException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ReadException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (WriteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return marcFF;
-	}
-
-	/**
-	 * Simply write a String into a text file
-	 * 
-	 * @param string
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
-	public static File writeTextFile(String string, File file) throws IOException {
-
-		FileWriter writer = null;
-		writer = new FileWriter(file);
-		writer.write(string);
-		if (writer != null)
-			writer.close();
-
-		return file;
-	}
-
 	public static void main(String[] args) throws PreferencesException, WriteException {
 		CSICMixedImport converter = new CSICMixedImport();
 		converter.prefs = new Prefs();
@@ -1409,43 +1228,43 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			logger.error(e.getMessage(), e);
 		}
 		
-		try {
-			Fileformat testFF = new MetsMods(converter.prefs);
-			File testFile = new File("output/laavrod_CSIC000927984.xml");
-			if (testFile.isFile()) {
-				testFF.read(testFile.getAbsolutePath());
-
-				List<DocStruct> logicalChildren = testFF.getDigitalDocument().getLogicalDocStruct().getAllChildren();
-				System.out.println("Listing all children of logical docstruct:");
-				for (DocStruct docStruct : logicalChildren) {
-					List<Metadata> mdList = docStruct.getAllMetadata();
-					System.out.println(" * Listing metadata:");
-					for (Metadata metadata : mdList) {
-						System.out.println(" * * Metadata type = " + metadata.getType().getName() + "; value = " + metadata.getValue());
-					}
-				}
-
-				List<DocStruct> physicalChildren = testFF.getDigitalDocument().getPhysicalDocStruct().getAllChildren();
-				System.out.println("Listing all children of physical docstruct:");
-				for (DocStruct docStruct : physicalChildren) {
-					List<Metadata> mdList = docStruct.getAllMetadata();
-					System.out.println(" * Listing metadata:");
-					for (Metadata metadata : mdList) {
-						System.out.println(" * * Metadata type = " + metadata.getType().getName() + "; value = " + metadata.getValue());
-					}
-				}
-
-				System.out.println(testFF.getDigitalDocument().toString());
-				testFF.write("test.xml");
-			} else
-				System.out.println("COuld not load file.");
-		} catch (ReadException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("Finished");
+//		try {
+//			Fileformat testFF = new MetsMods(converter.prefs);
+//			File testFile = new File("output/laavrod_CSIC000927984.xml");
+//			if (testFile.isFile()) {
+//				testFF.read(testFile.getAbsolutePath());
+//
+//				List<DocStruct> logicalChildren = testFF.getDigitalDocument().getLogicalDocStruct().getAllChildren();
+//				System.out.println("Listing all children of logical docstruct:");
+//				for (DocStruct docStruct : logicalChildren) {
+//					List<Metadata> mdList = docStruct.getAllMetadata();
+//					System.out.println(" * Listing metadata:");
+//					for (Metadata metadata : mdList) {
+//						System.out.println(" * * Metadata type = " + metadata.getType().getName() + "; value = " + metadata.getValue());
+//					}
+//				}
+//
+//				List<DocStruct> physicalChildren = testFF.getDigitalDocument().getPhysicalDocStruct().getAllChildren();
+//				System.out.println("Listing all children of physical docstruct:");
+//				for (DocStruct docStruct : physicalChildren) {
+//					List<Metadata> mdList = docStruct.getAllMetadata();
+//					System.out.println(" * Listing metadata:");
+//					for (Metadata metadata : mdList) {
+//						System.out.println(" * * Metadata type = " + metadata.getType().getName() + "; value = " + metadata.getValue());
+//					}
+//				}
+//
+//				System.out.println(testFF.getDigitalDocument().toString());
+//				testFF.write("test.xml");
+//			} else
+//				System.out.println("COuld not load file.");
+//		} catch (ReadException e) {
+//			logger.error("Could not read mets file");
+//		}
+//		System.out.println("Finished");
 		
 		// converter.DeleteExistingData("CSIC");
+		
 		converter.setImportFolder("output/");
 		List<Record> records = new ArrayList<Record>();
 		if (!converter.exportFolder.isDirectory()) {

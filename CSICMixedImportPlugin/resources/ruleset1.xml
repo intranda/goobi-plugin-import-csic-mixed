@@ -1296,6 +1296,8 @@
 		<metadata num="*">CountryCode</metadata>
 		<metadata num="*">recordContentSource</metadata>
 		<metadata num="*">CatalogLanguage</metadata>
+		<metadata num="*">TitleDocParallel</metadata>
+		<metadata num="*">physicalLocation</metadata>
 		<metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
 		<metadata num="1o" DefaultDisplay="true">CurrentNo</metadata>
 	</DocStrctType>
