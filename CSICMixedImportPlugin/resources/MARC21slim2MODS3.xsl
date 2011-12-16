@@ -6,6 +6,7 @@
 	<!-- Maintenance note: For each revision, change the content of <recordInfo><recordOrigin> to reflect the new revision number.
 	MARC21slim2MODS3-4 (Revision 1.70) 2010227
 	
+Revision 1.74 - Identified subfield "v" in Series info fields as partNumber field	
 Revision 1.73 - Added conversion for "simpleHolding" within "createLocationFrom852"
 Revision 1.72 - Mapping to <shelfLocator> instead of <shelfLocation>, as expected by mods V3
 Revision 1.71 - Surrounded all calls to integer variables with single quotes to perform integer check before assigning
@@ -804,10 +805,10 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 			<xsl:for-each select="leader">
 				<issuance>
 					<xsl:choose>
-						<xsl:when test="$leader7='a' or $leader7='c' or $leader7='d' or $leader7='m'">monographic</xsl:when>
-						<xsl:when test="$leader7='b'">continuing</xsl:when>
 						<xsl:when test="$leader7='m' and ($leader19='a' or $leader19='b' or $leader19='c')">multipart monograph</xsl:when>
 						<xsl:when test="$leader7='m' and ($leader19='#')">single unit</xsl:when>
+						<xsl:when test="$leader7='a' or $leader7='c' or $leader7='d' or $leader7='m'">monographic</xsl:when>
+						<xsl:when test="$leader7='b'">continuing</xsl:when>
 						<xsl:when test="$leader7='i'">integrating resource</xsl:when>
 						<xsl:when test="$leader7='s'">serial</xsl:when>
 					</xsl:choose>
@@ -2022,7 +2023,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 						<xsl:call-template name="chopPunctuation">
 							<xsl:with-param name="chopString">
 								<xsl:call-template name="subfieldSelect">
-									<xsl:with-param name="codes">adfgklmorsv</xsl:with-param>
+									<xsl:with-param name="codes">adfgklmors</xsl:with-param>
 								</xsl:call-template>
 							</xsl:with-param>
 						</xsl:call-template>
@@ -2356,7 +2357,7 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 		<xsl:variable name="partNumber">
 			<xsl:call-template name="specialSubfieldSelect">
 				<xsl:with-param name="axis">n</xsl:with-param>
-				<xsl:with-param name="anyCodes">n</xsl:with-param>
+				<xsl:with-param name="anyCodes">nv</xsl:with-param>
 				<xsl:with-param name="afterCodes">fgkdlmor</xsl:with-param>
 			</xsl:call-template>
 		</xsl:variable>

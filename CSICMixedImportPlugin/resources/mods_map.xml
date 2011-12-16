@@ -3,6 +3,7 @@
 	<metadata logical="true">
 		<name>CatalogIDDigital</name>
 		<xpath>/mods:mods/mods:recordInfo/mods:recordIdentifier</xpath>
+<!-- 		<xpath>/mods:mods/mods:location/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath> -->
 	</metadata>
 	<metadata logical="true">
 		<name>TitleDocMain</name>
@@ -39,12 +40,12 @@
 		<name>shelfmarksource</name>
 		<xpath>/mods:mods/mods:location/mods:shelfLocator</xpath>
 	</metadata>
-	<metadata logical="true" physical="true">
-		<name>physicallocation</name>
+	<metadata physical="true">
+		<name>physicalLocation</name>
 		<xpath>/mods:mods/mods:location/mods:physicalLocation</xpath>
 	</metadata>
 	<metadata logical="true">
-		<name>SizeSourcePrint</name>
+		<name>FormatSourcePrint</name>
 		<xpath>/mods:mods/mods:physicalDescription/mods:extent</xpath>
 	</metadata>
 	<metadata logical="true">
@@ -103,13 +104,17 @@
 		<name>relatedSeries</name>
 		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo/mods:title</xpath>
 	</metadata>
-	<metadata logical="true" physical="true">
-		<name>subLocation</name>
-		<xpath>/mods:mods/mods:location/mods:simpleHolding/mods:copyInformation/mods:subLocation</xpath>
+	<metadata logical="true">
+		<name>CurrentNo</name>
+		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo/mods:partNumber</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>CurrentNoSorting</name>
+		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo/mods:partNumber</xpath>
 	</metadata>
 	<metadata logical="true">
-		<name>CountryCode</name>
-		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='code']</xpath>
+		<name>singleDigCollection</name>
+		<xpath>/mods:mods/mods:location/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>CountryCode</name>
@@ -126,9 +131,5 @@
 		<metadata physical="true">
 		<name>pieceDesignation</name>
 		<xpath>/mods:mods/mods:location/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-	</metadata>
-		<metadata logical="true">
-		<name>CountryCode</name>
-		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='code']</xpath>
 	</metadata>
 </map>

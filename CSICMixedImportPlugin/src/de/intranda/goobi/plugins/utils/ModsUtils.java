@@ -88,21 +88,57 @@ public class ModsUtils {
 			logger.error(e.getMessage());
 		}
 	}
-	
-	private static void writeFile(File file, Object obj)
-	{
-		try{
+
+	private static void writeFile(File file, Object obj) {
+		try {
 			FileOutputStream fs = new FileOutputStream(file);
 			ObjectOutputStream os = new ObjectOutputStream(fs);
 			os.writeObject(obj);
 			os.close();
-		} catch(IOException e) {
+		} catch (IOException e) {
 			logger.error("Error writing binary file", e);
 		}
 	}
-	
-	private static Object readFile(File file)
-	{
+
+	public static Document createEmptyGoobiDoc(Namespace mets, Namespace mods, Namespace goobi) {
+		Document doc = new Document();
+
+		doc.setRootElement(new Element("mets", mets));
+		Element root = doc.getRootElement();
+		Element dmdSec = new Element("dmdSec", mets);
+		dmdSec.setAttribute("ID", "DMDLOG_0000");
+		root.addContent(dmdSec);
+		Element mdWrap = new Element("mdWrap", mets);
+		mdWrap.setAttribute("MDTYPE", "MODS");
+		dmdSec.addContent(mdWrap);
+		Element xmlData = new Element("xmlData", mets);
+		mdWrap.setContent(xmlData);
+		Element modsEle = new Element("mods", mods);
+		xmlData.setContent(modsEle);
+		Element extension = new Element("extension", mods);
+		modsEle.addContent(extension);
+		Element goobiEle = new Element("goobi", goobi);
+		extension.addContent(goobiEle);
+		Element dmdSec2 = new Element("dmdSec", mets);
+		dmdSec.setAttribute("ID", "DMDPHYS_0000");
+		root.addContent(dmdSec2);
+		Element mdWrap2 = new Element("mdWrap", mets);
+		mdWrap.setAttribute("MDTYPE", "MODS");
+		dmdSec2.addContent(mdWrap2);
+		Element xmlData2 = new Element("xmlData", mets);
+		mdWrap2.setContent(xmlData2);
+		Element modsEle2 = new Element("mods", mods);
+		xmlData2.setContent(modsEle2);
+		Element extension2 = new Element("extension", mods);
+		modsEle2.addContent(extension2);
+		Element goobiEle2 = new Element("goobi", goobi);
+		extension2.addContent(goobiEle2);
+
+		return doc;
+
+	}
+
+	private static Object readFile(File file) {
 		FileInputStream fis;
 		Object obj = null;
 		try {
@@ -131,30 +167,26 @@ public class ModsUtils {
 	 * @throws JDOMException
 	 */
 	@SuppressWarnings("unchecked")
-	public static void parseModsSection(String mappingFileName, Prefs prefs, DocStruct dsLogical, DocStruct dsPhysical, Element eleMods) throws JDOMException,
+	public static void parseModsSection(String mappingFileName, Prefs prefs, DocStruct dsLogical, DocStruct dsPhysical, DocStruct dsSeries, Element eleMods) throws JDOMException,
 			IOException {
 		// logger.debug(new XMLOutputter().outputString(eleMods));
 		File mappingFile = new File(mappingFileName);
 		
-		//Get seriesInfo from File
+
+		// Get seriesInfo from File
 		File tempDir = new File(mappingFile.getParentFile().getParentFile(), "temp");
-		if(!tempDir.isDirectory())
-		{
+		if (!tempDir.isDirectory()) {
 			tempDir.mkdirs();
 		}
 		File seriesInfoFile = new File(tempDir, seriesInfoFilename);
-		if(seriesInfoFile.isFile())
-		{
+		if (seriesInfoFile.isFile()) {
 			logger.debug("Reading data from " + seriesInfoFile.getName());
 			Object obj = readFile(seriesInfoFile);
-			if(obj instanceof HashMap<?, ?>)
-			{
+			if (obj instanceof HashMap<?, ?>) {
 				seriesInfo = (HashMap<String, String>) obj;
 			}
 		}
-		
-			
-		
+
 		Document doc = new Document();
 		Element eleNewMods = (Element) eleMods.clone();
 		doc.setRootElement(eleNewMods);
@@ -168,14 +200,14 @@ public class ModsUtils {
 				List<Element> eleXpathList = eleMetadata.getChildren("xpath", null);
 				for (Element eleXpath : eleXpathList) {
 					String query = eleXpath.getTextTrim();
-//					logger.debug("XPath: " + query);
+					// logger.debug("XPath: " + query);
 					XPath xpath = XPath.newInstance(query);
 					xpath.addNamespace(NS_MODS);
 					List<Element> eleValueList = xpath.selectNodes(doc);
 					if (eleValueList != null) {
 						List<String> values = new ArrayList<String>();
 						for (Element eleValue : eleValueList) {
-//							logger.debug("Value: " + eleValue.getTextTrim());
+							// logger.debug("Value: " + eleValue.getTextTrim());
 							values.add(eleValue.getTextTrim());
 						}
 
@@ -188,19 +220,44 @@ public class ModsUtils {
 						value = value.trim();
 						String[] valueParts = value.split("\\s");
 						String seriesName = "";
-						for (int i = 0; i < valueParts.length-1; i++) {
+						for (int i = 0; i < valueParts.length; i++) {
 							seriesName += " " + valueParts[i];
 						}
 						seriesName = seriesName.trim();
-						String seriesPart = valueParts[valueParts.length-1];
 						logger.debug("related Series = " + seriesName);
 						String seriesID = seriesInfo.get(seriesName);
-						if(seriesID == null)
-						{
-							seriesID = new ImportOpac().createAtstsl(seriesName, null).toLowerCase() + "_" + "CSIC" + System.currentTimeMillis();
+						if (seriesID == null) {
+							// seriesID = new ImportOpac().createAtstsl(seriesName, null).toLowerCase() + "_" + "CSIC" +
+							// System.currentTimeMillis();
+							seriesID = "CSIC" + System.currentTimeMillis();
 							logger.debug("Series not found. creating new one: " + seriesID);
 							seriesInfo.put(seriesName, seriesID);
-						}	
+						}
+
+						// Creating metadata for series
+						try {
+							MetadataType titleType = prefs.getMetadataTypeByName("TitleDocMain");
+							MetadataType idType = prefs.getMetadataTypeByName("CatalogIDDigital");
+							Metadata mdTitle;
+							mdTitle = new Metadata(titleType);
+							Metadata mdID = new Metadata(idType);
+							mdTitle.setValue(seriesName);
+							mdID.setValue(seriesID);
+
+							logger.debug("Found metadata: " + mdTitle.getType().getName());
+							if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+								logger.debug("Added metadata \"" + mdTitle.getValue() + "\" to logical structure");
+								dsSeries.addMetadata(mdTitle);
+							}
+							logger.debug("Found metadata: " + mdID.getType().getName());
+							if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+								logger.debug("Added metadata \"" + mdID.getValue() + "\" to logical structure");
+								dsSeries.addMetadata(mdID);
+							}
+							
+						} catch (MetadataTypeNotAllowedException e) {
+							logger.error(e.toString(), e);
+						}
 					}
 				}
 			}
@@ -243,7 +300,7 @@ public class ModsUtils {
 									} else {
 										lastName = name;
 									}
-									
+
 									if (StringUtils.isNotEmpty(lastName)) {
 										Person person = new Person(mdType);
 										person.setFirstname(firstName);
@@ -260,6 +317,7 @@ public class ModsUtils {
 					} else {
 						// Regular metadata
 						String titleArticle = null, title = null;
+						String id1 = null, id2 = null;
 						for (Element eleXpath : eleXpathList) {
 							String query = eleXpath.getTextTrim();
 							// logger.debug("XPath: " + query);
@@ -271,42 +329,57 @@ public class ModsUtils {
 								for (Element eleValue : eleValueList) {
 
 									// logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
-									values.add(eleValue.getTextTrim());
-								}
-								String value = "";
-								for (String s : values) {
-									if (StringUtils.isNotEmpty(s)) {
-										value += " " + s;
-									}
-								}
-								value = value.trim();
+									// values.add(eleValue.getTextTrim());
+									// String value = "";
+									// for (String s : values) {
+									// if (StringUtils.isNotEmpty(s)) {
+									// value += " " + s;
+									// }
+									// }
+									// value = value.trim();
+									String value = eleValue.getTextTrim();
 
-								// if we have the title, get both nonSort (article) and title before writing metadata
-								if (mdType.getName().contentEquals("TitleDocMain")) {
-									if (eleXpath.getValue().contains("nonSort")) {
-										titleArticle = value;
-									} else if (eleXpath.getValue().contains("title")) {
-										title = value;
+									// if we have the title, get both nonSort (article) and title before writing metadata
+									if (mdType.getName().contentEquals("TitleDocMain")) {
+										if (eleXpath.getValue().contains("nonSort")) {
+											titleArticle = value;
+										} else if (eleXpath.getValue().contains("title")) {
+											title = value;
+										}
+										if (titleArticle != null && title != null) {
+											value = titleArticle + " " + title;
+										} else if (title != null) {
+											value = title;
+										} else
+											continue;
 									}
-									if (titleArticle != null && title != null) {
-										value = titleArticle + " " + title;
-									} else if (title != null) {
-										value = title;
-									} else
-										continue;
-								}
+									
+									//Add singleDigCollection to series also
+									if(mdType.getName().contentEquals("singleDigCollection"))
+									{
+										if (value.length() > 0) {
+											Metadata metadata = new Metadata(mdType);
+											metadata.setValue(value);
+											logger.debug("Found metadata: " + metadata.getType().getName());
+											if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+												logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
+												dsSeries.addMetadata(metadata);
+											}
+										}
+									}
 
-								if (value.length() > 0) {
-									Metadata metadata = new Metadata(mdType);
-									metadata.setValue(value);
-									logger.debug("Found metadata: " + metadata.getType().getName());
-									if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-										logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
-										dsLogical.addMetadata(metadata);
-									}
-									if (eleMetadata.getAttribute("physical") != null && eleMetadata.getAttributeValue("physical").equalsIgnoreCase("true")) {
-										logger.debug("Added metadata \"" + metadata.getValue() + "\" to physical structure");
-										dsPhysical.addMetadata(metadata);
+									if (value.length() > 0) {
+										Metadata metadata = new Metadata(mdType);
+										metadata.setValue(value);
+										logger.debug("Found metadata: " + metadata.getType().getName());
+										if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+											logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
+											dsLogical.addMetadata(metadata);
+										}
+										if (eleMetadata.getAttribute("physical") != null && eleMetadata.getAttributeValue("physical").equalsIgnoreCase("true")) {
+											logger.debug("Added metadata \"" + metadata.getValue() + "\" to physical structure");
+											dsPhysical.addMetadata(metadata);
+										}
 									}
 								}
 							}
@@ -319,10 +392,9 @@ public class ModsUtils {
 				logger.warn("Metadata '" + mdName + "' is not defined in the ruleset.");
 			}
 		}
-		
-		//write seriesInfo to file
-		if(seriesInfoFile.isFile())
-		{
+
+		// write seriesInfo to file
+		if (seriesInfoFile.isFile()) {
 			logger.debug("deleting old seriesInfoFile");
 			seriesInfoFile.delete();
 		}
