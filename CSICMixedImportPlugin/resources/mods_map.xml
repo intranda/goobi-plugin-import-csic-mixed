@@ -45,7 +45,7 @@
 		<xpath>/mods:mods/mods:location/mods:physicalLocation</xpath>
 	</metadata>
 	<metadata logical="true">
-		<name>FormatSourcePrint</name>
+		<name>SizeSourcePrint</name>
 		<xpath>/mods:mods/mods:physicalDescription/mods:extent</xpath>
 	</metadata>
 	<metadata logical="true">
