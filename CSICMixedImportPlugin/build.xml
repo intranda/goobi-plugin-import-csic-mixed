@@ -29,7 +29,7 @@
          ================================= -->
 	<target name="copyToPluginFolder" depends="linux,win32">
 		<echo>cleaning up</echo>
-		 <delete file="${jarfile}" />
+		<delete file="${jarfile}" />
 		<echo>cleaned up successfully</echo>
 	</target>
 	<target name="linux" if="isUnix">
@@ -40,7 +40,7 @@
 		<echo>use Windows path: ${pluginFolderWin}</echo>
 		<copy tofile="${pluginFolderWin}${jarfile}" file="${jarfile}" overwrite="true" />
 	</target>
-	 
+
 	<!-- ================================= 
 	          target: deploy 
          ================================= -->

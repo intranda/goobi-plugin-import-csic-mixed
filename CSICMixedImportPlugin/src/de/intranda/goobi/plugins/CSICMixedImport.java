@@ -94,13 +94,18 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "0.0.43300000";
+	private static final String VERSION = "0.2.20120621";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
 	// private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
 	// private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
 	private static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
 	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
 
+	private final static boolean deleteOriginalImages = false;
+	private final static boolean deleteTempFiles = true;
+	private final static boolean logConversionLoss = true;
+	private final static boolean copyImages = false;
+	
 	// Namespaces
 	private Namespace mets;
 	private Namespace premis;
@@ -126,15 +131,19 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 */
 //	 public File exportFolder = new File("/opt/digiverso/goobi/0008_PCTN");
 
-	private File exportFolder = new File("samples/test");
+	private File exportFolder = new File("example");
 
 	public CSICMixedImport() {
 		map.put("?monographic", "Monograph");
-		map.put("?continuing", "Periodical");
-		map.put("?multipart monograph", "MultiVolumeWork");
+//		map.put("?continuing", "Periodical");
+		map.put("?continuing", "PeriodicalVolume");
+//		map.put("?multipart monograph", "MultiVolumeWork");
+		map.put("?multipart monograph", "Volume");
 		map.put("?single unit", "Monograph");
-		map.put("?integrating resource", "MultiVolumeWork");
-		map.put("?serial", "Periodical");
+//		map.put("?integrating resource", "MultiVolumeWork");
+		map.put("?integrating resource", "Volume");
+//		map.put("?serial", "Periodical");
+		map.put("?serial", "PeriodicalVolume");
 		map.put("?cartographic", "Map");
 		map.put("?notated music", null);
 		map.put("?sound recording-nonmusical", null);
@@ -219,11 +228,19 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		doc = replaceStructData(doc, modsDoc);
 
 		File anchorFile = new File(tempFile.getAbsolutePath().replace(".xml", "_anchor.xml"));
-		if (anchorFile.isFile()) {
+		if (deleteTempFiles && anchorFile.isFile()) {
 			anchorFile.renameTo(new File(importFolder, getProcessTitle().replace(".xml", "_anchor.xml")));
+		} else if(anchorFile.isFile()){
+			try {
+				copyFile(anchorFile, new File(importFolder, getProcessTitle().replace(".xml", "_anchor.xml")));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		if (tempFile.exists())
+		if (deleteTempFiles && tempFile.exists()) {			
 			tempFile.delete();
+		}
 
 		return doc;
 	}
@@ -457,7 +474,30 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			if (doc != null && doc.hasRootElement()) {
 				XSLTransformer transformer = new XSLTransformer(XSLT_PATH);
 				Document docMods = transformer.transform(doc);
-
+				
+				if(logConversionLoss) {
+					File marcLossFile = new File(exportFolder, currentIdentifier + "_MarcLoss.xml");
+					Document lossDoc = getMarcModsLoss(doc, docMods);
+					CommonUtils.getFileFromDocument(marcLossFile, lossDoc);
+					File modsFile = new File(exportFolder, currentIdentifier + "_Mods.xml");
+					try {
+						CommonUtils.getFileFromDocument(modsFile, docMods);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				if(!deleteTempFiles) {
+					File modsFile = new File(exportFolder, "modsTemp.xml");
+					try {
+						CommonUtils.getFileFromDocument(modsFile, docMods);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
 				// logger.debug(new XMLOutputter().outputString(docMods));
 				ff = new MetsMods(prefs);
 				DigitalDocument dd = new DigitalDocument();
@@ -882,6 +922,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 * @param exportFolder
 	 */
 	private void copyImageFiles(File exportFolder) {
+		
+		if(!copyImages) {
+			return;
+		}
 
 		String id = currentIdentifier.replace("CSIC", "");
 
@@ -907,9 +951,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		// within exportFolder
 		if (tiffDir == null) {
 			for (File folder : folders) {
-				if (folder.isDirectory() && folder.getName().contains(id))
+				if (folder.isDirectory() && folder.getName().contains(id)) {
 					imageDir = folder;
-				logger.debug("found export folder " + imageDir + " in " + exportFolder);
+					logger.debug("found export folder " + imageDir + " in " + exportFolder);
+				}
 			}
 		} else {
 			// search in tiff-dir
@@ -946,26 +991,32 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		List<File> images = Arrays.asList(imageDir.listFiles(ImageFilter));
 		for (File imageFile : images) {
 			try {
-				InputStream inStream = new FileInputStream(imageFile);
-				BufferedInputStream bis = new BufferedInputStream(inStream);
 				String filename = imageFile.getName();
-				FileOutputStream fos = new FileOutputStream(new File(tempDir, filename));
-				byte[] bytes = new byte[8192];
-				int count = bis.read(bytes);
-				while (count != -1 && count <= 8192) {
-					fos.write(bytes, 0, count);
-					count = bis.read(bytes);
+				copyFile(imageFile, new File(tempDir, filename));
+				if(deleteOriginalImages) {					
+					imageFile.delete();
 				}
-				if (count != -1) {
-					fos.write(bytes, 0, count);
-				}
-				fos.close();
-				bis.close();
-				imageFile.delete();
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
 		}
+	}
+	
+	private void copyFile(File source, File dest) throws IOException {
+		InputStream inStream = new FileInputStream(source);
+		BufferedInputStream bis = new BufferedInputStream(inStream);
+		FileOutputStream fos = new FileOutputStream(dest);
+		byte[] bytes = new byte[8192];
+		int count = bis.read(bytes);
+		while (count != -1 && count <= 8192) {
+			fos.write(bytes, 0, count);
+			count = bis.read(bytes);
+		}
+		if (count != -1) {
+			fos.write(bytes, 0, count);
+		}
+		fos.close();
+		bis.close();
 	}
 
 	/**
@@ -1023,13 +1074,15 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		// set type of physical root
 		Element physRoot = null;
 		for (Object obj : physStruct.getChildren("div", mets)) {
-			if (obj instanceof Element)
+			if (obj instanceof Element) {				
 				physRoot = (Element) obj;
-			else
 				break;
-
-			physRoot.setAttribute("TYPE", getPhysicalType(modsDoc));
+			}
+			else {				
+				continue;
+			}
 		}
+		physRoot.setAttribute("TYPE", getPhysicalType(modsDoc));
 
 		// integrate logical structMaps
 		if (isSeriesVolume) {
@@ -1040,21 +1093,24 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			seriesElement.addContent(logicalChildren);
 		}
 
-		// remove "volume"
+		// make physDocStrct comply to BoundBook->page
 		List<Element> volumes = physRoot.getChildren();
-		List<Element> volumeChildren = new ArrayList<Element>();
+		List<Element> pages = new ArrayList<Element>();
 		int noVolumes = 0;
+		
+		//get all pages in the physical DocStruct
 		for (Element volume : volumes) {
-			if (volume.getAttributeValue("TYPE").contentEquals("VOLUME")) {
-				volumeChildren.addAll(volume.cloneContent());
-				noVolumes++;
-			} else {
-				volumeChildren.add(volume);
-			}
+			noVolumes++;
+			pages.addAll(getPhysicalPages(volume));
 		}
-		if (noVolumes > 1)
-			logger.warn("Number of volumes in book is " + noVolumes);
-		physRoot.setContent(volumeChildren);
+		
+		//remove all children of the physical root (BoundBook)
+		physRoot.removeChildren("div", mets);
+		
+		//add all pages to the physical root (BoundBook)
+		for (Element element : pages) {
+			physRoot.addContent((Element)element.clone());
+		}	
 
 		// rename PAGE->page
 		Iterator<Content> descendant = physRoot.getDescendants();
@@ -1077,6 +1133,26 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		}
 
 		return doc;
+	}
+	
+	private ArrayList<Element> getPhysicalPages(Element parent) {
+		
+		ArrayList<Element> pages = new ArrayList<Element>();
+		
+		List children = parent.getChildren();
+		for (Object object : children) {
+			if(object instanceof Element) {
+				Element child = (Element) object;
+				if(child.getAttributeValue("TYPE").toLowerCase().contentEquals("page")) {
+					//child is a page
+					pages.add(child);
+				} else {
+					pages.addAll(getPhysicalPages(child));
+				}
+			}
+		}
+		
+		return pages;
 	}
 
 	/**
@@ -1228,43 +1304,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			logger.error(e.getMessage(), e);
 		}
 		
-//		try {
-//			Fileformat testFF = new MetsMods(converter.prefs);
-//			File testFile = new File("output/laavrod_CSIC000927984.xml");
-//			if (testFile.isFile()) {
-//				testFF.read(testFile.getAbsolutePath());
-//
-//				List<DocStruct> logicalChildren = testFF.getDigitalDocument().getLogicalDocStruct().getAllChildren();
-//				System.out.println("Listing all children of logical docstruct:");
-//				for (DocStruct docStruct : logicalChildren) {
-//					List<Metadata> mdList = docStruct.getAllMetadata();
-//					System.out.println(" * Listing metadata:");
-//					for (Metadata metadata : mdList) {
-//						System.out.println(" * * Metadata type = " + metadata.getType().getName() + "; value = " + metadata.getValue());
-//					}
-//				}
-//
-//				List<DocStruct> physicalChildren = testFF.getDigitalDocument().getPhysicalDocStruct().getAllChildren();
-//				System.out.println("Listing all children of physical docstruct:");
-//				for (DocStruct docStruct : physicalChildren) {
-//					List<Metadata> mdList = docStruct.getAllMetadata();
-//					System.out.println(" * Listing metadata:");
-//					for (Metadata metadata : mdList) {
-//						System.out.println(" * * Metadata type = " + metadata.getType().getName() + "; value = " + metadata.getValue());
-//					}
-//				}
-//
-//				System.out.println(testFF.getDigitalDocument().toString());
-//				testFF.write("test.xml");
-//			} else
-//				System.out.println("COuld not load file.");
-//		} catch (ReadException e) {
-//			logger.error("Could not read mets file");
-//		}
-//		System.out.println("Finished");
-		
-		// converter.DeleteExistingData("CSIC");
-		
 		converter.setImportFolder("output/");
 		List<Record> records = new ArrayList<Record>();
 		if (!converter.exportFolder.isDirectory()) {
@@ -1285,6 +1324,56 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			System.out.println(key + " \t \t " + results.get(key));
 		}
 	}
+	
+	private Document getMarcModsLoss(Document marcDoc, Document modsDoc) {
+	
+		Element record = marcDoc.getRootElement();
+		if(record == null){
+			return null;
+		}
+		
+		Document missingElementsDoc = new Document(new Element("Lost-in-MarcMods-Conversion"));
+		String modsString = CommonUtils.getStringFromDocument(modsDoc, encoding);
+		modsString = modsString.replaceAll("\"", "");
+		
+		Iterator<Content> descendant = record.getDescendants();
+		while (descendant.hasNext()) {
+			Element ele = null;
+			Object obj = descendant.next();
+			if (obj instanceof Element) {
+				ele = (Element) obj;
+				String marcContent = ele.getText();
+				if(marcContent != null && !marcContent.isEmpty()) {
+					try {
+						CharSequence cs = marcContent.trim().subSequence(0, marcContent.trim().length()-1);
+						marcContent = cs.toString().trim();
+					if(modsString.contains(marcContent)) {
+						//marc field is contained in the mods doc
+					} else {
+						Element parentElement = ele.getParentElement();
+						if(parentElement != null && parentElement != record) {
+							//The element has a parent that is not the root element, which we should log as well					
+							Element parentClone = (Element)parentElement.clone();
+							parentClone.removeContent();	
+							missingElementsDoc.getRootElement().addContent(parentClone);
+							parentClone.addContent((Element)ele.clone());
+						} else {
+							missingElementsDoc.getRootElement().addContent((Element)ele.clone());
+						}
+					}
+					} catch(IndexOutOfBoundsException e) {
+						continue;
+					}
+				}
+				
+			}
+		}
+		return missingElementsDoc;
+	}
+	
+//	private Document getModsMetsLoss(Document modsDoc, Document metsDoc) {
+//		
+//	}
 
 	public static FilenameFilter ImageFilter = new FilenameFilter() {
 		@Override
