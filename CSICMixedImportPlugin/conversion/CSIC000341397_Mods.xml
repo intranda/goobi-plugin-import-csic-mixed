@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="3.4"
+	xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
+	<titleInfo>
+		<title>Catálogo abreviado de los manuscritos de la biblioteca del
+			Excmo. Señor Duque de Osuna e Infantado</title>
+	</titleInfo>
+	<name type="personal" usage="primary">
+		<namePart>Rocamora, José María</namePart>
+	</name>
+	<typeOfResource>text</typeOfResource>
+	<originInfo>
+		<place>
+			<placeTerm type="code" authority="marccountry">esp</placeTerm>
+		</place>
+		<place>
+			<placeTerm type="text">Madrid</placeTerm>
+		</place>
+		<publisher>[s.n.]</publisher>
+		<dateIssued>1882</dateIssued>
+		<issuance>monographic</issuance>
+		<frequency></frequency>
+	</originInfo>
+	<language>
+		<languageTerm authority="iso639-2b" type="code">spa</languageTerm>
+	</language>
+	<physicalDescription>
+		<form authority="marcform">print</form>
+		<extent>138 p. ; 26 cm.</extent>
+	</physicalDescription>
+	<subject>
+		<name type="personal">
+			<namePart type="termsOfAddress">Duque de</namePart>
+			<namePart>Osuna, Mariano Téllez-Gíron y Beaufort</namePart>
+			<namePart type="date">(1814-1882)</namePart>
+		</name>
+		<titleInfo>
+			<title></title>
+			<partNumber>Catálogos</partNumber>
+		</titleInfo>
+		<topic>Biblioteca</topic>
+		<genre>Catálogos</genre>
+	</subject>
+	<subject>
+		<topic>Manuscritos</topic>
+		<genre>Catálogos</genre>
+	</subject>
+	<location>
+		<physicalLocation displayLabel="BOOK">MAD01 M-CCHS</physicalLocation>
+		<shelfLocator>SXIX/283770 1</shelfLocator>
+		<holdingSimple>
+			<copyInformation>
+				<subLocation>M-CCHS Impresos del siglo XIX (1831-1900)</subLocation>
+				<shelfLocator>SXIX/283770 1</shelfLocator>
+				<pieceDesignation>64462001011</pieceDesignation>
+			</copyInformation>
+		</holdingSimple>
+	</location>
+	<location>
+		<physicalLocation displayLabel="BOOK">MAD01 M-CCHS</physicalLocation>
+		<shelfLocator>SXIX/76260 1</shelfLocator>
+		<holdingSimple>
+			<copyInformation>
+				<subLocation>M-CCHS Impresos del siglo XIX (1831-1900)</subLocation>
+				<shelfLocator>SXIX/76260 1</shelfLocator>
+				<pieceDesignation>64462001013</pieceDesignation>
+			</copyInformation>
+		</holdingSimple>
+	</location>
+	<location>
+		<physicalLocation displayLabel="BOOK">MAD01 M-CCHS</physicalLocation>
+		<shelfLocator>BC RM RM/4925 1</shelfLocator>
+		<holdingSimple>
+			<copyInformation>
+				<subLocation>M-CCHS Legados</subLocation>
+				<shelfLocator>BC RM RM/4925 1</shelfLocator>
+				<pieceDesignation>64462001012</pieceDesignation>
+			</copyInformation>
+		</holdingSimple>
+	</location>
+	<location>
+		<physicalLocation displayLabel="BOOK">MAD01 M-MNCN</physicalLocation>
+		<shelfLocator>1-4659 1</shelfLocator>
+		<holdingSimple>
+			<copyInformation>
+				<subLocation>M-MNCN</subLocation>
+				<shelfLocator>1-4659 1</shelfLocator>
+				<pieceDesignation>64462001010</pieceDesignation>
+			</copyInformation>
+		</holdingSimple>
+	</location>
+	<location>
+		<physicalLocation displayLabel="BOOK">MAD01 M-Resid.</physicalLocation>
+		<shelfLocator>017-15</shelfLocator>
+		<holdingSimple>
+			<copyInformation>
+				<subLocation>M-Resid. MP5</subLocation>
+				<shelfLocator>017-15</shelfLocator>
+				<pieceDesignation>516596</pieceDesignation>
+			</copyInformation>
+		</holdingSimple>
+	</location>
+	<location>
+		<physicalLocation displayLabel="BOOK">MAD01 M-Resid.</physicalLocation>
+		<shelfLocator>017-16</shelfLocator>
+		<holdingSimple>
+			<copyInformation>
+				<subLocation>M-Resid. MP5</subLocation>
+				<shelfLocator>017-16</shelfLocator>
+				<pieceDesignation>516599</pieceDesignation>
+			</copyInformation>
+		</holdingSimple>
+	</location>
+	<location>
+		<url displayLabel="Texto completo libro digitalizado" usage="primary display">http://aleph.csic.es/imagenes/mad01/pvc/P_000064462_64462001011_V00.pdf</url>
+	</location>
+	<recordInfo>
+		<recordContentSource authority="marcorg">ES-MaCSI</recordContentSource>
+		<recordCreationDate encoding="marc">981103</recordCreationDate>
+		<recordChangeDate encoding="iso8601">20000501070000.0</recordChangeDate>
+		<recordIdentifier>CSIC000064462</recordIdentifier>
+		<recordOrigin>Converted from MARCXML to MODS version 3.4 using
+			MARC21slim2MODS3-4.xsl
+			(Revision 1.70)</recordOrigin>
+		<languageOfCataloging>
+			<languageTerm authority="iso639-2b" type="code">spa</languageTerm>
+		</languageOfCataloging>
+	</recordInfo>
+</mods>

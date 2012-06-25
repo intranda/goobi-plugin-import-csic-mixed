@@ -326,15 +326,15 @@ public class ModsUtils {
 								List<String> values = new ArrayList<String>();
 								for (Element eleValue : eleValueList) {
 
-									// logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
-									// values.add(eleValue.getTextTrim());
-									// String value = "";
-									// for (String s : values) {
-									// if (StringUtils.isNotEmpty(s)) {
-									// value += " " + s;
-									// }
-									// }
-									// value = value.trim();
+//									 logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
+//									 values.add(eleValue.getTextTrim());
+//									 String value = "";
+//									 for (String s : values) {
+//									 if (StringUtils.isNotEmpty(s)) {
+//									 value += " " + s;
+//									 }
+//									 }
+//									 value = value.trim();
 									String value = eleValue.getTextTrim();
 
 									// if we have the title, get both nonSort (article) and title before writing metadata

@@ -94,7 +94,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "0.2.20120621";
+	private static final String VERSION = "0.2.20120625";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
 	// private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
 	// private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
@@ -103,8 +103,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 	private final static boolean deleteOriginalImages = false;
 	private final static boolean deleteTempFiles = true;
-	private final static boolean logConversionLoss = true;
-	private final static boolean copyImages = false;
+	private final static boolean logConversionLoss = false;
+	private final static boolean copyImages = true;
 	
 	// Namespaces
 	private Namespace mets;
@@ -117,7 +117,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private Prefs prefs;
 	private String data = "";
 	private File importFile = null;
-	private String importFolder = "output/";
+	private String importFolder = "/output";
 	private Map<String, String> map = new HashMap<String, String>();
 	private String currentIdentifier;
 	private String currentTitle;
@@ -129,9 +129,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	/**
 	 * Directory containing the image files (possibly in TIFF/JPEG subfolders)
 	 */
-//	 public File exportFolder = new File("/opt/digiverso/goobi/0008_PCTN");
+	 public File exportFolder = new File("/mnt/csic/0009_VCTN");
 
-	private File exportFolder = new File("example");
+//	private File exportFolder = new File("example");
 
 	public CSICMixedImport() {
 		map.put("?monographic", "Monograph");
@@ -546,7 +546,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				try {
 					List<? extends Metadata> seriesIDList = dsRoot.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital"));
 					for (Metadata metadata : seriesIDList) {
-						System.out.println("SeriesID = " + metadata.getValue());
 					}
 					if (seriesIDList != null && !seriesIDList.isEmpty()) {
 						logger.debug("Record is part of a series");
@@ -1293,40 +1292,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 		return root;
 	}
-
-	public static void main(String[] args) throws PreferencesException, WriteException {
-		CSICMixedImport converter = new CSICMixedImport();
-		converter.prefs = new Prefs();
-		
-		try {
-			converter.prefs.loadPrefs("resources/ruleset1.xml");
-		} catch (PreferencesException e) {
-			logger.error(e.getMessage(), e);
-		}
-		
-		converter.setImportFolder("output/");
-		List<Record> records = new ArrayList<Record>();
-		if (!converter.exportFolder.isDirectory()) {
-			logger.warn("No export directory found. Aborting");
-			return;
-		}
-
-		for (File file : converter.exportFolder.listFiles(XmlFilter)) {
-
-			// converter.createFileformat(file);
-			converter.setFile(file);
-			records.addAll(converter.generateRecordsFromFile());
-		}
-
-		HashMap<String, ImportReturnValue> results = converter.generateFiles(records);
-
-		for (String key : results.keySet()) {
-			System.out.println(key + " \t \t " + results.get(key));
-		}
-	}
 	
 	private Document getMarcModsLoss(Document marcDoc, Document modsDoc) {
-	
+		
 		Element record = marcDoc.getRootElement();
 		if(record == null){
 			return null;
@@ -1334,7 +1302,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		
 		Document missingElementsDoc = new Document(new Element("Lost-in-MarcMods-Conversion"));
 		String modsString = CommonUtils.getStringFromDocument(modsDoc, encoding);
-		modsString = modsString.replaceAll("\"", "");
+//		modsString = modsString.replaceAll("\"", "");
 		
 		Iterator<Content> descendant = record.getDescendants();
 		while (descendant.hasNext()) {
@@ -1370,6 +1338,39 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		}
 		return missingElementsDoc;
 	}
+
+	public static void main(String[] args) throws PreferencesException, WriteException {
+		CSICMixedImport converter = new CSICMixedImport();
+		converter.prefs = new Prefs();
+		
+		try {
+			converter.prefs.loadPrefs("resources/rulesetCSIC.xml");
+		} catch (PreferencesException e) {
+			logger.error(e.getMessage(), e);
+		}
+		
+		converter.setImportFolder("output/");
+		List<Record> records = new ArrayList<Record>();
+		if (!converter.exportFolder.isDirectory()) {
+			logger.warn("No export directory found. Aborting");
+			return;
+		}
+
+		for (File file : converter.exportFolder.listFiles(XmlFilter)) {
+
+			// converter.createFileformat(file);
+			converter.setFile(file);
+			records.addAll(converter.generateRecordsFromFile());
+		}
+
+		HashMap<String, ImportReturnValue> results = converter.generateFiles(records);
+
+		for (String key : results.keySet()) {
+			System.out.println(key + " \t \t " + results.get(key));
+		}
+	}
+	
+
 	
 //	private Document getModsMetsLoss(Document modsDoc, Document metsDoc) {
 //		

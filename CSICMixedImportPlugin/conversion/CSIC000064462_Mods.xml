@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="3.4"
+	xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
+	<titleInfo>
+		<title>Saggi di bibliografia teatrale spagnuola</title>
+	</titleInfo>
+	<name type="personal" usage="primary">
+		<namePart>Restori, Antonio</namePart>
+	</name>
+	<typeOfResource>text</typeOfResource>
+	<originInfo>
+		<place>
+			<placeTerm type="code" authority="marccountry">che</placeTerm>
+		</place>
+		<place>
+			<placeTerm type="text">Genève</placeTerm>
+		</place>
+		<publisher>Leo S. Olschki</publisher>
+		<dateIssued>1927</dateIssued>
+		<issuance>monographic</issuance>
+		<frequency></frequency>
+	</originInfo>
+	<language>
+		<languageTerm authority="iso639-2b" type="code">ita</languageTerm>
+	</language>
+	<physicalDescription>
+		<form authority="marcform">print</form>
+		<extent>3 h., 121 p. ; 26 cm.</extent>
+	</physicalDescription>
+	<location>
+		<physicalLocation displayLabel="BOOK">MAD01 M-CCHS</physicalLocation>
+		<shelfLocator>DEU/693300</shelfLocator>
+		<holdingSimple>
+			<copyInformation>
+				<subLocation>M-CCHS Colección complementaria</subLocation>
+				<shelfLocator>DEU/693300</shelfLocator>
+				<pieceDesignation>447010000001</pieceDesignation>
+			</copyInformation>
+		</holdingSimple>
+	</location>
+	<location>
+		<url displayLabel="Texto completo libro digitalizado" usage="primary display">http://aleph.csic.es/imagenes/mad01/pvc/P_000447010_447010000001_V00.pdf</url>
+	</location>
+	<recordInfo>
+		<recordContentSource authority="marcorg">ES-MaCSI</recordContentSource>
+		<recordCreationDate encoding="marc">950109</recordCreationDate>
+		<recordChangeDate encoding="iso8601">20000501070000.0</recordChangeDate>
+		<recordIdentifier>CSIC000447010</recordIdentifier>
+		<recordOrigin>Converted from MARCXML to MODS version 3.4 using
+			MARC21slim2MODS3-4.xsl
+			(Revision 1.70)</recordOrigin>
+		<languageOfCataloging>
+			<languageTerm authority="iso639-2b" type="code">spa</languageTerm>
+		</languageOfCataloging>
+	</recordInfo>
+</mods>

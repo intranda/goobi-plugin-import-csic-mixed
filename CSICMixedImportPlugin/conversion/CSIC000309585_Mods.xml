@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mods xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="3.4"
+	xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
+	<titleInfo>
+		<title>Per una bibliografia di J. Pérez de Montalbán</title>
+		<subTitle>adidenda e corrigenda</subTitle>
+	</titleInfo>
+	<name type="personal" usage="primary">
+		<namePart>Profeti, María Grazia</namePart>
+	</name>
+	<typeOfResource>text</typeOfResource>
+	<originInfo>
+		<place>
+			<placeTerm type="code" authority="marccountry">ita</placeTerm>
+		</place>
+		<place>
+			<placeTerm type="text">Verona</placeTerm>
+		</place>
+		<publisher>Università degli Studi di Padona. Facoltà di Economia e
+			Commercio ; Istituto di Lingue e Letterature straniere di Verona</publisher>
+		<dateIssued>1982</dateIssued>
+		<issuance>monographic</issuance>
+		<frequency></frequency>
+	</originInfo>
+	<language>
+		<languageTerm authority="iso639-2b" type="code">ita</languageTerm>
+	</language>
+	<physicalDescription>
+		<form authority="marcform">print</form>
+		<extent>79 p. ; 25 cm.</extent>
+	</physicalDescription>
+	<subject>
+		<name type="personal">
+			<namePart>Pérez de Montalbán, Juan</namePart>
+			<namePart type="date">(1602-1638)</namePart>
+		</name>
+		<titleInfo>
+			<title></title>
+		</titleInfo>
+	</subject>
+	<classification authority="udc">012 Pérez de Montalbán, Juan</classification>
+	<location>
+		<physicalLocation displayLabel="BOOK">MAD01 M-CCHS</physicalLocation>
+		<shelfLocator>DUP/61446</shelfLocator>
+		<holdingSimple>
+			<copyInformation>
+				<subLocation>M-CCHS Monografías duplicadas</subLocation>
+				<shelfLocator>DUP/61446</shelfLocator>
+				<pieceDesignation>309586000001</pieceDesignation>
+			</copyInformation>
+		</holdingSimple>
+	</location>
+	<location>
+		<physicalLocation displayLabel="BOOK">MAD01 M-CCHS</physicalLocation>
+		<shelfLocator>821.134.2"15/17" Pér.0 PRO per</shelfLocator>
+		<holdingSimple>
+			<copyInformation>
+				<subLocation>M-CCHS Secciones temáticas</subLocation>
+				<shelfLocator>821.134.2"15/17" Pér.0 PRO per</shelfLocator>
+				<pieceDesignation>309586000002</pieceDesignation>
+			</copyInformation>
+		</holdingSimple>
+	</location>
+	<location>
+		<url displayLabel="Texto completo libro digitalizado" usage="primary display">http://aleph.csic.es/imagenes/mad01/pvc/P_000309586_309586000001_V00.pdf</url>
+	</location>
+	<recordInfo>
+		<recordContentSource authority="marcorg">ES-MaCSI</recordContentSource>
+		<recordCreationDate encoding="marc">920606</recordCreationDate>
+		<recordChangeDate encoding="iso8601">20000501070000.0</recordChangeDate>
+		<recordIdentifier>CSIC000309586</recordIdentifier>
+		<recordOrigin>Converted from MARCXML to MODS version 3.4 using
+			MARC21slim2MODS3-4.xsl
+			(Revision 1.70)</recordOrigin>
+		<languageOfCataloging>
+			<languageTerm authority="iso639-2b" type="code">spa</languageTerm>
+		</languageOfCataloging>
+	</recordInfo>
+</mods>
