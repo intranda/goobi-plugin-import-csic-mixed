@@ -1,23 +1,20 @@
-/**
- * This file is part of CamImportPlugins/SotonImportPlugins.
+/*************************************************************************
  * 
- * Copyright (C) 2011 intranda GmbH
+ * Copyright intranda GmbH
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * ************************* CONFIDENTIAL ********************************
  * 
- * @author Andrey Kozhushkov
- */
+ * [2003] - [2012] intranda GmbH, Bertha-von-Suttner-Str. 9, 37085 Göttingen, Germany 
+ * 
+ * All Rights Reserved.
+ * 
+ * NOTICE: All information contained herein is protected by copyright. 
+ * The source code contained herein is proprietary of intranda GmbH. 
+ * The dissemination, reproduction, distribution or modification of 
+ * this source code, without prior written permission from intranda GmbH, 
+ * is expressly forbidden and a violation of international copyright law.
+ * 
+ *************************************************************************/
 package de.intranda.goobi.plugins;
 
 import java.io.BufferedInputStream;
@@ -97,15 +94,15 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 	private static final String NAME = "CSICMixedImport";
 	private static final String VERSION = "0.2.20120625";
-//	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
-	 private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
-	 private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
-//	private static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
+	// private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
+	private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
+	private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
+	// private static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
 	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
 
 	private final static boolean deleteOriginalImages = false;
 	private final static boolean deleteTempFiles = true;
-	private final static boolean logConversionLoss = false;
+	private final static boolean logConversionLoss = true;
 	private final static boolean copyImages = true;
 
 	// Namespaces
@@ -128,12 +125,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private String encoding = "utf-8";
 	private boolean isSeriesVolume = false;
 
+	private String collection = "0018_ACN_PC";
+
 	/**
 	 * Directory containing the image files (possibly in TIFF/JPEG subfolders)
 	 */
 	// public File exportFolder = new File("/mnt/csic/0009_VCTN");
-
-	private File exportFolder = new File("example");
+	private File exportFolder = new File("D:/digiverso/Kunden/CSIC/Daten/" + collection);
 
 	public CSICMixedImport() {
 		map.put("?monographic", "Monograph");
@@ -147,7 +145,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		// map.put("?serial", "Periodical");
 		map.put("?serial", "PeriodicalVolume");
 		map.put("?cartographic", "Map");
-		map.put("?notated music", null);
+		map.put("?notated music", "SheetMusic");
 		map.put("?sound recording-nonmusical", null);
 		map.put("?sound recording-musical", null);
 		map.put("?moving image", null);
@@ -185,7 +183,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				logger.error(e.toString(), e);
 			}
 		}
-		
+
 		return ff;
 	}
 
@@ -238,8 +236,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			try {
 				copyFile(anchorFile, new File(importFolder, getProcessTitle().replace(".xml", "_anchor.xml")));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		}
 		if (deleteTempFiles && tempFile.exists()) {
@@ -260,6 +257,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		List<ImportObject> ret = new ArrayList<ImportObject>();
 
 		for (Record r : records) {
+			logger.info("Processing " + r.getId());
 			// Data conversion
 			data = r.getData();
 			currentCollectionList = r.getCollections();
@@ -318,51 +316,66 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				Record rec = new Record();
 				rec.setData(importData);
 				rec.setId(importFileName.split("_")[0]);
-				;
+
 				// check for old records
-				File oldFile = searchForExistingData("CSIC" + rec.getId());
-				if (oldFile != null) {
-					logger.info("Found existing record. Updating.");
-					updateOldRecord(rec, oldFile);
-				} else {
-					ret.add(rec);
-				}
+				// TODO comment back in
+				// File oldFile = searchForExistingData("CSIC" + rec.getId());
+				// if (oldFile != null) {
+				// logger.info("Found existing record. Updating.");
+				// updateOldRecord(rec, oldFile);
+				// } else {
+				ret.add(rec);
+				// }
 			}
 		} else {
-			logger.info("Importing single record file");
-			InputStream input = null;
+			logger.debug("Importing single record file");
+			FileInputStream input = null;
 			StringWriter writer = null;
 			try {
-				logger.debug("loaded file: " + importFile.getAbsolutePath());
+				logger.info("loaded file: " + importFile.getAbsolutePath());
 				input = new FileInputStream(importFile);
-				Record record = new Record();
+
+				// FileChannel fc = input.getChannel();
+				// MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+				// Record record = new Record();
+				// String data = Charset.defaultCharset().decode(bb).toString();
+				// record.setData(data);
+
 				writer = new StringWriter();
-				IOUtils.copy(input, writer, encoding);
+				IOUtils.copy(input, writer, encoding); // TODO OutOfMemoryError here
+				Record record = new Record();
 				record.setData(writer.toString());
+
 				record.setId(importFile.getName().split("_")[0]);
+
 				// check for old records
-				File oldFile = searchForExistingData("CSIC" + record.getId());
-				if (oldFile != null) {
-					logger.info("Found existing record. Updating.");
-					updateOldRecord(record, oldFile);
-				} else {
-					ret.add(record);
-				}
+				// TODO comment back in
+				// File oldFile = searchForExistingData("CSIC" + record.getId());
+				// if (oldFile != null) {
+				// logger.info("Found existing record. Updating.");
+				// updateOldRecord(record, oldFile);
+				// } else {
+				ret.add(record);
+				// }
 			} catch (FileNotFoundException e) {
 				logger.error(e.getMessage(), e);
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			} finally {
-				if (input != null) {
-					try {
-						if (writer != null)
-							writer.close();
-						input.close();
-					} catch (IOException e) {
-						logger.error(e.getMessage(), e);
-					}
+				try {
+					if (writer != null)
+						writer.close();
+				} catch (IOException e) {
+					logger.error(e.getMessage(), e);
 				}
-				if (ret != null && importFile != null)
+				try {
+					if (input != null) {
+						input.close();
+					}
+				} catch (IOException e) {
+					logger.error(e.getMessage(), e);
+				}
+				if (importFile != null && ret.size() > 0)
 					logger.info("Extracted " + ret.size() + " records from '" + importFile.getName() + "'.");
 				else
 					logger.error("No record extracted from importFile");
@@ -486,7 +499,57 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			if (doc != null && doc.hasRootElement()) {
 				XSLTransformer transformer = new XSLTransformer(XSLT_PATH);
 				Document docMods = transformer.transform(doc);
+				// logger.info("MODS: " + new XMLOutputter().outputString(docMods));
 
+				// logger.debug(new XMLOutputter().outputString(docMods));
+				ff = new MetsMods(prefs);
+				DigitalDocument dd = new DigitalDocument();
+				ff.setDigitalDocument(dd);
+
+				Element eleMods = docMods.getRootElement();
+				if (eleMods.getName().equals("modsCollection")) {
+					eleMods = eleMods.getChild("mods", null);
+				}
+
+				// Determine the root docstruct type
+				String dsType = "Monograph";
+				String dsAnchorType = "Series";
+				if (eleMods.getChild("originInfo", null) != null) {
+					Element eleIssuance = eleMods.getChild("originInfo", null).getChild("issuance", null);
+					if (eleIssuance != null && map.get("?" + eleIssuance.getTextTrim()) != null) {
+						dsType = map.get("?" + eleIssuance.getTextTrim());
+					}
+				}
+				Element eleTypeOfResource = eleMods.getChild("typeOfResource", null);
+				if (eleTypeOfResource != null) {
+					if ("yes".equals(eleTypeOfResource.getAttributeValue("manuscript"))) {
+						// Manuscript
+						dsType = "Manuscript";
+					} else if (map.get("?" + eleTypeOfResource.getTextTrim()) != null) {
+						dsType = map.get("?" + eleTypeOfResource.getTextTrim());
+					}
+				}
+
+				// dsType = "Volume";
+				logger.debug("Docstruct type: " + dsType);
+				DocStruct dsRoot = dd.createDocStruct(prefs.getDocStrctTypeByName(dsAnchorType));
+				if (dsRoot == null) {
+					logger.error("Could not create DocStructType " + dsAnchorType);
+				}
+				DocStruct dsVolume = dd.createDocStruct(prefs.getDocStrctTypeByName(dsType));
+				if (dsVolume == null || dsVolume.getType() == null) {
+					logger.error("Could not create DocStructType '" + dsType + "'");
+				}
+
+				DocStruct dsBoundBook = dd.createDocStruct(prefs.getDocStrctTypeByName("BoundBook"));
+				dd.setPhysicalDocStruct(dsBoundBook);
+				// Collect MODS metadata
+				ModsUtils.parseModsSection(MODS_MAPPING_FILE, prefs, dsVolume, dsBoundBook, dsRoot, eleMods);
+				currentIdentifier = ModsUtils.getIdentifier(prefs, dsVolume);
+				currentTitle = ModsUtils.getTitle(prefs, dsVolume);
+				currentAuthor = ModsUtils.getAuthor(prefs, dsVolume);
+				logger.debug("Author:" + currentAuthor + ", Title: " + currentTitle);
+				
 				if (logConversionLoss) {
 					File marcLossFile = new File(exportFolder, currentIdentifier + "_MarcLoss.xml");
 					Document lossDoc = getMarcModsLoss(doc, docMods);
@@ -510,55 +573,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					}
 				}
 
-				// logger.debug(new XMLOutputter().outputString(docMods));
-				ff = new MetsMods(prefs);
-				DigitalDocument dd = new DigitalDocument();
-				ff.setDigitalDocument(dd);
-
-				Element eleMods = docMods.getRootElement();
-				if (eleMods.getName().equals("modsCollection")) {
-					eleMods = eleMods.getChild("mods", null);
-				}
-
-				// Determine the root docstruct type
-				String dsType = "Monograph";
-				String dsAnchorType = "Series";
-				if (eleMods.getChild("originInfo", null) != null) {
-					Element eleIssuance = eleMods.getChild("originInfo", null).getChild("issuance", null);
-					if (eleIssuance != null && map.get("?" + eleIssuance.getTextTrim()) != null) {
-						dsType = map.get("?" + eleIssuance.getTextTrim());
-					}
-				}
-				Element eleTypeOfResource = eleMods.getChild("typeOfResource", null);
-				if (eleTypeOfResource != null && map.get("?" + eleTypeOfResource.getTextTrim()) != null) {
-					dsType = map.get("?" + eleTypeOfResource.getTextTrim());
-				}
-
-				// dsType = "Volume";
-				logger.debug("Docstruct type: " + dsType);
-				DocStruct dsRoot = dd.createDocStruct(prefs.getDocStrctTypeByName(dsAnchorType));
-				if (dsRoot == null) {
-					logger.error("Could not create DocStructType " + dsAnchorType);
-				}
-				DocStruct dsVolume = dd.createDocStruct(prefs.getDocStrctTypeByName(dsType));
-				if (dsVolume == null) {
-					logger.error("Could not create DocStructType " + dsVolume);
-				}
-
-				DocStruct dsBoundBook = dd.createDocStruct(prefs.getDocStrctTypeByName("BoundBook"));
-				dd.setPhysicalDocStruct(dsBoundBook);
-				// Collect MODS metadata
-				ModsUtils.parseModsSection(MODS_MAPPING_FILE, prefs, dsVolume, dsBoundBook, dsRoot, eleMods);
-				currentIdentifier = ModsUtils.getIdentifier(prefs, dsVolume);
-				currentTitle = ModsUtils.getTitle(prefs, dsVolume);
-				currentAuthor = ModsUtils.getAuthor(prefs, dsVolume);
-				logger.debug("Author:" + currentAuthor + ", Title: " + currentTitle);
-
 				// Check if we are part of a series, and if so, create logical DocStruct accordingly
+				// TODO: Why an anchor instead of a metadata field 'relatedSeries'?
 				try {
 					List<? extends Metadata> seriesIDList = dsRoot.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital"));
-					for (Metadata metadata : seriesIDList) {
-					}
+					// for (Metadata metadata : seriesIDList) {
+					// }
 					if (seriesIDList != null && !seriesIDList.isEmpty()) {
 						logger.debug("Record is part of a series");
 						isSeriesVolume = true;
@@ -1360,7 +1380,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			logger.error(e.getMessage(), e);
 		}
 
-		converter.setImportFolder("output/");
+		converter.setImportFolder(converter.exportFolder + "/out/");
 		List<Record> records = new ArrayList<Record>();
 		if (!converter.exportFolder.isDirectory()) {
 			logger.warn("No export directory found. Aborting");

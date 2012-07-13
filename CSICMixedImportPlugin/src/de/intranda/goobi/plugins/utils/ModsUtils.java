@@ -32,8 +32,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.hdf.model.hdftypes.FileInformationBlock;
-import org.apache.poi.hssf.record.chart.SeriesIndexRecord;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -42,9 +40,6 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
 
-import de.schlichtherle.io.FileInputStream;
-import de.sub.goobi.Import.ImportOpac;
-
 import ugh.dl.DocStruct;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
@@ -52,6 +47,7 @@ import ugh.dl.Person;
 import ugh.dl.Prefs;
 import ugh.exceptions.DocStructHasNoTypeException;
 import ugh.exceptions.MetadataTypeNotAllowedException;
+import de.schlichtherle.io.FileInputStream;
 
 public class ModsUtils {
 
@@ -227,6 +223,7 @@ public class ModsUtils {
 						logger.debug("related Series = " + seriesName);
 						String seriesID = seriesInfo.get(seriesName);
 						if (seriesID == null) {
+							// TODO Why???
 							seriesID = "CSIC" + System.currentTimeMillis();
 							logger.debug("Series not found. creating new one: " + seriesID);
 							seriesInfo.put(seriesName, seriesID);
