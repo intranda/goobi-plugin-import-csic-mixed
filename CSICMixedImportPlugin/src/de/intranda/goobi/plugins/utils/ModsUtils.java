@@ -32,6 +32,8 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.poi.hdf.model.hdftypes.FileInformationBlock;
+import org.apache.poi.hssf.record.chart.SeriesIndexRecord;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -40,6 +42,9 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
 
+import de.schlichtherle.io.FileInputStream;
+import de.sub.goobi.Import.ImportOpac;
+
 import ugh.dl.DocStruct;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
@@ -47,7 +52,6 @@ import ugh.dl.Person;
 import ugh.dl.Prefs;
 import ugh.exceptions.DocStructHasNoTypeException;
 import ugh.exceptions.MetadataTypeNotAllowedException;
-import de.schlichtherle.io.FileInputStream;
 
 public class ModsUtils {
 
@@ -163,11 +167,10 @@ public class ModsUtils {
 	 * @throws JDOMException
 	 */
 	@SuppressWarnings("unchecked")
-	public static void parseModsSection(String mappingFileName, Prefs prefs, DocStruct dsLogical, DocStruct dsPhysical, DocStruct dsSeries, Element eleMods) throws JDOMException,
-			IOException {
+	public static void parseModsSection(String mappingFileName, Prefs prefs, DocStruct dsLogical, DocStruct dsPhysical, DocStruct dsSeries,
+			Element eleMods) throws JDOMException, IOException {
 		// logger.debug(new XMLOutputter().outputString(eleMods));
 		File mappingFile = new File(mappingFileName);
-		
 
 		// Get seriesInfo from File
 		File tempDir = new File(mappingFile.getParentFile().getParentFile(), "temp");
@@ -187,74 +190,87 @@ public class ModsUtils {
 		Element eleNewMods = (Element) eleMods.clone();
 		doc.setRootElement(eleNewMods);
 		Document mapDoc = new SAXBuilder().build(mappingFile);
+		String seriesName = null;
+		String seriesID = null;
 		for (Object obj : mapDoc.getRootElement().getChildren("metadata", null)) {
 			Element eleMetadata = (Element) obj;
 			String mdName = eleMetadata.getChildTextTrim("name", null);
 
 			// Code to handle related works, e.g. series
 			if (mdName.contentEquals("relatedSeries")) {
+				boolean isPartOfSeries = false;
+				if (dsLogical.getType() == prefs.getDocStrctTypeByName("Volume") || dsLogical.getType() == prefs.getDocStrctTypeByName("Periodical")) {
+					isPartOfSeries = true;
+				}
 				List<Element> eleXpathList = eleMetadata.getChildren("xpath", null);
-				for (Element eleXpath : eleXpathList) {
-					String query = eleXpath.getTextTrim();
-					// logger.debug("XPath: " + query);
-					XPath xpath = XPath.newInstance(query);
-					xpath.addNamespace(NS_MODS);
-					List<Element> eleValueList = xpath.selectNodes(doc);
-					if (eleValueList != null && !eleValueList.isEmpty()) {
-						List<String> values = new ArrayList<String>();
-						for (Element eleValue : eleValueList) {
-							// logger.debug("Value: " + eleValue.getTextTrim());
-							values.add(eleValue.getTextTrim());
-						}
-
-						String value = "";
-						for (String s : values) {
-							if (StringUtils.isNotEmpty(s)) {
-								value += " " + s;
+				if (eleXpathList != null && !eleXpathList.isEmpty()) {
+					isPartOfSeries = true;
+					for (Element eleXpath : eleXpathList) {
+						String query = eleXpath.getTextTrim();
+						// logger.debug("XPath: " + query);
+						XPath xpath = XPath.newInstance(query);
+						xpath.addNamespace(NS_MODS);
+						List<Element> eleValueList = xpath.selectNodes(doc);
+						if (eleValueList != null && !eleValueList.isEmpty()) {
+							List<String> values = new ArrayList<String>();
+							for (Element eleValue : eleValueList) {
+								// logger.debug("Value: " + eleValue.getTextTrim());
+								values.add(eleValue.getTextTrim());
 							}
-						}
-						value = value.trim();
-						String[] valueParts = value.split("\\s");
-						String seriesName = "";
-						for (int i = 0; i < valueParts.length; i++) {
-							seriesName += " " + valueParts[i];
-						}
-						seriesName = seriesName.trim();
-						logger.debug("related Series = " + seriesName);
-						String seriesID = seriesInfo.get(seriesName);
-						if (seriesID == null) {
-							// TODO Why???
-							seriesID = "CSIC" + System.currentTimeMillis();
-							logger.debug("Series not found. creating new one: " + seriesID);
-							seriesInfo.put(seriesName, seriesID);
-						}
 
-						// Creating metadata for series
-						try {
-							MetadataType titleType = prefs.getMetadataTypeByName("TitleDocMain");
-							MetadataType idType = prefs.getMetadataTypeByName("CatalogIDDigital");
-							Metadata mdTitle;
-							mdTitle = new Metadata(titleType);
-							Metadata mdID = new Metadata(idType);
-							mdTitle.setValue(seriesName);
-							mdID.setValue(seriesID);
-
-							logger.debug("Found metadata: " + mdTitle.getType().getName());
-							if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-								logger.debug("Added metadata \"" + mdTitle.getValue() + "\" to logical structure");
-								dsSeries.addMetadata(mdTitle);
+							String value = "";
+							for (String s : values) {
+								if (StringUtils.isNotEmpty(s)) {
+									value += " " + s;
+								}
 							}
-							logger.debug("Found metadata: " + mdID.getType().getName());
-							if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-								logger.debug("Added metadata \"" + mdID.getValue() + "\" to logical structure");
-								dsSeries.addMetadata(mdID);
+							value = value.trim();
+							String[] valueParts = value.split("\\s");
+							seriesName = "";
+							for (int i = 0; i < valueParts.length; i++) {
+								seriesName += " " + valueParts[i];
 							}
-							
-						} catch (MetadataTypeNotAllowedException e) {
-							logger.error(e.toString(), e);
+							seriesName = seriesName.trim();
+							logger.debug("related Series = " + seriesName);
+							seriesID = seriesInfo.get(seriesName);
 						}
 					}
 				}
+				
+				if(isPartOfSeries)  {
+				if (seriesID == null) {
+					seriesID = "CSIC" + System.currentTimeMillis();
+					logger.debug("Series not found. creating new one: " + seriesID);
+				}
+				if(seriesName == null) {
+					seriesName = seriesID;
+				}
+
+				// Creating metadata for series
+				try {
+					MetadataType titleType = prefs.getMetadataTypeByName("TitleDocMain");
+					MetadataType idType = prefs.getMetadataTypeByName("CatalogIDDigital");
+					Metadata mdTitle;
+					mdTitle = new Metadata(titleType);
+					Metadata mdID = new Metadata(idType);
+					mdTitle.setValue(seriesName);
+					mdID.setValue(seriesID);
+
+					logger.debug("Found metadata: " + mdTitle.getType().getName());
+					if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+						logger.debug("Added metadata \"" + mdTitle.getValue() + "\" to logical structure");
+						dsSeries.addMetadata(mdTitle);
+					}
+					logger.debug("Found metadata: " + mdID.getType().getName());
+					if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+						logger.debug("Added metadata \"" + mdID.getValue() + "\" to logical structure");
+						dsSeries.addMetadata(mdID);
+					}
+
+				} catch (MetadataTypeNotAllowedException e) {
+					logger.error(e.toString(), e);
+				}
+			}
 			}
 
 			MetadataType mdType = prefs.getMetadataTypeByName(mdName);
@@ -301,7 +317,8 @@ public class ModsUtils {
 										person.setFirstname(firstName);
 										person.setLastname(lastName);
 										person.setRole(mdType.getName());
-										if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+										if (eleMetadata.getAttribute("logical") != null
+												&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
 											dsLogical.addPerson(person);
 										}
 									}
@@ -322,17 +339,18 @@ public class ModsUtils {
 							if (eleValueList != null) {
 								List<String> values = new ArrayList<String>();
 								for (Element eleValue : eleValueList) {
-
-//									 logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
-//									 values.add(eleValue.getTextTrim());
-//									 String value = "";
-//									 for (String s : values) {
-//									 if (StringUtils.isNotEmpty(s)) {
-//									 value += " " + s;
-//									 }
-//									 }
-//									 value = value.trim();
-									String value = eleValue.getTextTrim();
+									
+									 logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
+									 values.add(eleValue.getTextTrim());
+								}
+									 String value = "";
+									 for (String s : values) {
+									 if (StringUtils.isNotEmpty(s)) {
+									 value += " " + s;
+									 }
+									 }
+									 value = value.trim();
+//									String value = eleValue.getTextTrim();
 
 									// if we have the title, get both nonSort (article) and title before writing metadata
 									if (mdType.getName().contentEquals("TitleDocMain")) {
@@ -348,15 +366,15 @@ public class ModsUtils {
 										} else
 											continue;
 									}
-									
-									//Add singleDigCollection to series also
-									if(mdType.getName().contentEquals("singleDigCollection"))
-									{
+
+									// Add singleDigCollection to series also
+									if (mdType.getName().contentEquals("singleDigCollection")) {
 										if (value.length() > 0) {
 											Metadata metadata = new Metadata(mdType);
 											metadata.setValue(value);
 											logger.debug("Found metadata: " + metadata.getType().getName());
-											if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+											if (eleMetadata.getAttribute("logical") != null
+													&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
 												logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
 												dsSeries.addMetadata(metadata);
 											}
@@ -367,17 +385,18 @@ public class ModsUtils {
 										Metadata metadata = new Metadata(mdType);
 										metadata.setValue(value);
 										logger.debug("Found metadata: " + metadata.getType().getName());
-										if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+										if (eleMetadata.getAttribute("logical") != null
+												&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
 											logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
 											dsLogical.addMetadata(metadata);
 										}
-										if (eleMetadata.getAttribute("physical") != null && eleMetadata.getAttributeValue("physical").equalsIgnoreCase("true")) {
+										if (eleMetadata.getAttribute("physical") != null
+												&& eleMetadata.getAttributeValue("physical").equalsIgnoreCase("true")) {
 											logger.debug("Added metadata \"" + metadata.getValue() + "\" to physical structure");
 											dsPhysical.addMetadata(metadata);
 										}
 									}
 								}
-							}
 						}
 					}
 				} catch (MetadataTypeNotAllowedException e) {
@@ -389,6 +408,7 @@ public class ModsUtils {
 		}
 
 		// write seriesInfo to file
+		seriesInfo.put(seriesName, seriesID);
 		if (seriesInfoFile.isFile()) {
 			logger.debug("deleting old seriesInfoFile");
 			seriesInfoFile.delete();

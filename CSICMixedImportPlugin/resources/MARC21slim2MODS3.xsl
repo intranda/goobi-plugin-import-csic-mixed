@@ -1658,6 +1658,15 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 			<xsl:call-template name="createRelatedItemFrom490"/>
 		</xsl:for-each>
 
+		<xsl:for-each select="datafield[@tag=866]">
+			<xsl:call-template name="createLocationFrom866"/>
+		</xsl:for-each>
+		<xsl:for-each select="datafield[@tag=867]">
+			<xsl:call-template name="createLocationFrom867"/>
+		</xsl:for-each>
+		<xsl:for-each select="datafield[@tag=868]">
+			<xsl:call-template name="createLocationFrom868"/>
+		</xsl:for-each>
 
 		<xsl:for-each select="datafield[@tag=440]">
 			<relatedItem type="series">
@@ -3602,6 +3611,16 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 			<xsl:when test="$sf06a='490'">
 				<xsl:call-template name="createRelatedItemFrom490"/>
 			</xsl:when>
+
+			<xsl:when test="$sf06a='866'">
+				<xsl:call-template name="createLocationFrom866"/>
+			</xsl:when>
+			<xsl:when test="$sf06a='867'">
+				<xsl:call-template name="createLocationFrom867"/>
+			</xsl:when>
+			<xsl:when test="$sf06a='868'">
+				<xsl:call-template name="createLocationFrom868"/>
+			</xsl:when>
 		</xsl:choose>
 	</xsl:template>
 
@@ -4904,6 +4923,55 @@ Revision 1.02 - Added Log Comment  2003/03/24 19:37:42  ckeith
 					</xsl:if>
 					<xsl:value-of select="subfield[@code='u']"/>
 				</url>
+			</location>
+		</xsl:if>
+	</xsl:template>
+
+	<xsl:template name="createLocationFrom866">
+		<xsl:if test="//datafield[@tag=866]">
+			<location>
+				<holdingSimple>
+					<copyInformation>
+						<enumerationAndChronology>
+							<xsl:attribute name="unitType">1</xsl:attribute>
+								<xsl:call-template name="subfieldSelect">
+									<xsl:with-param name="codes">abcdefghijkl</xsl:with-param>
+								</xsl:call-template>
+						</enumerationAndChronology>
+					</copyInformation>
+				</holdingSimple>
+			</location>
+		</xsl:if>
+	</xsl:template>
+	<xsl:template name="createLocationFrom867">
+		<xsl:if test="//datafield[@tag=867]">
+			<location>
+				<holdingSimple>
+					<copyInformation>
+						<enumerationAndChronology>
+							<xsl:attribute name="unitType">2</xsl:attribute>
+								<xsl:call-template name="subfieldSelect">
+									<xsl:with-param name="codes">abcdefghijkl</xsl:with-param>
+								</xsl:call-template>
+						</enumerationAndChronology>
+					</copyInformation>
+				</holdingSimple>
+			</location>
+		</xsl:if>
+	</xsl:template>
+	<xsl:template name="createLocationFrom868">
+		<xsl:if test="//datafield[@tag=868]">
+			<location>
+				<holdingSimple>
+					<copyInformation>
+						<enumerationAndChronology>
+							<xsl:attribute name="unitType">3</xsl:attribute>
+								<xsl:call-template name="subfieldSelect">
+									<xsl:with-param name="codes">abcdefghijkl</xsl:with-param>
+								</xsl:call-template>
+						</enumerationAndChronology>
+					</copyInformation>
+				</holdingSimple>
 			</location>
 		</xsl:if>
 	</xsl:template>

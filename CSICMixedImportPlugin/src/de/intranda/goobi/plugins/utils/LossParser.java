@@ -21,7 +21,7 @@ import org.jdom.output.XMLOutputter;
  */
 public class LossParser {
 
-	private static String path = "D:/digiverso/Kunden/CSIC/Daten/0018_ACN_PC";
+	private static String path = "/opt/digiverso/Kunden/CSIC/Daten/0018_ACN_PC";
 
 	private static FilenameFilter lossFileFilter = new FilenameFilter() {
 		@Override

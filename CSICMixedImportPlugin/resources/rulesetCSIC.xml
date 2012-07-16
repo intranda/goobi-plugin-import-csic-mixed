@@ -362,12 +362,6 @@
     <language name="en">main title (sorting)</language>
     <language name="es">Título principal (clasificación)</language>
   </MetadataType>
-  <MetadataType>
-    <Name>CatalogIDPredecessorPeriodical</Name>
-    <language name="de">PPN d. Vorgängers</language>
-    <language name="en">PPN of predecessor</language>
-    <language name="es">PPN del predecesor</language>
-  </MetadataType>
   <MetadataType type="identifier">
     <Name>CatalogIDDigital</Name>
     <language name="de">PPN (digital)</language>
@@ -445,12 +439,6 @@
     <language name="de">Erscheinungsjahr Band</language>
     <language name="en">publication year</language>
     <language name="es">Año de publicación</language>
-  </MetadataType>
-  <MetadataType>
-    <Name>CatalogIDSuccessorPeriodical</Name>
-    <language name="de">PPN d. Nachfolger-Zeitschrift</language>
-    <language name="en">PPN of successor journal</language>
-    <language name="es">PPN del períodico sucesor</language>
   </MetadataType>
   <MetadataType>
     <Name>CatalogIDSupplement</Name>
@@ -949,6 +937,38 @@
     <language name="de">Jahrgang/Heftnummer/#704/#706</language>
     <language name="en">Item number</language>
   </MetadataType>
+  <MetadataType>
+    <Name>SubjectCorporate</Name>
+    <language name="de">Referenzierte Körperschaft</language>
+    <language name="en">referenced corporate</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>SubjectGeneral</Name>
+    <language name="de">Subjekt</language>
+    <language name="en">referenced subject</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>CatalogIDPredecessorPeriodical</Name>
+    <language name="de">PPN d. Vorgängers</language>
+    <language name="en">PPN of predecessor</language>
+    <language name="es">PPN del predecesor</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>CatalogIDSuccessorPeriodical</Name>
+    <language name="de">PPN d. Nachfolger-Zeitschrift</language>
+    <language name="en">PPN of successor journal</language>
+    <language name="es">PPN del períodico sucesor</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>PrecedingVolume</Name>
+    <language name="de">Vorgänger</language>
+    <language name="en">Predecessor</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>SucceedingVolume</Name>
+    <language name="de">Nachfolger</language>
+    <language name="en">successor</language>
+  </MetadataType>
   <!-- ########################################################################## ## Logical document structure types ## ########################################################################## -->
   <DocStrctType>
     <Name>Binder</Name>
@@ -1210,110 +1230,6 @@
     <metadata num="*">Description</metadata>
   </DocStrctType>
   <DocStrctType>
-    <Name>PeriodicalVolume</Name>
-    <language name="de">Zeitschriften-Band</language>
-    <language name="en">Periodical Volume</language>
-    <language name="es">Volumen del periódico</language>
-    <allowedchildtype>Acknowledgment</allowedchildtype>
-    <allowedchildtype>Announcement</allowedchildtype>
-    <allowedchildtype>Addendum</allowedchildtype>
-    <allowedchildtype>Advertising</allowedchildtype>
-    <allowedchildtype>Appendix</allowedchildtype>
-    <allowedchildtype>Article</allowedchildtype>
-    <allowedchildtype>Binder</allowedchildtype>
-    <allowedchildtype>Chapter</allowedchildtype>
-    <allowedchildtype>Cover</allowedchildtype>
-    <allowedchildtype>CurriculumVitae</allowedchildtype>
-    <allowedchildtype>Dedication</allowedchildtype>
-    <allowedchildtype>Epilogue</allowedchildtype>
-    <allowedchildtype>Errata</allowedchildtype>
-    <allowedchildtype>Headword</allowedchildtype>
-    <allowedchildtype>Figure</allowedchildtype>
-    <allowedchildtype>IllustrationDescription</allowedchildtype>
-    <allowedchildtype>Imprint</allowedchildtype>
-    <allowedchildtype>Index</allowedchildtype>
-    <allowedchildtype>IndexAuthor</allowedchildtype>
-    <allowedchildtype>IndexLocation</allowedchildtype>
-    <allowedchildtype>IndexOfChronology</allowedchildtype>
-    <allowedchildtype>IndexOverall</allowedchildtype>
-    <allowedchildtype>IndexPersons</allowedchildtype>
-    <allowedchildtype>IndexSpecial</allowedchildtype>
-    <allowedchildtype>IndexSubject</allowedchildtype>
-    <allowedchildtype>Introduction</allowedchildtype>
-    <allowedchildtype>Letter</allowedchildtype>
-    <allowedchildtype>ListOfIllustrations</allowedchildtype>
-    <allowedchildtype>ListOfMaps</allowedchildtype>
-    <allowedchildtype>ListOfTables</allowedchildtype>
-    <allowedchildtype>Map</allowedchildtype>
-    <allowedchildtype>Miscella</allowedchildtype>
-    <allowedchildtype>Obituary</allowedchildtype>
-    <allowedchildtype>OtherDocStrct</allowedchildtype>
-    <allowedchildtype>PeriodicalIssue</allowedchildtype>
-    <allowedchildtype>PeriodicalPart</allowedchildtype>
-    <allowedchildtype>Preface</allowedchildtype>
-    <allowedchildtype>Prepage</allowedchildtype>
-    <allowedchildtype>Remarks</allowedchildtype>
-    <allowedchildtype>Table</allowedchildtype>
-    <allowedchildtype>TableDescription</allowedchildtype>
-    <allowedchildtype>TableOfAbbreviations</allowedchildtype>
-    <allowedchildtype>TableOfContents</allowedchildtype>
-    <allowedchildtype>TableOfLiteratureRefs</allowedchildtype>
-    <allowedchildtype>Theses</allowedchildtype>
-    <allowedchildtype>TitlePage</allowedchildtype>
-    <allowedchildtype>List</allowedchildtype>
-    <allowedchildtype>Poem</allowedchildtype>
-    <allowedchildtype>Review</allowedchildtype>
-    <allowedchildtype>Nachtrag</allowedchildtype>
-    <allowedchildtype>Supplement</allowedchildtype>
-    <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
-    <metadata num="1o">CatalogIDSource</metadata>
-    <metadata num="1o">_purl</metadata>
-    <metadata num="*">_urn</metadata>
-    <metadata num="*">DOI</metadata>
-    <metadata num="1o">_digitalOrigin</metadata>
-    <metadata num="+" DefaultDisplay="true">TitleDocMain</metadata>
-    <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
-    <metadata num="*">TitleDocParallel</metadata>
-    <metadata num="+">TitleDocMainShort</metadata>
-    <metadata num="1o">CurrentNo</metadata>
-    <metadata num="1m" DefaultDisplay="true">CurrentNoSorting</metadata>
-    <metadata num="1o">CreatorsAllOrigin</metadata>
-    <metadata num="*">FormatSourcePrint</metadata>
-    <metadata num="*">ReportingYear</metadata>
-    <metadata num="*">Creator</metadata>
-    <metadata num="*">IllustratorArtist</metadata>
-    <metadata num="*">Translator</metadata>
-    <metadata num="*" DefaultDisplay="true">DocLanguage</metadata>
-    <metadata num="1o">PublisherName</metadata>
-    <metadata num="1o">Sponsorship</metadata>
-    <metadata num="1o">SizeSourcePrint</metadata>
-    <metadata num="1o">PlaceOfPublication</metadata>
-    <metadata num="*">Author</metadata>
-    <metadata num="*">SICI</metadata>
-    <metadata num="1o">TSL_ATS</metadata>
-    <metadata num="1o">PublicationYear</metadata>
-    <metadata num="*">singleDigCollection</metadata>
-    <metadata num="1o">Editor</metadata>
-    <metadata num="*">Photographer</metadata>
-    <metadata num="*">Edition</metadata>
-    <metadata num="*">shelfmarksource</metadata>
-    <metadata num="*">Classification</metadata>
-    <metadata num="*">NotePhysical</metadata>
-    <metadata num="*">SubjectGenre</metadata>
-    <metadata num="*">SubjectPerson</metadata>
-    <metadata num="*">SubjectPersonAddress</metadata>
-    <metadata num="*">SubjectPersonLifetime</metadata>
-    <metadata num="*">SubjectTopic</metadata>
-    <metadata num="*">Description</metadata>
-    <metadata num="*">ISBN</metadata>
-    <metadata num="*">ISSN</metadata>
-    <metadata num="*">LCCN</metadata>
-    <metadata num="*">AdditionalInformation</metadata>
-    <metadata num="*">TitleDocAbbreviated</metadata>
-    <metadata num="*">CountryCode</metadata>
-    <metadata num="*">recordContentSource</metadata>
-  </DocStrctType>
-  <DocStrctType>
     <Name>Nachtrag</Name>
     <language name="de">Nachtrag</language>
     <language name="en">Nachtrag</language>
@@ -1560,7 +1476,6 @@
     <language name="de">Zeitschrift</language>
     <language name="en">Periodical</language>
     <language name="es">Periódico</language>
-    <allowedchildtype>PeriodicalVolume</allowedchildtype>
     <metadata num="1o">_digitalOrigin</metadata>
     <metadata num="1o">_purl</metadata>
     <metadata num="*">_urn</metadata>
@@ -1570,8 +1485,6 @@
     <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
     <metadata num="*" DefaultDisplay="true">CatalogIDPeriodicalDB</metadata>
     <metadata num="+" DefaultDisplay="true">CatalogIDSource</metadata>
-    <metadata num="*">CatalogIDPredecessorPeriodical</metadata>
-    <metadata num="*">CatalogIDSuccessorPeriodical</metadata>
     <metadata num="*">CatalogIDSupplement</metadata>
     <metadata num="*">CatalogIDParentPeriodical</metadata>
     <metadata num="+" DefaultDisplay="true">TitleDocMain</metadata>
@@ -2013,214 +1926,13 @@
     <metadata num="*">_purl</metadata>
     <metadata num="*">Description</metadata>
   </DocStrctType>
-  <DocStrctType>
-    <Name>Monograph</Name>
-    <language name="de">Monographie</language>
-    <language name="en">Monograph</language>
-    <language name="es">Monografía</language>
-    <allowedchildtype>Acknowledgment</allowedchildtype>
-    <allowedchildtype>Addendum</allowedchildtype>
-    <allowedchildtype>Advertising</allowedchildtype>
-    <allowedchildtype>Appendix</allowedchildtype>
-    <allowedchildtype>AttachedWork</allowedchildtype>
-    <allowedchildtype>Binder</allowedchildtype>
-    <allowedchildtype>Bibliography</allowedchildtype>
-    <allowedchildtype>Chapter</allowedchildtype>
-    <allowedchildtype>Cover</allowedchildtype>
-    <allowedchildtype>CurriculumVitae</allowedchildtype>
-    <allowedchildtype>Dedication</allowedchildtype>
-    <allowedchildtype>Epilogue</allowedchildtype>
-    <allowedchildtype>Errata</allowedchildtype>
-    <allowedchildtype>Headword</allowedchildtype>
-    <allowedchildtype>Figure</allowedchildtype>
-    <allowedchildtype>IllustrationDescription</allowedchildtype>
-    <allowedchildtype>Imprint</allowedchildtype>
-    <allowedchildtype>Index</allowedchildtype>
-    <allowedchildtype>IndexAuthor</allowedchildtype>
-    <allowedchildtype>IndexLocation</allowedchildtype>
-    <allowedchildtype>IndexOfChronology</allowedchildtype>
-    <allowedchildtype>IndexOverall</allowedchildtype>
-    <allowedchildtype>IndexPersons</allowedchildtype>
-    <allowedchildtype>IndexSpecial</allowedchildtype>
-    <allowedchildtype>IndexSubject</allowedchildtype>
-    <allowedchildtype>Introduction</allowedchildtype>
-    <allowedchildtype>Letter</allowedchildtype>
-    <allowedchildtype>ListOfIllustrations</allowedchildtype>
-    <allowedchildtype>ListOfMaps</allowedchildtype>
-    <allowedchildtype>ListOfTables</allowedchildtype>
-    <allowedchildtype>Map</allowedchildtype>
-    <allowedchildtype>Obituary</allowedchildtype>
-    <allowedchildtype>OtherDocStrct</allowedchildtype>
-    <allowedchildtype>PartOfWork</allowedchildtype>
-    <allowedchildtype>Preface</allowedchildtype>
-    <allowedchildtype>Prepage</allowedchildtype>
-    <allowedchildtype>Remarks</allowedchildtype>
-    <allowedchildtype>SheetMusic</allowedchildtype>
-    <allowedchildtype>Supplement</allowedchildtype>
-    <allowedchildtype>Table</allowedchildtype>
-    <allowedchildtype>TableDescription</allowedchildtype>
-    <allowedchildtype>TableOfAbbreviations</allowedchildtype>
-    <allowedchildtype>TableOfContents</allowedchildtype>
-    <allowedchildtype>TableOfLiteratureRefs</allowedchildtype>
-    <allowedchildtype>Theses</allowedchildtype>
-    <allowedchildtype>TitlePage</allowedchildtype>
-    <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
-    <metadata num="1o">CreatorsAllOrigin</metadata>
-    <metadata num="*">FormatSourcePrint</metadata>
-    <metadata num="*">Creator</metadata>
-    <metadata num="*">IllustratorArtist</metadata>
-    <metadata num="*">Translator</metadata>
-    <metadata num="*" DefaultDisplay="true">PersonOriginal</metadata>
-    <metadata num="*" DefaultDisplay="true">CatalogIDSource</metadata>
-    <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
-    <metadata num="+">TitleDocMainShort</metadata>
-    <metadata num="1o">BibliographicCitation</metadata>
-    <metadata num="1m" DefaultDisplay="true">TitleDocMain</metadata>
-    <metadata num="*">TitleDocAbbreviated</metadata>
-    <metadata num="*">_urn</metadata>
-    <metadata num="*" DefaultDisplay="true">DocLanguage</metadata>
-    <metadata num="+">Sponsorship</metadata>
-    <metadata num="1o">PublisherName</metadata>
-    <metadata num="1o">SizeSourcePrint</metadata>
-    <metadata num="1o" DefaultDisplay="true">PlaceOfPublication</metadata>
-    <metadata num="*">RezenssionsZssDBID</metadata>
-    <metadata num="*" DefaultDisplay="true">Author</metadata>
-    <metadata num="*">Collaborator</metadata>
-    <metadata num="1o" DefaultDisplay="true">TSL_ATS</metadata>
-    <metadata num="1o" DefaultDisplay="true">PublicationYear</metadata>
-    <metadata num="*">singleDigCollection</metadata>
-    <metadata num="1o" DefaultDisplay="true">Editor</metadata>
-    <metadata num="1o">_purl</metadata>
-    <metadata num="*">Photographer</metadata>
-    <metadata num="*">Description</metadata>
-    <metadata num="*">shelfmarksource</metadata>
-    <metadata num="*">AdditionalInformation</metadata>
-    <metadata num="*">CountryCode</metadata>
-    <metadata num="*">recordContentSource</metadata>
-    <metadata num="*">CatalogLanguage</metadata>
-    <metadata num="*">TitleDocParallel</metadata>
-    <metadata num="*">physicalLocation</metadata>
-    <metadata num="1o">CurrentNo</metadata>
-    <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
-    <metadata num="*">NotePhysical</metadata>
-    <metadata num="*">SubjectGenre</metadata>
-    <metadata num="*">SubjectPerson</metadata>
-    <metadata num="*">SubjectPersonAddress</metadata>
-    <metadata num="*">SubjectPersonLifetime</metadata>
-    <metadata num="*">SubjectTopic</metadata>
-    <metadata num="*">Classification</metadata>
-    <metadata num="*">ISBN</metadata>
-    <metadata num="*">ISSN</metadata>
-    <metadata num="*">LCCN</metadata>
-    <metadata num="*">relatedSeries</metadata>
-  </DocStrctType>
-  <DocStrctType>
-    <Name>Manuscript</Name>
-    <language name="de">Handschrift</language>
-    <language name="en">Manuscript</language>
-    <language name="es">Manuscript zzz</language>
-    <allowedchildtype>Acknowledgment</allowedchildtype>
-    <allowedchildtype>Addendum</allowedchildtype>
-    <allowedchildtype>Advertising</allowedchildtype>
-    <allowedchildtype>Appendix</allowedchildtype>
-    <allowedchildtype>AttachedWork</allowedchildtype>
-    <allowedchildtype>Binder</allowedchildtype>
-    <allowedchildtype>Bibliography</allowedchildtype>
-    <allowedchildtype>Chapter</allowedchildtype>
-    <allowedchildtype>Cover</allowedchildtype>
-    <allowedchildtype>CurriculumVitae</allowedchildtype>
-    <allowedchildtype>Dedication</allowedchildtype>
-    <allowedchildtype>Epilogue</allowedchildtype>
-    <allowedchildtype>Errata</allowedchildtype>
-    <allowedchildtype>Headword</allowedchildtype>
-    <allowedchildtype>Figure</allowedchildtype>
-    <allowedchildtype>IllustrationDescription</allowedchildtype>
-    <allowedchildtype>Imprint</allowedchildtype>
-    <allowedchildtype>Index</allowedchildtype>
-    <allowedchildtype>IndexAuthor</allowedchildtype>
-    <allowedchildtype>IndexLocation</allowedchildtype>
-    <allowedchildtype>IndexOfChronology</allowedchildtype>
-    <allowedchildtype>IndexOverall</allowedchildtype>
-    <allowedchildtype>IndexPersons</allowedchildtype>
-    <allowedchildtype>IndexSpecial</allowedchildtype>
-    <allowedchildtype>IndexSubject</allowedchildtype>
-    <allowedchildtype>Introduction</allowedchildtype>
-    <allowedchildtype>Letter</allowedchildtype>
-    <allowedchildtype>ListOfIllustrations</allowedchildtype>
-    <allowedchildtype>ListOfMaps</allowedchildtype>
-    <allowedchildtype>ListOfTables</allowedchildtype>
-    <allowedchildtype>Map</allowedchildtype>
-    <allowedchildtype>Obituary</allowedchildtype>
-    <allowedchildtype>OtherDocStrct</allowedchildtype>
-    <allowedchildtype>PartOfWork</allowedchildtype>
-    <allowedchildtype>Preface</allowedchildtype>
-    <allowedchildtype>Prepage</allowedchildtype>
-    <allowedchildtype>Remarks</allowedchildtype>
-    <allowedchildtype>SheetMusic</allowedchildtype>
-    <allowedchildtype>Supplement</allowedchildtype>
-    <allowedchildtype>Table</allowedchildtype>
-    <allowedchildtype>TableDescription</allowedchildtype>
-    <allowedchildtype>TableOfAbbreviations</allowedchildtype>
-    <allowedchildtype>TableOfContents</allowedchildtype>
-    <allowedchildtype>TableOfLiteratureRefs</allowedchildtype>
-    <allowedchildtype>Theses</allowedchildtype>
-    <allowedchildtype>TitlePage</allowedchildtype>
-    <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
-    <metadata num="1o">CreatorsAllOrigin</metadata>
-    <metadata num="*">FormatSourcePrint</metadata>
-    <metadata num="*">Creator</metadata>
-    <metadata num="*">IllustratorArtist</metadata>
-    <metadata num="*">Translator</metadata>
-    <metadata num="*" DefaultDisplay="true">PersonOriginal</metadata>
-    <metadata num="*" DefaultDisplay="true">CatalogIDSource</metadata>
-    <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
-    <metadata num="+">TitleDocMainShort</metadata>
-    <metadata num="1o">BibliographicCitation</metadata>
-    <metadata num="1m" DefaultDisplay="true">TitleDocMain</metadata>
-    <metadata num="*">TitleDocAbbreviated</metadata>
-    <metadata num="*">_urn</metadata>
-    <metadata num="*" DefaultDisplay="true">DocLanguage</metadata>
-    <metadata num="+">Sponsorship</metadata>
-    <metadata num="1o">PublisherName</metadata>
-    <metadata num="1o">SizeSourcePrint</metadata>
-    <metadata num="1o" DefaultDisplay="true">PlaceOfPublication</metadata>
-    <metadata num="*">RezenssionsZssDBID</metadata>
-    <metadata num="*" DefaultDisplay="true">Author</metadata>
-    <metadata num="*">Collaborator</metadata>
-    <metadata num="1o" DefaultDisplay="true">TSL_ATS</metadata>
-    <metadata num="1o" DefaultDisplay="true">PublicationYear</metadata>
-    <metadata num="*">singleDigCollection</metadata>
-    <metadata num="1o" DefaultDisplay="true">Editor</metadata>
-    <metadata num="1o">_purl</metadata>
-    <metadata num="*">Photographer</metadata>
-    <metadata num="*">Description</metadata>
-    <metadata num="*">shelfmarksource</metadata>
-    <metadata num="*">AdditionalInformation</metadata>
-    <metadata num="*">CountryCode</metadata>
-    <metadata num="*">recordContentSource</metadata>
-    <metadata num="*">CatalogLanguage</metadata>
-    <metadata num="*">TitleDocParallel</metadata>
-    <metadata num="*">physicalLocation</metadata>
-    <metadata num="1o">CurrentNo</metadata>
-    <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
-    <metadata num="*">NotePhysical</metadata>
-    <metadata num="*">SubjectGenre</metadata>
-    <metadata num="*">SubjectPerson</metadata>
-    <metadata num="*">SubjectPersonAddress</metadata>
-    <metadata num="*">SubjectPersonLifetime</metadata>
-    <metadata num="*">SubjectTopic</metadata>
-    <metadata num="*">Classification</metadata>
-    <metadata num="*">ISBN</metadata>
-    <metadata num="*">ISSN</metadata>
-    <metadata num="*">LCCN</metadata>
-    <metadata num="*">relatedSeries</metadata>
-  </DocStrctType>
   <DocStrctType anchor="true">
     <Name>Series</Name>
     <language name="de">Serie</language>
     <language name="en">series</language>
     <language name="es">Serie</language>
     <allowedchildtype>Monograph</allowedchildtype>
+    <allowedchildtype>SerialVolume</allowedchildtype>
     <allowedchildtype>Manuscript</allowedchildtype>
     <metadata num="1o">CreatorsAllOrigin</metadata>
     <metadata num="1m" DefaultDisplay="true">TitleDocMain</metadata>
@@ -2449,7 +2161,6 @@
     <language name="de">Mehrbändiges Werk</language>
     <language name="en">Multivolume Work</language>
     <language name="es">Obra con varios volúmenes</language>
-    <allowedchildtype>Volume</allowedchildtype>
     <metadata num="1o">_digitalOrigin</metadata>
     <metadata num="1o">CatalogIDAllegro</metadata>
     <metadata num="*">CatalogIDSource</metadata>
@@ -2479,104 +2190,6 @@
     <metadata num="*">Footer</metadata>
     <metadata num="*">Description</metadata>
     <metadata num="*">AdditionalInformation</metadata>
-  </DocStrctType>
-  <DocStrctType>
-    <Name>Volume</Name>
-    <language name="de">Band</language>
-    <language name="en">Volume</language>
-    <language name="es">Volumen</language>
-    <allowedchildtype>AttachedWork</allowedchildtype>
-    <allowedchildtype>Acknowledgment</allowedchildtype>
-    <allowedchildtype>Addendum</allowedchildtype>
-    <allowedchildtype>Advertising</allowedchildtype>
-    <allowedchildtype>Appendix</allowedchildtype>
-    <allowedchildtype>Bibliography</allowedchildtype>
-    <allowedchildtype>Binder</allowedchildtype>
-    <allowedchildtype>Chapter</allowedchildtype>
-    <allowedchildtype>ContainedWork</allowedchildtype>
-    <allowedchildtype>Cover</allowedchildtype>
-    <allowedchildtype>CurriculumVitae</allowedchildtype>
-    <allowedchildtype>Dedication</allowedchildtype>
-    <allowedchildtype>Epilogue</allowedchildtype>
-    <allowedchildtype>Errata</allowedchildtype>
-    <allowedchildtype>Headword</allowedchildtype>
-    <allowedchildtype>Figure</allowedchildtype>
-    <allowedchildtype>IllustrationDescription</allowedchildtype>
-    <allowedchildtype>Imprint</allowedchildtype>
-    <allowedchildtype>Index</allowedchildtype>
-    <allowedchildtype>IndexAuthor</allowedchildtype>
-    <allowedchildtype>IndexLocation</allowedchildtype>
-    <allowedchildtype>IndexOfChronology</allowedchildtype>
-    <allowedchildtype>IndexOverall</allowedchildtype>
-    <allowedchildtype>IndexPersons</allowedchildtype>
-    <allowedchildtype>IndexSpecial</allowedchildtype>
-    <allowedchildtype>IndexSubject</allowedchildtype>
-    <allowedchildtype>Introduction</allowedchildtype>
-    <allowedchildtype>Letter</allowedchildtype>
-    <allowedchildtype>ListOfIllustrations</allowedchildtype>
-    <allowedchildtype>ListOfMaps</allowedchildtype>
-    <allowedchildtype>ListOfTables</allowedchildtype>
-    <allowedchildtype>Map</allowedchildtype>
-    <allowedchildtype>Obituary</allowedchildtype>
-    <allowedchildtype>OtherDocStrct</allowedchildtype>
-    <allowedchildtype>PartOfWork</allowedchildtype>
-    <allowedchildtype>Preface</allowedchildtype>
-    <allowedchildtype>Prepage</allowedchildtype>
-    <allowedchildtype>Remarks</allowedchildtype>
-    <allowedchildtype>SheetMusic</allowedchildtype>
-    <allowedchildtype>Supplement</allowedchildtype>
-    <allowedchildtype>Table</allowedchildtype>
-    <allowedchildtype>TableDescription</allowedchildtype>
-    <allowedchildtype>TableOfAbbreviations</allowedchildtype>
-    <allowedchildtype>TableOfContents</allowedchildtype>
-    <allowedchildtype>TableOfLiteratureRefs</allowedchildtype>
-    <allowedchildtype>Theses</allowedchildtype>
-    <allowedchildtype>TitlePage</allowedchildtype>
-    <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
-    <metadata num="1o">CatalogIDAllegro</metadata>
-    <metadata num="*">CatalogIDSource</metadata>
-    <metadata num="*">_urn</metadata>
-    <metadata num="1o">_purl</metadata>
-    <metadata num="*">RezenssionsZssDBID</metadata>
-    <metadata num="1o" DefaultDisplay="true">TitleDocMain</metadata>
-    <metadata num="*">TitleDocAbbreviated</metadata>
-    <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
-    <metadata num="1o">TitleDocMainShort</metadata>
-    <metadata num="1o">CreatorsAllOrigin</metadata>
-    <metadata num="*">FormatSourcePrint</metadata>
-    <metadata num="*">Creator</metadata>
-    <metadata num="*">IllustratorArtist</metadata>
-    <metadata num="*">Translator</metadata>
-    <metadata num="1o">CurrentNo</metadata>
-    <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
-    <metadata num="1o" DefaultDisplay="true">DocLanguage</metadata>
-    <metadata num="1o">PublisherName</metadata>
-    <metadata num="1o">Sponsorship</metadata>
-    <metadata num="1o">SizeSourcePrint</metadata>
-    <metadata num="1o">PlaceOfPublication</metadata>
-    <metadata num="*" DefaultDisplay="true">Author</metadata>
-    <metadata num="*">Collaborator</metadata>
-    <metadata num="1o">TSL_ATS</metadata>
-    <metadata num="1o">PublicationYear</metadata>
-    <metadata num="*">singleDigCollection</metadata>
-    <metadata num="1o">Editor</metadata>
-    <metadata num="*">Photographer</metadata>
-    <metadata num="*">Edition</metadata>
-    <metadata num="*">Footer</metadata>
-    <metadata num="*">NotePhysical</metadata>
-    <metadata num="*">SubjectGenre</metadata>
-    <metadata num="*">SubjectPerson</metadata>
-    <metadata num="*">SubjectPersonAddress</metadata>
-    <metadata num="*">SubjectPersonLifetime</metadata>
-    <metadata num="*">SubjectTopic</metadata>
-    <metadata num="*">Classification</metadata>
-    <metadata num="*">Description</metadata>
-    <metadata num="*">ISBN</metadata>
-    <metadata num="*">ISSN</metadata>
-    <metadata num="*">LCCN</metadata>
-    <metadata num="*">AdditionalInformation</metadata>
-    <metadata num="*">CountryCode</metadata>
-    <metadata num="*">recordContentSource</metadata>
   </DocStrctType>
   <DocStrctType>
     <Name>Miscella</Name>
@@ -3202,6 +2815,524 @@
     <metadata num="+" DefaultDisplay="true">Content</metadata>
     <metadata num="*">Description</metadata>
   </DocStrctType>
+  <DocStrctType topStruct="true">
+    <Name>SerialVolume</Name>
+    <language name="de">Serienband</language>
+    <language name="en">serial volume</language>
+    <allowedchildtype>Acknowledgment</allowedchildtype>
+    <allowedchildtype>Addendum</allowedchildtype>
+    <allowedchildtype>Advertising</allowedchildtype>
+    <allowedchildtype>Appendix</allowedchildtype>
+    <allowedchildtype>AttachedWork</allowedchildtype>
+    <allowedchildtype>Binder</allowedchildtype>
+    <allowedchildtype>Bibliography</allowedchildtype>
+    <allowedchildtype>Chapter</allowedchildtype>
+    <allowedchildtype>Cover</allowedchildtype>
+    <allowedchildtype>CurriculumVitae</allowedchildtype>
+    <allowedchildtype>Dedication</allowedchildtype>
+    <allowedchildtype>Epilogue</allowedchildtype>
+    <allowedchildtype>Errata</allowedchildtype>
+    <allowedchildtype>Headword</allowedchildtype>
+    <allowedchildtype>Figure</allowedchildtype>
+    <allowedchildtype>IllustrationDescription</allowedchildtype>
+    <allowedchildtype>Imprint</allowedchildtype>
+    <allowedchildtype>Index</allowedchildtype>
+    <allowedchildtype>IndexAuthor</allowedchildtype>
+    <allowedchildtype>IndexLocation</allowedchildtype>
+    <allowedchildtype>IndexOfChronology</allowedchildtype>
+    <allowedchildtype>IndexOverall</allowedchildtype>
+    <allowedchildtype>IndexPersons</allowedchildtype>
+    <allowedchildtype>IndexSpecial</allowedchildtype>
+    <allowedchildtype>IndexSubject</allowedchildtype>
+    <allowedchildtype>Introduction</allowedchildtype>
+    <allowedchildtype>Letter</allowedchildtype>
+    <allowedchildtype>ListOfIllustrations</allowedchildtype>
+    <allowedchildtype>ListOfMaps</allowedchildtype>
+    <allowedchildtype>ListOfTables</allowedchildtype>
+    <allowedchildtype>Map</allowedchildtype>
+    <allowedchildtype>Obituary</allowedchildtype>
+    <allowedchildtype>OtherDocStrct</allowedchildtype>
+    <allowedchildtype>PartOfWork</allowedchildtype>
+    <allowedchildtype>Preface</allowedchildtype>
+    <allowedchildtype>Prepage</allowedchildtype>
+    <allowedchildtype>Remarks</allowedchildtype>
+    <allowedchildtype>SheetMusic</allowedchildtype>
+    <allowedchildtype>Supplement</allowedchildtype>
+    <allowedchildtype>Table</allowedchildtype>
+    <allowedchildtype>TableDescription</allowedchildtype>
+    <allowedchildtype>TableOfAbbreviations</allowedchildtype>
+    <allowedchildtype>TableOfContents</allowedchildtype>
+    <allowedchildtype>TableOfLiteratureRefs</allowedchildtype>
+    <allowedchildtype>Theses</allowedchildtype>
+    <allowedchildtype>TitlePage</allowedchildtype>
+    <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
+    <metadata num="1o">CreatorsAllOrigin</metadata>
+    <metadata num="*">FormatSourcePrint</metadata>
+    <metadata num="*">Creator</metadata>
+    <metadata num="*">IllustratorArtist</metadata>
+    <metadata num="*">Translator</metadata>
+    <metadata num="*" DefaultDisplay="true">PersonOriginal</metadata>
+    <metadata num="*" DefaultDisplay="true">CatalogIDSource</metadata>
+    <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
+    <metadata num="+">TitleDocMainShort</metadata>
+    <metadata num="1o">BibliographicCitation</metadata>
+    <metadata num="1m" DefaultDisplay="true">TitleDocMain</metadata>
+    <metadata num="*">TitleDocAbbreviated</metadata>
+    <metadata num="*">_urn</metadata>
+    <metadata num="*" DefaultDisplay="true">DocLanguage</metadata>
+    <metadata num="+">Sponsorship</metadata>
+    <metadata num="1o">PublisherName</metadata>
+    <metadata num="1o">SizeSourcePrint</metadata>
+    <metadata num="1o" DefaultDisplay="true">PlaceOfPublication</metadata>
+    <metadata num="*">RezenssionsZssDBID</metadata>
+    <metadata num="*" DefaultDisplay="true">Author</metadata>
+    <metadata num="*">Collaborator</metadata>
+    <metadata num="1o" DefaultDisplay="true">TSL_ATS</metadata>
+    <metadata num="1o" DefaultDisplay="true">PublicationYear</metadata>
+    <metadata num="*">singleDigCollection</metadata>
+    <metadata num="1o" DefaultDisplay="true">Editor</metadata>
+    <metadata num="1o">_purl</metadata>
+    <metadata num="*">Photographer</metadata>
+    <metadata num="*">Description</metadata>
+    <metadata num="*">shelfmarksource</metadata>
+    <metadata num="*">AdditionalInformation</metadata>
+    <metadata num="*">CountryCode</metadata>
+    <metadata num="*">recordContentSource</metadata>
+    <metadata num="*">CatalogLanguage</metadata>
+    <metadata num="*">TitleDocParallel</metadata>
+    <metadata num="*">physicalLocation</metadata>
+    <metadata num="1o">CurrentNo</metadata>
+    <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
+    <metadata num="*">NotePhysical</metadata>
+    <metadata num="*">SubjectGenre</metadata>
+    <metadata num="*">SubjectPerson</metadata>
+    <metadata num="*">SubjectPersonAddress</metadata>
+    <metadata num="*">SubjectPersonLifetime</metadata>
+    <metadata num="*">SubjectTopic</metadata>
+    <metadata num="*">Classification</metadata>
+    <metadata num="*">ISBN</metadata>
+    <metadata num="*">ISSN</metadata>
+    <metadata num="*">LCCN</metadata>
+    <metadata num="*">relatedSeries</metadata>
+    <metadata num="*">SubjectGeneral</metadata>
+    <metadata num="*">SubjectCorporate</metadata>
+    <metadata num="*">PrecedingVolume</metadata>
+    <metadata num="*">SucceedingVolume</metadata>
+    <metadata num="*">CatalogIDPredecessorPeriodical</metadata>
+    <metadata num="*">CatalogIDSuccessorPeriodical</metadata>
+  </DocStrctType>
+  <DocStrctType topStruct="true">
+    <Name>Monograph</Name>
+    <language name="de">Monographie</language>
+    <language name="en">Monograph</language>
+    <language name="es">Monografía</language>
+    <allowedchildtype>Acknowledgment</allowedchildtype>
+    <allowedchildtype>Addendum</allowedchildtype>
+    <allowedchildtype>Advertising</allowedchildtype>
+    <allowedchildtype>Appendix</allowedchildtype>
+    <allowedchildtype>AttachedWork</allowedchildtype>
+    <allowedchildtype>Binder</allowedchildtype>
+    <allowedchildtype>Bibliography</allowedchildtype>
+    <allowedchildtype>Chapter</allowedchildtype>
+    <allowedchildtype>Cover</allowedchildtype>
+    <allowedchildtype>CurriculumVitae</allowedchildtype>
+    <allowedchildtype>Dedication</allowedchildtype>
+    <allowedchildtype>Epilogue</allowedchildtype>
+    <allowedchildtype>Errata</allowedchildtype>
+    <allowedchildtype>Headword</allowedchildtype>
+    <allowedchildtype>Figure</allowedchildtype>
+    <allowedchildtype>IllustrationDescription</allowedchildtype>
+    <allowedchildtype>Imprint</allowedchildtype>
+    <allowedchildtype>Index</allowedchildtype>
+    <allowedchildtype>IndexAuthor</allowedchildtype>
+    <allowedchildtype>IndexLocation</allowedchildtype>
+    <allowedchildtype>IndexOfChronology</allowedchildtype>
+    <allowedchildtype>IndexOverall</allowedchildtype>
+    <allowedchildtype>IndexPersons</allowedchildtype>
+    <allowedchildtype>IndexSpecial</allowedchildtype>
+    <allowedchildtype>IndexSubject</allowedchildtype>
+    <allowedchildtype>Introduction</allowedchildtype>
+    <allowedchildtype>Letter</allowedchildtype>
+    <allowedchildtype>ListOfIllustrations</allowedchildtype>
+    <allowedchildtype>ListOfMaps</allowedchildtype>
+    <allowedchildtype>ListOfTables</allowedchildtype>
+    <allowedchildtype>Map</allowedchildtype>
+    <allowedchildtype>Obituary</allowedchildtype>
+    <allowedchildtype>OtherDocStrct</allowedchildtype>
+    <allowedchildtype>PartOfWork</allowedchildtype>
+    <allowedchildtype>Preface</allowedchildtype>
+    <allowedchildtype>Prepage</allowedchildtype>
+    <allowedchildtype>Remarks</allowedchildtype>
+    <allowedchildtype>SheetMusic</allowedchildtype>
+    <allowedchildtype>Supplement</allowedchildtype>
+    <allowedchildtype>Table</allowedchildtype>
+    <allowedchildtype>TableDescription</allowedchildtype>
+    <allowedchildtype>TableOfAbbreviations</allowedchildtype>
+    <allowedchildtype>TableOfContents</allowedchildtype>
+    <allowedchildtype>TableOfLiteratureRefs</allowedchildtype>
+    <allowedchildtype>Theses</allowedchildtype>
+    <allowedchildtype>TitlePage</allowedchildtype>
+    <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
+    <metadata num="1o">CreatorsAllOrigin</metadata>
+    <metadata num="*">FormatSourcePrint</metadata>
+    <metadata num="*">Creator</metadata>
+    <metadata num="*">IllustratorArtist</metadata>
+    <metadata num="*">Translator</metadata>
+    <metadata num="*" DefaultDisplay="true">PersonOriginal</metadata>
+    <metadata num="*" DefaultDisplay="true">CatalogIDSource</metadata>
+    <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
+    <metadata num="+">TitleDocMainShort</metadata>
+    <metadata num="1o">BibliographicCitation</metadata>
+    <metadata num="1m" DefaultDisplay="true">TitleDocMain</metadata>
+    <metadata num="*">TitleDocAbbreviated</metadata>
+    <metadata num="*">_urn</metadata>
+    <metadata num="*" DefaultDisplay="true">DocLanguage</metadata>
+    <metadata num="+">Sponsorship</metadata>
+    <metadata num="1o">PublisherName</metadata>
+    <metadata num="1o">SizeSourcePrint</metadata>
+    <metadata num="1o" DefaultDisplay="true">PlaceOfPublication</metadata>
+    <metadata num="*">RezenssionsZssDBID</metadata>
+    <metadata num="*" DefaultDisplay="true">Author</metadata>
+    <metadata num="*">Collaborator</metadata>
+    <metadata num="1o" DefaultDisplay="true">TSL_ATS</metadata>
+    <metadata num="1o" DefaultDisplay="true">PublicationYear</metadata>
+    <metadata num="*">singleDigCollection</metadata>
+    <metadata num="1o" DefaultDisplay="true">Editor</metadata>
+    <metadata num="1o">_purl</metadata>
+    <metadata num="*">Photographer</metadata>
+    <metadata num="*">Description</metadata>
+    <metadata num="*">shelfmarksource</metadata>
+    <metadata num="*">AdditionalInformation</metadata>
+    <metadata num="*">CountryCode</metadata>
+    <metadata num="*">recordContentSource</metadata>
+    <metadata num="*">CatalogLanguage</metadata>
+    <metadata num="*">TitleDocParallel</metadata>
+    <metadata num="*">physicalLocation</metadata>
+    <metadata num="1o">CurrentNo</metadata>
+    <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
+    <metadata num="*">NotePhysical</metadata>
+    <metadata num="*">SubjectGenre</metadata>
+    <metadata num="*">SubjectPerson</metadata>
+    <metadata num="*">SubjectPersonAddress</metadata>
+    <metadata num="*">SubjectPersonLifetime</metadata>
+    <metadata num="*">SubjectTopic</metadata>
+    <metadata num="*">Classification</metadata>
+    <metadata num="*">ISBN</metadata>
+    <metadata num="*">ISSN</metadata>
+    <metadata num="*">LCCN</metadata>
+    <metadata num="*">relatedSeries</metadata>
+    <metadata num="*">SubjectGeneral</metadata>
+    <metadata num="*">SubjectCorporate</metadata>
+  </DocStrctType>
+  <DocStrctType topStruct="true">
+    <Name>Volume</Name>
+    <language name="de">Band</language>
+    <language name="en">Volume</language>
+    <language name="es">Volumen</language>
+    <allowedchildtype>AttachedWork</allowedchildtype>
+    <allowedchildtype>Acknowledgment</allowedchildtype>
+    <allowedchildtype>Addendum</allowedchildtype>
+    <allowedchildtype>Advertising</allowedchildtype>
+    <allowedchildtype>Appendix</allowedchildtype>
+    <allowedchildtype>Bibliography</allowedchildtype>
+    <allowedchildtype>Binder</allowedchildtype>
+    <allowedchildtype>Chapter</allowedchildtype>
+    <allowedchildtype>ContainedWork</allowedchildtype>
+    <allowedchildtype>Cover</allowedchildtype>
+    <allowedchildtype>CurriculumVitae</allowedchildtype>
+    <allowedchildtype>Dedication</allowedchildtype>
+    <allowedchildtype>Epilogue</allowedchildtype>
+    <allowedchildtype>Errata</allowedchildtype>
+    <allowedchildtype>Headword</allowedchildtype>
+    <allowedchildtype>Figure</allowedchildtype>
+    <allowedchildtype>IllustrationDescription</allowedchildtype>
+    <allowedchildtype>Imprint</allowedchildtype>
+    <allowedchildtype>Index</allowedchildtype>
+    <allowedchildtype>IndexAuthor</allowedchildtype>
+    <allowedchildtype>IndexLocation</allowedchildtype>
+    <allowedchildtype>IndexOfChronology</allowedchildtype>
+    <allowedchildtype>IndexOverall</allowedchildtype>
+    <allowedchildtype>IndexPersons</allowedchildtype>
+    <allowedchildtype>IndexSpecial</allowedchildtype>
+    <allowedchildtype>IndexSubject</allowedchildtype>
+    <allowedchildtype>Introduction</allowedchildtype>
+    <allowedchildtype>Letter</allowedchildtype>
+    <allowedchildtype>ListOfIllustrations</allowedchildtype>
+    <allowedchildtype>ListOfMaps</allowedchildtype>
+    <allowedchildtype>ListOfTables</allowedchildtype>
+    <allowedchildtype>Map</allowedchildtype>
+    <allowedchildtype>Obituary</allowedchildtype>
+    <allowedchildtype>OtherDocStrct</allowedchildtype>
+    <allowedchildtype>PartOfWork</allowedchildtype>
+    <allowedchildtype>Preface</allowedchildtype>
+    <allowedchildtype>Prepage</allowedchildtype>
+    <allowedchildtype>Remarks</allowedchildtype>
+    <allowedchildtype>SheetMusic</allowedchildtype>
+    <allowedchildtype>Supplement</allowedchildtype>
+    <allowedchildtype>Table</allowedchildtype>
+    <allowedchildtype>TableDescription</allowedchildtype>
+    <allowedchildtype>TableOfAbbreviations</allowedchildtype>
+    <allowedchildtype>TableOfContents</allowedchildtype>
+    <allowedchildtype>TableOfLiteratureRefs</allowedchildtype>
+    <allowedchildtype>Theses</allowedchildtype>
+    <allowedchildtype>TitlePage</allowedchildtype>
+    <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
+    <metadata num="1o">CatalogIDAllegro</metadata>
+    <metadata num="*">CatalogIDSource</metadata>
+    <metadata num="*">_urn</metadata>
+    <metadata num="1o">_purl</metadata>
+    <metadata num="*">RezenssionsZssDBID</metadata>
+    <metadata num="1o" DefaultDisplay="true">TitleDocMain</metadata>
+    <metadata num="*">TitleDocAbbreviated</metadata>
+    <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
+    <metadata num="1o">TitleDocMainShort</metadata>
+    <metadata num="1o">CreatorsAllOrigin</metadata>
+    <metadata num="*">FormatSourcePrint</metadata>
+    <metadata num="*">Creator</metadata>
+    <metadata num="*">IllustratorArtist</metadata>
+    <metadata num="*">Translator</metadata>
+    <metadata num="1o">CurrentNo</metadata>
+    <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
+    <metadata num="1o" DefaultDisplay="true">DocLanguage</metadata>
+    <metadata num="1o">PublisherName</metadata>
+    <metadata num="1o">Sponsorship</metadata>
+    <metadata num="1o">SizeSourcePrint</metadata>
+    <metadata num="1o">PlaceOfPublication</metadata>
+    <metadata num="*" DefaultDisplay="true">Author</metadata>
+    <metadata num="*">Collaborator</metadata>
+    <metadata num="1o">TSL_ATS</metadata>
+    <metadata num="1o">PublicationYear</metadata>
+    <metadata num="*">singleDigCollection</metadata>
+    <metadata num="1o">Editor</metadata>
+    <metadata num="*">Photographer</metadata>
+    <metadata num="*">Edition</metadata>
+    <metadata num="*">Footer</metadata>
+    <metadata num="*">NotePhysical</metadata>
+    <metadata num="*">SubjectGenre</metadata>
+    <metadata num="*">SubjectPerson</metadata>
+    <metadata num="*">SubjectPersonAddress</metadata>
+    <metadata num="*">SubjectPersonLifetime</metadata>
+    <metadata num="*">SubjectTopic</metadata>
+    <metadata num="*">Classification</metadata>
+    <metadata num="*">Description</metadata>
+    <metadata num="*">ISBN</metadata>
+    <metadata num="*">ISSN</metadata>
+    <metadata num="*">LCCN</metadata>
+    <metadata num="*">AdditionalInformation</metadata>
+    <metadata num="*">CountryCode</metadata>
+    <metadata num="*">recordContentSource</metadata>
+    <metadata num="*">SubjectCorporate</metadata>
+    <metadata num="*">SubjectGeneral</metadata>
+  </DocStrctType>
+  <DocStrctType topStruct="true">
+    <Name>PeriodicalVolume</Name>
+    <language name="de">Zeitschriften-Band</language>
+    <language name="en">Periodical Volume</language>
+    <language name="es">Volumen del periódico</language>
+    <allowedchildtype>Acknowledgment</allowedchildtype>
+    <allowedchildtype>Announcement</allowedchildtype>
+    <allowedchildtype>Addendum</allowedchildtype>
+    <allowedchildtype>Advertising</allowedchildtype>
+    <allowedchildtype>Appendix</allowedchildtype>
+    <allowedchildtype>Article</allowedchildtype>
+    <allowedchildtype>Binder</allowedchildtype>
+    <allowedchildtype>Chapter</allowedchildtype>
+    <allowedchildtype>Cover</allowedchildtype>
+    <allowedchildtype>CurriculumVitae</allowedchildtype>
+    <allowedchildtype>Dedication</allowedchildtype>
+    <allowedchildtype>Epilogue</allowedchildtype>
+    <allowedchildtype>Errata</allowedchildtype>
+    <allowedchildtype>Headword</allowedchildtype>
+    <allowedchildtype>Figure</allowedchildtype>
+    <allowedchildtype>IllustrationDescription</allowedchildtype>
+    <allowedchildtype>Imprint</allowedchildtype>
+    <allowedchildtype>Index</allowedchildtype>
+    <allowedchildtype>IndexAuthor</allowedchildtype>
+    <allowedchildtype>IndexLocation</allowedchildtype>
+    <allowedchildtype>IndexOfChronology</allowedchildtype>
+    <allowedchildtype>IndexOverall</allowedchildtype>
+    <allowedchildtype>IndexPersons</allowedchildtype>
+    <allowedchildtype>IndexSpecial</allowedchildtype>
+    <allowedchildtype>IndexSubject</allowedchildtype>
+    <allowedchildtype>Introduction</allowedchildtype>
+    <allowedchildtype>Letter</allowedchildtype>
+    <allowedchildtype>ListOfIllustrations</allowedchildtype>
+    <allowedchildtype>ListOfMaps</allowedchildtype>
+    <allowedchildtype>ListOfTables</allowedchildtype>
+    <allowedchildtype>Map</allowedchildtype>
+    <allowedchildtype>Miscella</allowedchildtype>
+    <allowedchildtype>Obituary</allowedchildtype>
+    <allowedchildtype>OtherDocStrct</allowedchildtype>
+    <allowedchildtype>PeriodicalIssue</allowedchildtype>
+    <allowedchildtype>PeriodicalPart</allowedchildtype>
+    <allowedchildtype>Preface</allowedchildtype>
+    <allowedchildtype>Prepage</allowedchildtype>
+    <allowedchildtype>Remarks</allowedchildtype>
+    <allowedchildtype>Table</allowedchildtype>
+    <allowedchildtype>TableDescription</allowedchildtype>
+    <allowedchildtype>TableOfAbbreviations</allowedchildtype>
+    <allowedchildtype>TableOfContents</allowedchildtype>
+    <allowedchildtype>TableOfLiteratureRefs</allowedchildtype>
+    <allowedchildtype>Theses</allowedchildtype>
+    <allowedchildtype>TitlePage</allowedchildtype>
+    <allowedchildtype>List</allowedchildtype>
+    <allowedchildtype>Poem</allowedchildtype>
+    <allowedchildtype>Review</allowedchildtype>
+    <allowedchildtype>Nachtrag</allowedchildtype>
+    <allowedchildtype>Supplement</allowedchildtype>
+    <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
+    <metadata num="1o">CatalogIDSource</metadata>
+    <metadata num="1o">_purl</metadata>
+    <metadata num="*">_urn</metadata>
+    <metadata num="*">DOI</metadata>
+    <metadata num="1o">_digitalOrigin</metadata>
+    <metadata num="+" DefaultDisplay="true">TitleDocMain</metadata>
+    <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
+    <metadata num="*">TitleDocParallel</metadata>
+    <metadata num="+">TitleDocMainShort</metadata>
+    <metadata num="1o">CurrentNo</metadata>
+    <metadata num="1m" DefaultDisplay="true">CurrentNoSorting</metadata>
+    <metadata num="1o">CreatorsAllOrigin</metadata>
+    <metadata num="*">FormatSourcePrint</metadata>
+    <metadata num="*">ReportingYear</metadata>
+    <metadata num="*">Creator</metadata>
+    <metadata num="*">IllustratorArtist</metadata>
+    <metadata num="*">Translator</metadata>
+    <metadata num="*" DefaultDisplay="true">DocLanguage</metadata>
+    <metadata num="1o">PublisherName</metadata>
+    <metadata num="1o">Sponsorship</metadata>
+    <metadata num="1o">SizeSourcePrint</metadata>
+    <metadata num="1o">PlaceOfPublication</metadata>
+    <metadata num="*">Author</metadata>
+    <metadata num="*">SICI</metadata>
+    <metadata num="1o">TSL_ATS</metadata>
+    <metadata num="1o">PublicationYear</metadata>
+    <metadata num="*">singleDigCollection</metadata>
+    <metadata num="1o">Editor</metadata>
+    <metadata num="*">Photographer</metadata>
+    <metadata num="*">Edition</metadata>
+    <metadata num="*">shelfmarksource</metadata>
+    <metadata num="*">Classification</metadata>
+    <metadata num="*">NotePhysical</metadata>
+    <metadata num="*">SubjectGenre</metadata>
+    <metadata num="*">SubjectPerson</metadata>
+    <metadata num="*">SubjectPersonAddress</metadata>
+    <metadata num="*">SubjectPersonLifetime</metadata>
+    <metadata num="*">SubjectTopic</metadata>
+    <metadata num="*">Description</metadata>
+    <metadata num="*">ISBN</metadata>
+    <metadata num="*">ISSN</metadata>
+    <metadata num="*">LCCN</metadata>
+    <metadata num="*">AdditionalInformation</metadata>
+    <metadata num="*">TitleDocAbbreviated</metadata>
+    <metadata num="*">CountryCode</metadata>
+    <metadata num="*">recordContentSource</metadata>
+    <metadata num="*">SubjectCorporate</metadata>
+    <metadata num="*">SubjectGeneral</metadata>
+  </DocStrctType>
+  <DocStrctType topStruct="true">
+    <Name>Manuscript</Name>
+    <language name="de">Handschrift</language>
+    <language name="en">manuscript</language>
+    <language name="es">Manuscrito</language>
+    <allowedchildtype>Acknowledgment</allowedchildtype>
+    <allowedchildtype>Addendum</allowedchildtype>
+    <allowedchildtype>Advertising</allowedchildtype>
+    <allowedchildtype>Appendix</allowedchildtype>
+    <allowedchildtype>AttachedWork</allowedchildtype>
+    <allowedchildtype>Binder</allowedchildtype>
+    <allowedchildtype>Bibliography</allowedchildtype>
+    <allowedchildtype>Chapter</allowedchildtype>
+    <allowedchildtype>Cover</allowedchildtype>
+    <allowedchildtype>CurriculumVitae</allowedchildtype>
+    <allowedchildtype>Dedication</allowedchildtype>
+    <allowedchildtype>Epilogue</allowedchildtype>
+    <allowedchildtype>Errata</allowedchildtype>
+    <allowedchildtype>Headword</allowedchildtype>
+    <allowedchildtype>Figure</allowedchildtype>
+    <allowedchildtype>IllustrationDescription</allowedchildtype>
+    <allowedchildtype>Imprint</allowedchildtype>
+    <allowedchildtype>Index</allowedchildtype>
+    <allowedchildtype>IndexAuthor</allowedchildtype>
+    <allowedchildtype>IndexLocation</allowedchildtype>
+    <allowedchildtype>IndexOfChronology</allowedchildtype>
+    <allowedchildtype>IndexOverall</allowedchildtype>
+    <allowedchildtype>IndexPersons</allowedchildtype>
+    <allowedchildtype>IndexSpecial</allowedchildtype>
+    <allowedchildtype>IndexSubject</allowedchildtype>
+    <allowedchildtype>Introduction</allowedchildtype>
+    <allowedchildtype>Letter</allowedchildtype>
+    <allowedchildtype>ListOfIllustrations</allowedchildtype>
+    <allowedchildtype>ListOfMaps</allowedchildtype>
+    <allowedchildtype>ListOfTables</allowedchildtype>
+    <allowedchildtype>Map</allowedchildtype>
+    <allowedchildtype>Obituary</allowedchildtype>
+    <allowedchildtype>OtherDocStrct</allowedchildtype>
+    <allowedchildtype>PartOfWork</allowedchildtype>
+    <allowedchildtype>Preface</allowedchildtype>
+    <allowedchildtype>Prepage</allowedchildtype>
+    <allowedchildtype>Remarks</allowedchildtype>
+    <allowedchildtype>SheetMusic</allowedchildtype>
+    <allowedchildtype>Supplement</allowedchildtype>
+    <allowedchildtype>Table</allowedchildtype>
+    <allowedchildtype>TableDescription</allowedchildtype>
+    <allowedchildtype>TableOfAbbreviations</allowedchildtype>
+    <allowedchildtype>TableOfContents</allowedchildtype>
+    <allowedchildtype>TableOfLiteratureRefs</allowedchildtype>
+    <allowedchildtype>Theses</allowedchildtype>
+    <allowedchildtype>TitlePage</allowedchildtype>
+    <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
+    <metadata num="1o">CreatorsAllOrigin</metadata>
+    <metadata num="*">FormatSourcePrint</metadata>
+    <metadata num="*">Creator</metadata>
+    <metadata num="*">IllustratorArtist</metadata>
+    <metadata num="*">Translator</metadata>
+    <metadata num="*" DefaultDisplay="true">PersonOriginal</metadata>
+    <metadata num="*" DefaultDisplay="true">CatalogIDSource</metadata>
+    <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
+    <metadata num="+">TitleDocMainShort</metadata>
+    <metadata num="1o">BibliographicCitation</metadata>
+    <metadata num="1m" DefaultDisplay="true">TitleDocMain</metadata>
+    <metadata num="*">TitleDocAbbreviated</metadata>
+    <metadata num="*">_urn</metadata>
+    <metadata num="*" DefaultDisplay="true">DocLanguage</metadata>
+    <metadata num="+">Sponsorship</metadata>
+    <metadata num="1o">PublisherName</metadata>
+    <metadata num="1o">SizeSourcePrint</metadata>
+    <metadata num="1o" DefaultDisplay="true">PlaceOfPublication</metadata>
+    <metadata num="*">RezenssionsZssDBID</metadata>
+    <metadata num="*" DefaultDisplay="true">Author</metadata>
+    <metadata num="*">Collaborator</metadata>
+    <metadata num="1o" DefaultDisplay="true">TSL_ATS</metadata>
+    <metadata num="1o" DefaultDisplay="true">PublicationYear</metadata>
+    <metadata num="*">singleDigCollection</metadata>
+    <metadata num="1o" DefaultDisplay="true">Editor</metadata>
+    <metadata num="1o">_purl</metadata>
+    <metadata num="*">Photographer</metadata>
+    <metadata num="*">Description</metadata>
+    <metadata num="*">shelfmarksource</metadata>
+    <metadata num="*">AdditionalInformation</metadata>
+    <metadata num="*">CountryCode</metadata>
+    <metadata num="*">recordContentSource</metadata>
+    <metadata num="*">CatalogLanguage</metadata>
+    <metadata num="*">TitleDocParallel</metadata>
+    <metadata num="*">physicalLocation</metadata>
+    <metadata num="1o">CurrentNo</metadata>
+    <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
+    <metadata num="*">NotePhysical</metadata>
+    <metadata num="*">SubjectGenre</metadata>
+    <metadata num="*">SubjectPerson</metadata>
+    <metadata num="*">SubjectPersonAddress</metadata>
+    <metadata num="*">SubjectPersonLifetime</metadata>
+    <metadata num="*">SubjectTopic</metadata>
+    <metadata num="*">Classification</metadata>
+    <metadata num="*">ISBN</metadata>
+    <metadata num="*">ISSN</metadata>
+    <metadata num="*">LCCN</metadata>
+    <metadata num="*">relatedSeries</metadata>
+    <metadata num="*">SubjectGeneral</metadata>
+    <metadata num="*">SubjectCorporate</metadata>
+  </DocStrctType>
   <!-- DO NOT CHANGE!! -->
   <Formats>
     <!-- ########################################################################## ## The RDF Section ## ########################################################################## -->
@@ -3272,10 +3403,6 @@
         <RDFName>AGORA:TitleDocMainShort</RDFName>
       </Metadata>
       <Metadata>
-        <Name>CatalogIDPredecessorPeriodical</Name>
-        <RDFName>AGORA:CatalogIDPredecessorPeriodical</RDFName>
-      </Metadata>
-      <Metadata>
         <Name>CatalogIDDigital</Name>
         <RDFName>AGORA:CatalogIDDigital</RDFName>
       </Metadata>
@@ -3310,10 +3437,6 @@
       <Metadata>
         <Name>PublicationYear</Name>
         <RDFName>AGORA:PublicationYear</RDFName>
-      </Metadata>
-      <Metadata>
-        <Name>CatalogIDSuccessorPeriodical</Name>
-        <RDFName>AGORA:CatalogIDSuccessorPeriodical</RDFName>
       </Metadata>
       <Metadata>
         <Name>Copyright</Name>
@@ -3371,6 +3494,14 @@
         <Name>CurrentNo</Name>
         <RDFName>AGORA:CurrentNo</RDFName>
       </Metadata>
+      <Metadata>
+        <Name>CatalogIDPredecessorPeriodical</Name>
+        <RDFName>AGORA:CatalogIDPredecessorPeriodical</RDFName>
+      </Metadata>
+      <Metadata>
+        <Name>CatalogIDSuccessorPeriodical</Name>
+        <RDFName>AGORA:CatalogIDSuccessorPeriodical</RDFName>
+      </Metadata>
       <DocStruct>
         <Name>Acknowledgment</Name>
         <RDFName>AGORA:Acknowledgment</RDFName>
@@ -3386,10 +3517,6 @@
       <DocStruct>
         <Name>Epilogue</Name>
         <RDFName>AGORA:Epilogue</RDFName>
-      </DocStruct>
-      <DocStruct>
-        <Name>PeriodicalVolume</Name>
-        <RDFName>AGORA:PeriodicalVolume</RDFName>
       </DocStruct>
       <DocStruct>
         <Name>Nachtrag</Name>
@@ -3488,10 +3615,6 @@
         <RDFName>AGORA:Imprint</RDFName>
       </DocStruct>
       <DocStruct>
-        <Name>Monograph</Name>
-        <RDFName>AGORA:Monograph</RDFName>
-      </DocStruct>
-      <DocStruct>
         <Name>AttachedWork</Name>
         <RDFName>AGORA:WorkAttached</RDFName>
       </DocStruct>
@@ -3506,10 +3629,6 @@
       <DocStruct>
         <Name>MultiVolumeWork</Name>
         <RDFName>AGORA:MultiVolumeWork</RDFName>
-      </DocStruct>
-      <DocStruct>
-        <Name>Volume</Name>
-        <RDFName>AGORA:Volume</RDFName>
       </DocStruct>
       <DocStruct>
         <Name>Miscella</Name>
@@ -3610,6 +3729,26 @@
       <DocStruct>
         <Name>Notes</Name>
         <RDFName>AGORA:Notes</RDFName>
+      </DocStruct>
+      <DocStruct>
+        <Name>SerialVolume</Name>
+        <RDFName>AGORA:SerialVolume</RDFName>
+      </DocStruct>
+      <DocStruct>
+        <Name>Monograph</Name>
+        <RDFName>AGORA:Monograph</RDFName>
+      </DocStruct>
+      <DocStruct>
+        <Name>Volume</Name>
+        <RDFName>AGORA:Volume</RDFName>
+      </DocStruct>
+      <DocStruct>
+        <Name>PeriodicalVolume</Name>
+        <RDFName>AGORA:PeriodicalVolume</RDFName>
+      </DocStruct>
+      <DocStruct>
+        <Name>Manuscript</Name>
+        <RDFName>AGORA:Monograph</RDFName>
       </DocStruct>
     </RDF>
     <!-- ########################################################################## ## The PicaPlus Section ## ########################################################################## -->
@@ -3726,18 +3865,6 @@
         <picaContent>Ab</picaContent>
       </DocStruct>
       <DocStruct>
-        <Name>Monograph</Name>
-        <picaMainTag>002@</picaMainTag>
-        <picaSubTag>0</picaSubTag>
-        <picaContent>Oa</picaContent>
-      </DocStruct>
-      <DocStruct>
-        <Name>Monograph</Name>
-        <picaMainTag>002@</picaMainTag>
-        <picaSubTag>0</picaSubTag>
-        <picaContent>Aa</picaContent>
-      </DocStruct>
-      <DocStruct>
         <Name>ContainedWork</Name>
         <picaMainTag>002@</picaMainTag>
         <picaSubTag>0</picaSubTag>
@@ -3760,30 +3887,6 @@
         <picaMainTag>002@</picaMainTag>
         <picaSubTag>0</picaSubTag>
         <picaContent>Ac</picaContent>
-      </DocStruct>
-      <DocStruct>
-        <Name>Volume</Name>
-        <picaMainTag>002@</picaMainTag>
-        <picaSubTag>0</picaSubTag>
-        <picaContent>Of</picaContent>
-      </DocStruct>
-      <DocStruct>
-        <Name>Volume</Name>
-        <picaMainTag>002@</picaMainTag>
-        <picaSubTag>0</picaSubTag>
-        <picaContent>Af</picaContent>
-      </DocStruct>
-      <DocStruct>
-        <Name>Volume</Name>
-        <picaMainTag>002@</picaMainTag>
-        <picaSubTag>0</picaSubTag>
-        <picaContent>OF</picaContent>
-      </DocStruct>
-      <DocStruct>
-        <Name>Volume</Name>
-        <picaMainTag>002@</picaMainTag>
-        <picaSubTag>0</picaSubTag>
-        <picaContent>AF</picaContent>
       </DocStruct>
       <DocStruct>
         <Name>VolumeRun</Name>
@@ -3820,6 +3923,66 @@
         <picaMainTag>002@</picaMainTag>
         <picaSubTag>0</picaSubTag>
         <picaContent>Os</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>SerialVolume</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>Oa</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>SerialVolume</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>Aa</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>Monograph</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>Oa</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>Monograph</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>Aa</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>Volume</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>Of</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>Volume</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>Af</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>Volume</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>OF</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>Volume</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>AF</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>Manuscript</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>Oa</picaContent>
+      </DocStruct>
+      <DocStruct>
+        <Name>Manuscript</Name>
+        <picaMainTag>002@</picaMainTag>
+        <picaSubTag>0</picaSubTag>
+        <picaContent>Aa</picaContent>
       </DocStruct>
     </PicaPlus>
     <!-- ########################################################################## ## METS/MODS ## ########################################################################## -->
@@ -4418,6 +4581,34 @@
         <InternalName>CurrentNo</InternalName>
         <WriteXPath>./mods:mods/mods:relatedItem[@type='series']/mods:titleInfo/mods:partNumber</WriteXPath>
       </Metadata>
+      <Metadata>
+        <InternalName>SubjectCorporate</InternalName>
+        <WriteXPath>./mods:mods/mods:subject/mods:name[@type='corporate']/mods:namePart[not(@type)]</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>SubjectGeneral</InternalName>
+        <WriteXPath>./mods:mods/mods:subject/mods:name[not(@type]</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>SubjectGeneral</InternalName>
+        <WriteXPath>./mods:mods/mods:subject/mods:name[not(@type]/mods:namePart[not(@type)]</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>CatalogIDPredecessorPeriodical</InternalName>
+        <WriteXPath>./mods:mods/mods:relatedItem[@type='preceding']/mods:identifier</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>CatalogIDSuccessorPeriodical</InternalName>
+        <WriteXPath>./mods:mods/mods:relatedItem[@type='succeeding']/mods:identifier</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>PrecedingVolume</InternalName>
+        <WriteXPath>./mods:mods/mods:relatedItem[@type='preceding']/mods:titleInfo/mods:title</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>SucceedingVolume</InternalName>
+        <WriteXPath>./mods:mods/mods:relatedItem[@type='succeeding']/mods:titleInfo/mods:title</WriteXPath>
+      </Metadata>
       <DocStruct>
         <InternalName>Binder</InternalName>
         <MetsType>Binder</MetsType>
@@ -4437,10 +4628,6 @@
       <DocStruct>
         <InternalName>Epilogue</InternalName>
         <MetsType>Epilogue</MetsType>
-      </DocStruct>
-      <DocStruct>
-        <InternalName>PeriodicalVolume</InternalName>
-        <MetsType>PeriodicalVolume</MetsType>
       </DocStruct>
       <DocStruct>
         <InternalName>Nachtrag</InternalName>
@@ -4534,12 +4721,6 @@
         <InternalName>Imprint</InternalName>
         <MetsType>Imprint</MetsType>
       </DocStruct>
-      <!-- DO NOT CHANGE!! -->
-      <!-- ########################################################################## ## Logical structure entities ## ########################################################################## -->
-      <DocStruct>
-        <InternalName>Monograph</InternalName>
-        <MetsType>Monograph</MetsType>
-      </DocStruct>
       <DocStruct>
         <InternalName>AttachedWork</InternalName>
         <MetsType>AttachedWork</MetsType>
@@ -4555,10 +4736,6 @@
       <DocStruct>
         <InternalName>MultiVolumeWork</InternalName>
         <MetsType>MultiVolumeWork</MetsType>
-      </DocStruct>
-      <DocStruct>
-        <InternalName>Volume</InternalName>
-        <MetsType>Volume</MetsType>
       </DocStruct>
       <DocStruct>
         <InternalName>Miscella</InternalName>
@@ -4700,6 +4877,28 @@
       <DocStruct>
         <InternalName>Seal</InternalName>
         <MetsType>Seal</MetsType>
+      </DocStruct>
+      <DocStruct>
+        <InternalName>SerialVolume</InternalName>
+        <MetsType>SerialVolume</MetsType>
+      </DocStruct>
+      <!-- DO NOT CHANGE!! -->
+      <!-- ########################################################################## ## Logical structure entities ## ########################################################################## -->
+      <DocStruct>
+        <InternalName>Monograph</InternalName>
+        <MetsType>Monograph</MetsType>
+      </DocStruct>
+      <DocStruct>
+        <InternalName>Volume</InternalName>
+        <MetsType>Volume</MetsType>
+      </DocStruct>
+      <DocStruct>
+        <InternalName>PeriodicalVolume</InternalName>
+        <MetsType>PeriodicalVolume</MetsType>
+      </DocStruct>
+      <DocStruct>
+        <InternalName>Manuscript</InternalName>
+        <MetsType>Monograph</MetsType>
       </DocStruct>
     </METS>
   </Formats>
