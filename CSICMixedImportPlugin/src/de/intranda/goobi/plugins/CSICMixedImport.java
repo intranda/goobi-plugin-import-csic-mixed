@@ -21,7 +21,9 @@
 package de.intranda.goobi.plugins;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -33,6 +35,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,6 +49,7 @@ import java.util.zip.ZipInputStream;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.goobi.production.Import.DocstructElement;
@@ -87,6 +91,7 @@ import de.sub.goobi.Beans.Prozess;
 import de.sub.goobi.Import.ImportOpac;
 import de.sub.goobi.Persistence.ProzessDAO;
 import de.sub.goobi.config.ConfigMain;
+import de.sub.goobi.helper.FileUtils;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 
@@ -97,7 +102,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "1.0.20120716";
+	private static final String VERSION = "1.0.20120717";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
 	// private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
 	// private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
@@ -105,10 +110,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
 
 	private final static boolean deleteOriginalImages = false;
-	private final static boolean deleteTempFiles = true;
-	private final static boolean logConversionLoss = false;
+	private final static boolean deleteTempFiles = false;
+	private final static boolean logConversionLoss = true;
 	private final static boolean copyImages = false;
-	
+	private final static boolean updateExistingRecords = true;
+	private final static boolean overrideExistingData = false;
+
 	// Namespaces
 	private Namespace mets;
 	private Namespace premis;
@@ -133,20 +140,22 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	/**
 	 * Directory containing the image files (possibly in TIFF/JPEG subfolders)
 	 */
-	 public File exportFolder = new File("/mnt/csic/0009_VCTN");
+	public File exportFolder = new File("/mnt/csic/METS_0009");
+	public File sourceFolder = null;
+	public File logFolder = new File("/opt/digiverso/logs/CSIC");
 
-//	private File exportFolder = new File("example");
+	// private File exportFolder = new File("example");
 
 	public CSICMixedImport() {
 		map.put("?monographic", "Monograph");
-//		map.put("?continuing", "Periodical");
+		// map.put("?continuing", "Periodical");
 		map.put("?continuing", "PeriodicalVolume");
-//		map.put("?multipart monograph", "MultiVolumeWork");
+		// map.put("?multipart monograph", "MultiVolumeWork");
 		map.put("?multipart monograph", "Volume");
 		map.put("?single unit", "Monograph");
-//		map.put("?integrating resource", "MultiVolumeWork");
+		// map.put("?integrating resource", "MultiVolumeWork");
 		map.put("?integrating resource", "Volume");
-//		map.put("?serial", "Periodical");
+		// map.put("?serial", "Periodical");
 		map.put("?serial", "SerialVolume");
 		map.put("?cartographic", "Map");
 		map.put("?notated music", null);
@@ -156,7 +165,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		map.put("?three dimensional object", null);
 		map.put("?software, multimedia", null);
 		map.put("?mixed material", null);
-		
+
 		anchorMap.put("Monograph", "Series");
 		anchorMap.put("Manuscript", "Series");
 		anchorMap.put("SerialVolume", "Series");
@@ -193,7 +202,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				logger.error(e.toString(), e);
 			}
 		}
-		
+
 		return ff;
 	}
 
@@ -235,6 +244,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			logger.error(e.toString(), e);
 		}
 
+		verifyIdentifier();
 		doc = replaceXmlData(doc, modsDoc);
 		doc = exchangeStructData(doc);
 		doc = replaceStructData(doc, modsDoc);
@@ -242,18 +252,76 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		File anchorFile = new File(tempFile.getAbsolutePath().replace(".xml", "_anchor.xml"));
 		if (deleteTempFiles && anchorFile.isFile()) {
 			anchorFile.renameTo(new File(importFolder, getProcessTitle().replace(".xml", "_anchor.xml")));
-		} else if(anchorFile.isFile()){
+		} else if (anchorFile.isFile()) {
 			try {
 				copyFile(anchorFile, new File(importFolder, getProcessTitle().replace(".xml", "_anchor.xml")));
+				if (sourceFolder != null && sourceFolder.isDirectory()) {
+					anchorFile.renameTo(new File(sourceFolder, anchorFile.getName()));
+				}
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			}
 		}
-		if (deleteTempFiles && tempFile.exists()) {			
+		if (deleteTempFiles && tempFile.exists()) {
 			tempFile.delete();
+		} else if (sourceFolder != null && sourceFolder.isDirectory()) {
+			tempFile.renameTo(new File(sourceFolder, tempFile.getName()));
 		}
 
 		return doc;
+	}
+
+	private static DecimalFormat volumeNumberFormat = new DecimalFormat("00");
+	private static ArrayList<String> identifiers = new ArrayList<String>();
+
+	private void verifyIdentifier() {
+		boolean exists = false;
+		for (String id : identifiers) {
+			if (currentIdentifier.contentEquals(id)) {
+				exists = true;
+			}
+		}
+		File existingData = searchForExistingData(currentIdentifier);
+		if (existingData != null) {
+			if (overrideExistingData) {
+				// TODO
+			} else {
+				exists = true;
+			}
+		}
+
+		if (exists) {
+			// there is already a process of this name, either in Goobi, or in the list of imports
+			String[] parts = currentIdentifier.split("_");
+			if (parts != null && parts.length > 0) {
+				String end = parts[parts.length - 1];
+				if (end.startsWith("V") && end.length() == 3) {
+					// identifier already has a volume suffix, create a new one
+					int volume = 2;
+					try {
+						volume = Integer.valueOf(end.replaceAll("\\D", ""));
+					} catch (NumberFormatException e) {
+						logger.error("Found a volume suffix in the identifier, but couldn't resolve the volume number");
+					}
+					end = "V" + volumeNumberFormat.format(volume);
+					parts[parts.length - 1] = end;
+					// and rebuild identifier
+					currentIdentifier = "";
+					for (int i = 0; i < parts.length; i++) {
+						currentIdentifier += parts[i];
+					}
+				} else {
+					currentIdentifier += "_V02";
+				}
+			} else {
+				currentIdentifier += "_V02";
+			}
+			// check again ifthis identifier already exists
+			verifyIdentifier();
+		} else {
+			// unused identifier. User this and add to list
+			identifiers.add(currentIdentifier);
+		}
 	}
 
 	/**
@@ -265,6 +333,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	public List<ImportObject> generateFiles(List<Record> records) {
 		ArrayList<ImportObject> ret = new ArrayList<ImportObject>();
 
+		if (importFolder != null) {
+			// sourceFolder =
+		}
 
 		for (Record r : records) {
 			logger.info("Processing " + r.getId());
@@ -274,7 +345,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			Fileformat ff = convertData();
 
 			ImportObject io = new ImportObject();
-			
+
 			if (ff != null) {
 				// writing converted data into Import("temp") folder
 				try {
@@ -284,10 +355,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					logger.debug("Writing '" + fileName + "'...");
 					mm.write(fileName);
 					logger.debug("copying image files...");
-					copyImageFiles(exportFolder);
+					copyImageFiles(exportFolder, r);
 					io.setProcessTitle(getProcessTitle().replace(".xml", ""));
 					io.setMetsFilename(fileName);
 					io.setImportReturnValue(ImportReturnValue.ExportFinished);
+					if (importFile != null && sourceFolder != null) {
+						importFile.renameTo(new File(sourceFolder, importFile.getName()));
+					}
 				} catch (PreferencesException e) {
 					logger.error(e.getMessage(), e);
 					io.setImportReturnValue(ImportReturnValue.InvalidData);
@@ -316,19 +390,52 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 		if (importFile.getName().endsWith("zip")) {
 			logger.info("Extracting zip archive");
-			HashMap<String, String> recordStrings = unzipFile(importFile);
+			HashMap<String, byte[]> recordStrings = unzipFile(importFile);
+			HashMap<String, String> filteredRecordStrings = new HashMap<String, String>();
 
+			// Check all records first to see what's inside
 			int count = 0;
 			for (String key : recordStrings.keySet()) {
+				byte[] bytes = recordStrings.get(key);
+				InputStream bais = null;
+				if (key.endsWith(".zip")) {
+					// Another zip-archive
+					logger.debug("Extracting inner archive " + key + "; size = " + bytes.length + " bytes");
+					try {
+						bais = new ByteArrayInputStream(bytes);
+						// FileOutputStream fout = new FileOutputStream(new File(importFolder, "temp.zip"));
+						// fout.write(bytes);
+						// fout.close();
+						HashMap<String, String> tempRecords = unzipStream(bais);
+						filteredRecordStrings.putAll(tempRecords);
+					} catch (Exception e) {
+						logger.error("Unable to read inner zip file");
+					} finally {
+						if (bais != null) {
+							try {
+								bais.close();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				} else if (key.endsWith(".xml")) {
+					filteredRecordStrings.put(key, bytes.toString());
+				}
+			}
+
+			count = 0;
+			for (String key : filteredRecordStrings.keySet()) {
 				String importFileName = key;
-				String importData = recordStrings.get(key);
+				String importData = filteredRecordStrings.get(key);
 				logger.debug("Extracting record " + ++count);
 				Record rec = new Record();
 				rec.setData(importData);
-				rec.setId(importFileName.split("_")[0]);;
-//				 check for old records
-				File oldFile = searchForExistingData("CSIC" + rec.getId());
-				if (oldFile != null) {
+				rec.setId(importFileName.substring(0, importFileName.indexOf(".")));
+				// check for old records
+				File oldFile = searchForExistingData(/* "CSIC" + */rec.getId());
+				if (updateExistingRecords && oldFile != null) {
 					logger.info("Found existing record. Updating.");
 					updateOldRecord(rec, oldFile);
 				} else {
@@ -493,30 +600,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			if (doc != null && doc.hasRootElement()) {
 				XSLTransformer transformer = new XSLTransformer(XSLT_PATH);
 				Document docMods = transformer.transform(doc);
-				
-				if(logConversionLoss) {
-					File marcLossFile = new File(exportFolder, currentIdentifier + "_MarcLoss.xml");
-					Document lossDoc = getMarcModsLoss(doc, docMods);
-					CommonUtils.getFileFromDocument(marcLossFile, lossDoc);
-					File modsFile = new File(exportFolder, currentIdentifier + "_Mods.xml");
-					try {
-						CommonUtils.getFileFromDocument(modsFile, docMods);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				
-				if(!deleteTempFiles) {
-					File modsFile = new File(exportFolder, "modsTemp.xml");
-					try {
-						CommonUtils.getFileFromDocument(modsFile, docMods);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				
+
 				// logger.debug(new XMLOutputter().outputString(docMods));
 				ff = new MetsMods(prefs);
 				DigitalDocument dd = new DigitalDocument();
@@ -547,7 +631,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				}
 
 				dsAnchorType = anchorMap.get(dsType);
-//				dsType = "Volume";
+				// dsType = "Volume";
 				logger.debug("Docstruct type: " + dsType);
 				DocStruct dsRoot = dd.createDocStruct(prefs.getDocStrctTypeByName(dsAnchorType));
 				if (dsRoot == null) {
@@ -568,6 +652,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				currentAuthor = ModsUtils.getAuthor(prefs, dsVolume);
 				logger.debug("Author:" + currentAuthor + ", Title: " + currentTitle);
 
+				// create source ("import") Folder
+				if (importFolder != null) {
+					File tempDir = new File(importFolder, getProcessTitle().replace(".xml", ""));
+					sourceFolder = new File(tempDir, "import");
+					sourceFolder.mkdirs();
+				}
+
 				// Check if we are part of a series, and if so, create logical DocStruct accordingly
 				try {
 					List<? extends Metadata> seriesIDList = dsRoot.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital"));
@@ -585,6 +676,29 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					}
 				} catch (TypeNotAllowedAsChildException e) {
 					logger.error("Child Type not allowed", e);
+				}
+
+				if (logConversionLoss) {
+					File marcLossFile = new File(logFolder, currentIdentifier + "_MarcLoss.xml");
+					Document lossDoc = getMarcModsLoss(doc, docMods);
+					CommonUtils.getFileFromDocument(marcLossFile, lossDoc);
+					File modsFile = new File(logFolder, currentIdentifier + "_Mods.xml");
+					try {
+						CommonUtils.getFileFromDocument(modsFile, docMods);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
+				if (!deleteTempFiles) {
+					File modsFile = new File(sourceFolder, "modsTemp.xml");
+					try {
+						CommonUtils.getFileFromDocument(modsFile, docMods);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 
 				// Add 'pathimagefiles'
@@ -736,12 +850,11 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		currentCollectionList = record.getCollections();
 		Document newDoc = convertDocument();
 		logger.info("Replacing old matadata in metadata folder " + oldMetaFile.getParent() + " with new data");
-		
+
 		// renaming old metadata files to keep as backup
-		String newMetaFileName = oldMetaFile.getAbsolutePath();	
+		String newMetaFileName = oldMetaFile.getAbsolutePath();
 		File oldAnchorFile = new File(oldMetaFile.getParent(), "meta_anchor.xml");
-		if(oldAnchorFile.isFile())
-		{
+		if (oldAnchorFile.isFile()) {
 			oldAnchorFile.renameTo(new File(oldMetaFile.getParent(), oldAnchorFile.getName().replace(".xml", ".preIntrandaImport.xml")));
 		}
 		oldMetaFile.renameTo(new File(oldMetaFile.getParent(), oldMetaFile.getName().replace(".xml", ".preIntrandaImport.xml")));
@@ -765,12 +878,42 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 						break;
 					}
 				}
-				
-				//purging old temp files
-				for (File file : importDir.listFiles(XmlFilter)) {
-					if(file.getName().contains(record.getId()))
-						file.delete();
+
+				// updating import folders
+				if (sourceFolder != null && sourceFolder.isDirectory()) {
+					File tempDir = sourceFolder.getParentFile();
+					File metadataDir = oldMetaFile.getParentFile();
+
+					File[] files = tempDir.listFiles();
+					if (files != null) {
+						for (File file : files) {
+							File newFile = new File(metadataDir, file.getName());
+							if (file.isDirectory()) {
+								int counter = 0;
+								while (newFile.isDirectory()) {
+									newFile = new File(newFile.getParent(), newFile.getName() + counter);
+									counter++;
+								}
+								org.apache.commons.io.FileUtils.copyDirectory(file, newFile);
+							} else if (file.isFile()) {
+								int counter = 0;
+								while (newFile.isFile()) {
+									String fileNameTrunk = newFile.getName().substring(0, newFile.getName().indexOf("."));
+									String fileNameExt = newFile.getName().substring(newFile.getName().indexOf("."));
+									newFile = new File(newFile.getParent(), fileNameTrunk + counter + fileNameExt);
+									counter++;
+								}
+								org.apache.commons.io.FileUtils.copyDirectory(file, newFile);
+							}
+						}
+					}
 				}
+
+				// purging old temp files
+				// for (File file : importDir.listFiles(XmlFilter)) {
+				// if(file.getName().contains(record.getId()))
+				// file.delete();
+				// }
 			}
 
 			// ret.put(getProcessTitle(), ImportReturnValue.ExportFinished);
@@ -779,14 +922,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		}
 
 	}
-	
+
 	/**
 	 * Removes all duplicate occurences of marc datafields with the same same tag
 	 * 
 	 * @param newRecord
 	 * @return
 	 */
-	@SuppressWarnings({"unchecked", "unused"})
+	@SuppressWarnings({ "unchecked", "unused" })
 	private Element removeDuplicateChildren(Element newRecord) {
 		Element newnewRecord = new Element(newRecord.getName());
 		List<Element> children = newRecord.getChildren();
@@ -822,7 +965,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			if (root.getChildren().isEmpty())
 				logger.warn("No children found in root");
 			else {
-				marcRecord = root.getChild("dmdSec", mets).getChild("mdWrap", mets).getChild("xmlData", mets).getChild("marc", marc).getChild("record", marc);
+				marcRecord = root.getChild("dmdSec", mets).getChild("mdWrap", mets).getChild("xmlData", mets).getChild("marc", marc)
+						.getChild("record", marc);
 			}
 		} else
 			logger.warn("Root element not found");
@@ -879,7 +1023,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 		return docString;
 	}
-	
+
 	/**
 	 * Gets the "TYPE" of the logical structmap in Document doc
 	 * 
@@ -946,9 +1090,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 * 
 	 * @param exportFolder
 	 */
-	private void copyImageFiles(File exportFolder) {
-		
-		if(!copyImages) {
+	private void copyImageFiles(File exportFolder, Record r) {
+
+		if (!copyImages) {
 			return;
 		}
 
@@ -960,52 +1104,66 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		}
 
 		List<File> folders = Arrays.asList(exportFolder.listFiles());
-		File tiffDir = null, jpegDir = null, imageDir = null;
+		File tiffDir = null, jpegDir = null, parentImageDir = null;
+		ArrayList<File> imageDirs = new ArrayList<File>();
 		for (File file : folders) {
-			if (file.isDirectory() && file.getName().contentEquals("Tiff")) {
+			if (file.isDirectory() && file.getName().toLowerCase().contentEquals("tiff")) {
 				logger.debug("found \"tiff\" directory in " + exportFolder.getName());
 				tiffDir = file;
 			}
-			if (file.isDirectory() && file.getName().contentEquals("JPG")) {
+			if (file.isDirectory() && (file.getName().toLowerCase().contentEquals("jpg") || file.getName().toLowerCase().contentEquals("difusion"))) {
 				logger.debug("found \"jpeg\" directory in " + exportFolder.getName());
 				jpegDir = file;
 			}
 		}
 
-		// with no tiff dir, we assume the process directories are directly
-		// within exportFolder
-		if (tiffDir == null) {
-			for (File folder : folders) {
-				if (folder.isDirectory() && folder.getName().contains(id)) {
-					imageDir = folder;
-					logger.debug("found export folder " + imageDir + " in " + exportFolder);
-				}
+		// set the appropriate parent directory containing the image archives
+		if (tiffDir == null || !tiffDir.isDirectory()) {
+			if (jpegDir == null || !jpegDir.isDirectory()) {
+				parentImageDir = exportFolder;
+			} else {
+				parentImageDir = jpegDir;
 			}
 		} else {
-			// search in tiff-dir
-			folders = Arrays.asList(tiffDir.listFiles());
-			for (File folder : folders) {
-				if (folder.isDirectory() && folder.getName().contains(id))
-					imageDir = folder;
-			}
-			// if tiff-dir is empty or non-existant, search again in jpg dir
-			if (imageDir == null || imageDir.listFiles() == null || imageDir.listFiles().length == 0) {
-				folders = Arrays.asList(jpegDir.listFiles());
-				for (File folder : folders) {
-					if (folder.isDirectory() && folder.getName().contains(id))
-						imageDir = folder;
-					logger.debug("found export folder " + imageDir + " in " + jpegDir);
-				}
-			} else {
-				logger.debug("found export folder " + imageDir + " in " + tiffDir);
+			parentImageDir = tiffDir;
+		}
+
+		List<File> processFolders = Arrays.asList(parentImageDir.listFiles());
+		for (File file : processFolders) {
+			if (file.isDirectory() && file.getName().contains(r.getId())) {
+				imageDirs.add(file);
+				logger.debug("found export folder " + file.getName() + " in " + parentImageDir);
 			}
 		}
 
-		// check if we have an image Dir now
-		if (imageDir == null || imageDir.listFiles() == null || imageDir.listFiles().length == 0) {
-			logger.warn("No image dir found. Aborting image file import");
-			return;
-		}
+		// // with no tiff dir, we assume the process directories are directly
+		// // within exportFolder
+		// if (tiffDir == null) {
+		// for (File folder : folders) {
+		// if (folder.isDirectory() && folder.getName().contains(id)) {
+		// imageDir = folder;
+		// logger.debug("found export folder " + imageDir + " in " + exportFolder);
+		// }
+		// }
+		// } else {
+		// // search in tiff-dir
+		// folders = Arrays.asList(tiffDir.listFiles());
+		// for (File folder : folders) {
+		// if (folder.isDirectory() && folder.getName().contains(id))
+		// imageDir = folder;
+		// }
+		// // if tiff-dir is empty or non-existant, search again in jpg dir
+		// if (imageDir == null || imageDir.listFiles() == null || imageDir.listFiles().length == 0) {
+		// folders = Arrays.asList(jpegDir.listFiles());
+		// for (File folder : folders) {
+		// if (folder.isDirectory() && folder.getName().contains(id))
+		// imageDir = folder;
+		// logger.debug("found export folder " + imageDir + " in " + jpegDir);
+		// }
+		// } else {
+		// logger.debug("found export folder " + imageDir + " in " + tiffDir);
+		// }
+		// }
 
 		// get temp dir
 		File tempDir = new File(importFolder, getProcessTitle().replace(".xml", ""));
@@ -1013,23 +1171,32 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		File tempTiffDir = new File(tempImageDir, getProcessTitle().replace(".xml", "") + "_tif");
 		File tempOrigDir = new File(tempImageDir, "orig_" + getProcessTitle().replace(".xml", "") + "_tif");
 		tempTiffDir.mkdirs();
+		
+		// check if we have an image Dir now
+		for (File imageDir : imageDirs) {
 
-		// parse all image Files and write them into new Files in the import
-		// directory
-		List<File> images = Arrays.asList(imageDir.listFiles(ImageFilter));
-		for (File imageFile : images) {
-			try {
-				String filename = imageFile.getName();
-				copyFile(imageFile, new File(tempTiffDir, filename));
-				if(deleteOriginalImages) {					
-					imageFile.delete();
+			if (imageDir == null || imageDir.listFiles() == null || imageDir.listFiles().length == 0) {
+				logger.warn("Empty image dir: " + imageDir.getAbsolutePath() + ". Ignoring");
+				continue;
+			}
+
+			// parse all image Files and write them into new Files in the import
+			// directory
+			List<File> images = Arrays.asList(imageDir.listFiles(ImageFilter));
+			for (File imageFile : images) {
+				try {
+					String filename = imageFile.getName();
+					copyFile(imageFile, new File(tempTiffDir, filename));
+					if (deleteOriginalImages) {
+						imageFile.delete();
+					}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
 				}
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
 			}
 		}
 	}
-	
+
 	private void copyFile(File source, File dest) throws IOException {
 		InputStream inStream = new FileInputStream(source);
 		BufferedInputStream bis = new BufferedInputStream(inStream);
@@ -1092,8 +1259,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				logRoot = (Element) obj;
 			else
 				break;
-			
-			if(isSeriesVolume)
+
+			if (isSeriesVolume)
 				logRoot.setAttribute("TYPE", getLogicalSubType(modsDoc));
 			else
 				logRoot.setAttribute("TYPE", getLogicalType(modsDoc));
@@ -1102,11 +1269,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		// set type of physical root
 		Element physRoot = null;
 		for (Object obj : physStruct.getChildren("div", mets)) {
-			if (obj instanceof Element) {				
+			if (obj instanceof Element) {
 				physRoot = (Element) obj;
 				break;
-			}
-			else {				
+			} else {
 				continue;
 			}
 		}
@@ -1125,20 +1291,20 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		List<Element> volumes = physRoot.getChildren();
 		List<Element> pages = new ArrayList<Element>();
 		int noVolumes = 0;
-		
-		//get all pages in the physical DocStruct
+
+		// get all pages in the physical DocStruct
 		for (Element volume : volumes) {
 			noVolumes++;
 			pages.addAll(getPhysicalPages(volume));
 		}
-		
-		//remove all children of the physical root (BoundBook)
+
+		// remove all children of the physical root (BoundBook)
 		physRoot.removeChildren("div", mets);
-		
-		//add all pages to the physical root (BoundBook)
+
+		// add all pages to the physical root (BoundBook)
 		for (Element element : pages) {
-			physRoot.addContent((Element)element.clone());
-		}	
+			physRoot.addContent((Element) element.clone());
+		}
 
 		// rename PAGE->page
 		Iterator<Content> descendant = physRoot.getDescendants();
@@ -1162,24 +1328,24 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 		return doc;
 	}
-	
+
 	private ArrayList<Element> getPhysicalPages(Element parent) {
-		
+
 		ArrayList<Element> pages = new ArrayList<Element>();
-		
+
 		List children = parent.getChildren();
 		for (Object object : children) {
-			if(object instanceof Element) {
+			if (object instanceof Element) {
 				Element child = (Element) object;
-				if(child.getAttributeValue("TYPE").toLowerCase().contentEquals("page")) {
-					//child is a page
+				if (child.getAttributeValue("TYPE").toLowerCase().contentEquals("page")) {
+					// child is a page
 					pages.add(child);
 				} else {
 					pages.addAll(getPhysicalPages(child));
 				}
 			}
 		}
-		
+
 		return pages;
 	}
 
@@ -1273,13 +1439,58 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 * @param source
 	 * @return
 	 */
-	private HashMap<String, String> unzipFile(File source) {
+	private HashMap<String, byte[]> unzipFile(File source) {
+		ArrayList<String> stringList = new ArrayList<String>();
+		ArrayList<String> filenames = new ArrayList<String>();
+		HashMap<String, byte[]> contentMap = new HashMap<String, byte[]>();
+
+		try {
+			ZipInputStream in = new ZipInputStream(new BufferedInputStream(new FileInputStream(source)));
+			ZipEntry entry;
+			while ((entry = in.getNextEntry()) != null) {
+				filenames.add(entry.getName());
+				logger.debug("Unzipping file " + entry.getName() + " from archive " + source.getName());
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				BufferedOutputStream out = new BufferedOutputStream(baos);
+				int size;
+				byte[] buffer = new byte[2048];
+				while ((size = in.read(buffer, 0, buffer.length)) != -1) {
+					out.write(buffer, 0, size);
+				}
+
+				if (entry != null)
+					in.closeEntry();
+				if (out != null) {
+					out.close();
+				}
+				if (baos != null) {
+					baos.close();
+				}
+				contentMap.put(entry.getName(), baos.toByteArray());
+
+				// BufferedReader br = new BufferedReader(new InputStreamReader(in));
+				// StringBuffer sb = new StringBuffer();
+				// String line;
+				// while ((line = br.readLine()) != null) {
+				// sb.append(line)/*.append("\n")*/;
+				// }
+				// stringList.add(sb.toString());
+				// contentMap.put(entry.getName(), sb.toString());
+			}
+		} catch (IOException e) {
+			logger.error(e.toString(), e);
+		}
+
+		return contentMap;
+	}
+
+	private HashMap<String, String> unzipStream(InputStream iStream) {
 		ArrayList<String> stringList = new ArrayList<String>();
 		ArrayList<String> filenames = new ArrayList<String>();
 		HashMap<String, String> contentMap = new HashMap<String, String>();
 
 		try {
-			ZipInputStream in = new ZipInputStream(new BufferedInputStream(new FileInputStream(source)));
+			ZipInputStream in = new ZipInputStream(new BufferedInputStream(iStream));
 			ZipEntry entry;
 			while ((entry = in.getNextEntry()) != null) {
 				filenames.add(entry.getName());
@@ -1321,18 +1532,18 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 		return root;
 	}
-	
+
 	private Document getMarcModsLoss(Document marcDoc, Document modsDoc) {
-		
+
 		Element record = marcDoc.getRootElement();
-		if(record == null){
+		if (record == null) {
 			return null;
 		}
-		
+
 		Document missingElementsDoc = new Document(new Element("Lost-in-MarcMods-Conversion"));
 		String modsString = CommonUtils.getStringFromDocument(modsDoc, encoding);
-//		modsString = modsString.replaceAll("\"", "");
-		
+		// modsString = modsString.replaceAll("\"", "");
+
 		Iterator<Content> descendant = record.getDescendants();
 		while (descendant.hasNext()) {
 			Element ele = null;
@@ -1340,29 +1551,29 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			if (obj instanceof Element) {
 				ele = (Element) obj;
 				String marcContent = ele.getText();
-				if(marcContent != null && !marcContent.isEmpty()) {
+				if (marcContent != null && !marcContent.isEmpty()) {
 					try {
-						CharSequence cs = marcContent.trim().subSequence(0, marcContent.trim().length()-1);
+						CharSequence cs = marcContent.trim().subSequence(0, marcContent.trim().length() - 1);
 						marcContent = cs.toString().trim();
-					if(modsString.contains(marcContent)) {
-						//marc field is contained in the mods doc
-					} else {
-						Element parentElement = ele.getParentElement();
-						if(parentElement != null && parentElement != record) {
-							//The element has a parent that is not the root element, which we should log as well					
-							Element parentClone = (Element)parentElement.clone();
-							parentClone.removeContent();	
-							missingElementsDoc.getRootElement().addContent(parentClone);
-							parentClone.addContent((Element)ele.clone());
+						if (modsString.contains(marcContent)) {
+							// marc field is contained in the mods doc
 						} else {
-							missingElementsDoc.getRootElement().addContent((Element)ele.clone());
+							Element parentElement = ele.getParentElement();
+							if (parentElement != null && parentElement != record) {
+								// The element has a parent that is not the root element, which we should log as well
+								Element parentClone = (Element) parentElement.clone();
+								parentClone.removeContent();
+								missingElementsDoc.getRootElement().addContent(parentClone);
+								parentClone.addContent((Element) ele.clone());
+							} else {
+								missingElementsDoc.getRootElement().addContent((Element) ele.clone());
+							}
 						}
-					}
-					} catch(IndexOutOfBoundsException e) {
+					} catch (IndexOutOfBoundsException e) {
 						continue;
 					}
 				}
-				
+
 			}
 		}
 		return missingElementsDoc;
@@ -1371,13 +1582,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	public static void main(String[] args) throws PreferencesException, WriteException {
 		CSICMixedImport converter = new CSICMixedImport();
 		converter.prefs = new Prefs();
-		
+
 		try {
 			converter.prefs.loadPrefs("resources/rulesetCSIC.xml");
 		} catch (PreferencesException e) {
 			logger.error(e.getMessage(), e);
 		}
-		
+
 		converter.setImportFolder("output/");
 		List<Record> records = new ArrayList<Record>();
 		if (!converter.exportFolder.isDirectory()) {
@@ -1398,12 +1609,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			System.out.println(record.getProcessTitle() + " \t \t " + record.getImportReturnValue());
 		}
 	}
-	
 
-	
-//	private Document getModsMetsLoss(Document modsDoc, Document metsDoc) {
-//		
-//	}
+	// private Document getModsMetsLoss(Document modsDoc, Document metsDoc) {
+	//
+	// }
 
 	public static FilenameFilter ImageFilter = new FilenameFilter() {
 		@Override
@@ -1475,7 +1684,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	@Override
 	public void deleteFiles(List<String> selectedFilenames) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -1511,6 +1720,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	@Override
 	public void setDocstruct(DocstructElement dse) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

@@ -236,41 +236,41 @@ public class ModsUtils {
 						}
 					}
 				}
-				
-				if(isPartOfSeries)  {
-				if (seriesID == null) {
-					seriesID = "CSIC" + System.currentTimeMillis();
-					logger.debug("Series not found. creating new one: " + seriesID);
-				}
-				if(seriesName == null) {
-					seriesName = seriesID;
-				}
 
-				// Creating metadata for series
-				try {
-					MetadataType titleType = prefs.getMetadataTypeByName("TitleDocMain");
-					MetadataType idType = prefs.getMetadataTypeByName("CatalogIDDigital");
-					Metadata mdTitle;
-					mdTitle = new Metadata(titleType);
-					Metadata mdID = new Metadata(idType);
-					mdTitle.setValue(seriesName);
-					mdID.setValue(seriesID);
-
-					logger.debug("Found metadata: " + mdTitle.getType().getName());
-					if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-						logger.debug("Added metadata \"" + mdTitle.getValue() + "\" to logical structure");
-						dsSeries.addMetadata(mdTitle);
+				if (isPartOfSeries) {
+					if (seriesID == null) {
+						seriesID = "CSIC" + System.currentTimeMillis();
+						logger.debug("Series not found. creating new one: " + seriesID);
 					}
-					logger.debug("Found metadata: " + mdID.getType().getName());
-					if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-						logger.debug("Added metadata \"" + mdID.getValue() + "\" to logical structure");
-						dsSeries.addMetadata(mdID);
+					if (seriesName == null) {
+						seriesName = seriesID;
 					}
 
-				} catch (MetadataTypeNotAllowedException e) {
-					logger.error(e.toString(), e);
+					// Creating metadata for series
+					try {
+						MetadataType titleType = prefs.getMetadataTypeByName("TitleDocMain");
+						MetadataType idType = prefs.getMetadataTypeByName("CatalogIDDigital");
+						Metadata mdTitle;
+						mdTitle = new Metadata(titleType);
+						Metadata mdID = new Metadata(idType);
+						mdTitle.setValue(seriesName);
+						mdID.setValue(seriesID);
+
+						logger.debug("Found metadata: " + mdTitle.getType().getName());
+						if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+							logger.debug("Added metadata \"" + mdTitle.getValue() + "\" to logical structure");
+							dsSeries.addMetadata(mdTitle);
+						}
+						logger.debug("Found metadata: " + mdID.getType().getName());
+						if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+							logger.debug("Added metadata \"" + mdID.getValue() + "\" to logical structure");
+							dsSeries.addMetadata(mdID);
+						}
+
+					} catch (MetadataTypeNotAllowedException e) {
+						logger.error(e.toString(), e);
+					}
 				}
-			}
 			}
 
 			MetadataType mdType = prefs.getMetadataTypeByName(mdName);
@@ -339,18 +339,18 @@ public class ModsUtils {
 							if (eleValueList != null) {
 								List<String> values = new ArrayList<String>();
 								for (Element eleValue : eleValueList) {
-									
-									 logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
-									 values.add(eleValue.getTextTrim());
-								}
-									 String value = "";
-									 for (String s : values) {
-									 if (StringUtils.isNotEmpty(s)) {
-									 value += " " + s;
-									 }
-									 }
-									 value = value.trim();
-//									String value = eleValue.getTextTrim();
+
+									logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
+									// values.add(eleValue.getTextTrim());
+									// }
+									// String value = "";
+									// for (String s : values) {
+									// if (StringUtils.isNotEmpty(s)) {
+									// value += " " + s;
+									// }
+									// }
+									// value = value.trim();
+									String value = eleValue.getTextTrim();
 
 									// if we have the title, get both nonSort (article) and title before writing metadata
 									if (mdType.getName().contentEquals("TitleDocMain")) {
@@ -397,6 +397,7 @@ public class ModsUtils {
 										}
 									}
 								}
+							}
 						}
 					}
 				} catch (MetadataTypeNotAllowedException e) {
