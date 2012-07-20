@@ -247,28 +247,30 @@ public class ModsUtils {
 					}
 
 					// Creating metadata for series
-					try {
-						MetadataType titleType = prefs.getMetadataTypeByName("TitleDocMain");
-						MetadataType idType = prefs.getMetadataTypeByName("CatalogIDDigital");
-						Metadata mdTitle;
-						mdTitle = new Metadata(titleType);
-						Metadata mdID = new Metadata(idType);
-						mdTitle.setValue(seriesName);
-						mdID.setValue(seriesID);
+					if (dsSeries != null) {
+						try {
+							MetadataType titleType = prefs.getMetadataTypeByName("TitleDocMain");
+							MetadataType idType = prefs.getMetadataTypeByName("CatalogIDDigital");
+							Metadata mdTitle;
+							mdTitle = new Metadata(titleType);
+							Metadata mdID = new Metadata(idType);
+							mdTitle.setValue(seriesName);
+							mdID.setValue(seriesID);
 
-						logger.debug("Found metadata: " + mdTitle.getType().getName());
-						if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-							logger.debug("Added metadata \"" + mdTitle.getValue() + "\" to logical structure");
-							dsSeries.addMetadata(mdTitle);
-						}
-						logger.debug("Found metadata: " + mdID.getType().getName());
-						if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-							logger.debug("Added metadata \"" + mdID.getValue() + "\" to logical structure");
-							dsSeries.addMetadata(mdID);
-						}
+							logger.debug("Found metadata: " + mdTitle.getType().getName());
+							if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+								logger.debug("Added metadata \"" + mdTitle.getValue() + "\" to logical structure");
+								dsSeries.addMetadata(mdTitle);
+							}
+							logger.debug("Found metadata: " + mdID.getType().getName());
+							if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+								logger.debug("Added metadata \"" + mdID.getValue() + "\" to logical structure");
+								dsSeries.addMetadata(mdID);
+							}
 
-					} catch (MetadataTypeNotAllowedException e) {
-						logger.error(e.toString(), e);
+						} catch (MetadataTypeNotAllowedException e) {
+							logger.error(e.toString(), e);
+						}
 					}
 				}
 			}
@@ -368,7 +370,7 @@ public class ModsUtils {
 									}
 
 									// Add singleDigCollection to series also
-									if (mdType.getName().contentEquals("singleDigCollection")) {
+									if (mdType.getName().contentEquals("singleDigCollection") && dsSeries != null) {
 										if (value.length() > 0) {
 											Metadata metadata = new Metadata(mdType);
 											metadata.setValue(value);
@@ -409,12 +411,14 @@ public class ModsUtils {
 		}
 
 		// write seriesInfo to file
-		seriesInfo.put(seriesName, seriesID);
-		if (seriesInfoFile.isFile()) {
-			logger.debug("deleting old seriesInfoFile");
-			seriesInfoFile.delete();
+		if (dsSeries != null) {
+			seriesInfo.put(seriesName, seriesID);
+			if (seriesInfoFile.isFile()) {
+				logger.debug("deleting old seriesInfoFile");
+				seriesInfoFile.delete();
+			}
+			writeFile(seriesInfoFile, seriesInfo);
 		}
-		writeFile(seriesInfoFile, seriesInfo);
 	}
 
 	/**

@@ -229,6 +229,21 @@
 		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='text']
 		</xpath>
 	</metadata>
+		<metadata logical="true">
+		<name>PlaceOfProduction</name>
+		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='production']
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>Material</name>
+		<xpath>/mods:mods/mods:physicalDescription/mods:form[@type='material']
+		</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>AccessOptions</name>
+		<xpath>/mods:mods/mods:accessOptions
+		</xpath>
+	</metadata>
 	<metadata logical="true">
 		<name>Author</name>
 		<xpath>/mods:mods/mods:name[@type='personal']/mods:namePart[not(@type)]
@@ -250,6 +265,10 @@
 	<metadata logical="true">
 		<name>SubjectTopic</name>
 		<xpath>/mods:mods/mods:subject/mods:topic</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>Occupation</name>
+		<xpath>/mods:mods/mods:subject/mods:occupation</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>SubjectGenre</name>
