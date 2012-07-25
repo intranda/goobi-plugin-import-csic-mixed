@@ -13,6 +13,8 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.jdom.Document;
@@ -21,46 +23,43 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
-
 /**
  * Collection of common all-purpose functions
  * 
  * 
  * @author florian
- *
+ * 
  */
 public class CommonUtils {
-	
+
 	/** Logger for this class. */
 	private static final Logger logger = Logger.getLogger(CommonUtils.class);
 	private static final String encoding = "utf-8";
-	
+
 	/**
 	 * Writing serializable objects to a file
 	 * 
 	 * @param file
 	 * @param obj
 	 */
-	public static void writeFile(File file, Object obj)
-	{
-		try{
+	public static void writeFile(File file, Object obj) {
+		try {
 			FileOutputStream fs = new FileOutputStream(file);
 			ObjectOutputStream os = new ObjectOutputStream(fs);
 			os.writeObject(obj);
 			os.close();
-		} catch(IOException e) {
+		} catch (IOException e) {
 			logger.error("Error writing binary file", e);
 		}
 	}
-	
+
 	/**
 	 * Reading serializable objects from a file
 	 * 
 	 * @param file
 	 * @return
 	 */
-	public static Object readFile(File file)
-	{
+	public static Object readFile(File file) {
 		FileInputStream fis;
 		Object obj = null;
 		try {
@@ -77,7 +76,7 @@ public class CommonUtils {
 		}
 		return obj;
 	}
-	
+
 	/**
 	 * Read a text file and return content as String
 	 * 
@@ -115,7 +114,7 @@ public class CommonUtils {
 		}
 		return result.trim();
 	}
-	
+
 	/**
 	 * Simply write a String into a text file
 	 * 
@@ -134,7 +133,7 @@ public class CommonUtils {
 
 		return file;
 	}
-	
+
 	/**
 	 * Writes the Document doc into an xml File file
 	 * 
@@ -145,7 +144,7 @@ public class CommonUtils {
 	public static void getFileFromDocument(File file, Document doc) throws IOException {
 		writeTextFile(getStringFromDocument(doc, encoding), file);
 	}
-	
+
 	/**
 	 * 
 	 * Creates a single String out of the Document document
@@ -221,23 +220,35 @@ public class CommonUtils {
 		}
 		return document;
 	}
-	
+
 	// Deletes all files and subdirectories under dir.
 	// Returns true if all deletions were successful.
 	// If a deletion fails, the method stops attempting to delete and returns false.
 	public static boolean deleteDir(File dir) {
-	    if (dir.isDirectory()) {
-	        String[] children = dir.list();
-	        for (int i=0; i<children.length; i++) {
-	            boolean success = deleteDir(new File(dir, children[i]));
-	            if (!success) {
-	                return false;
-	            }
-	        }
-	    }
+		if (dir.isDirectory()) {
+			String[] children = dir.list();
+			for (int i = 0; i < children.length; i++) {
+				boolean success = deleteDir(new File(dir, children[i]));
+				if (!success) {
+					return false;
+				}
+			}
+		}
 
-	    // The directory is now empty so delete it
-	    return dir.delete();
+		// The directory is now empty so delete it
+		return dir.delete();
+	}
+
+	public static Object getFromMap(Map<String, ? extends Object> map, String id) {
+		for (Object obj : map.keySet()) {
+			if (obj instanceof String) {
+				String key = (String) obj;
+				if (id.contentEquals(key)) {
+					return map.get(obj);
+				}
+			}
+		}
+		return null;
 	}
 
 }

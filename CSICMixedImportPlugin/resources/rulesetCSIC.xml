@@ -679,12 +679,6 @@
     <language name="en">Content</language>
     <language name="es">Contenido</language>
   </MetadataType>
-  <MetadataType>
-    <Name>Dating</Name>
-    <language name="de">Datierung</language>
-    <language name="en">Dating</language>
-    <language name="es">Datación</language>
-  </MetadataType>
   <MetadataType type="person">
     <Name>Witness</Name>
     <language name="de">Zeuge</language>
@@ -744,12 +738,6 @@
     <language name="de">Kanzleivermerke</language>
     <language name="en">Not of chambers</language>
     <language name="es">Notas del bufete</language>
-  </MetadataType>
-  <MetadataType>
-    <Name>Material</Name>
-    <language name="de">Material</language>
-    <language name="en">Material</language>
-    <language name="es">Material</language>
   </MetadataType>
   <MetadataType>
     <Name>Scale</Name>
@@ -897,11 +885,6 @@
     <language name="de">behandeltes Genre</language>
     <language name="en">subject's genre</language>
   </MetadataType>
-  <MetadataType type="person">
-    <Name>SubjectPerson</Name>
-    <language name="de">behandelte Person</language>
-    <language name="en">referenced person</language>
-  </MetadataType>
   <MetadataType>
     <Name>SubjectPersonLifetime</Name>
     <language name="de">Lebensdaten der behandelten Person</language>
@@ -968,6 +951,40 @@
     <Name>SucceedingVolume</Name>
     <language name="de">Nachfolger</language>
     <language name="en">successor</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>placeOfManufacture</Name>
+    <language name="de">Herstellungsort</language>
+    <language name="en">place of Manufacture</language>
+    <language name="es">lugar de producción</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>Material</Name>
+    <language name="de">Material</language>
+    <language name="en">Material</language>
+    <language name="es">Material</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>AccessOptions</Name>
+    <language name="de">Zugriffsmöglichkeiten</language>
+    <language name="en">options of access</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>Occupation</Name>
+    <language name="de">Beruf</language>
+    <language name="en">occupation</language>
+    <language name="es">profesión</language>
+  </MetadataType>
+  <MetadataType>
+    <Name>Dating</Name>
+    <language name="de">Datierung</language>
+    <language name="en">Dating</language>
+    <language name="es">Datación</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>SubjectPerson</Name>
+    <language name="de">behandelte Person</language>
+    <language name="en">referenced person</language>
   </MetadataType>
   <!-- ########################################################################## ## Logical document structure types ## ########################################################################## -->
   <DocStrctType>
@@ -1378,6 +1395,7 @@
     <metadata num="*">TitleDocParallel</metadata>
     <metadata num="+" DefaultDisplay="true">TitleDocMain</metadata>
     <metadata num="*">Description</metadata>
+    <metadata num="*">relatedSeries</metadata>
   </DocStrctType>
   <DocStrctType>
     <Name>Advertising</Name>
@@ -1476,6 +1494,9 @@
     <language name="de">Zeitschrift</language>
     <language name="en">Periodical</language>
     <language name="es">Periódico</language>
+    <allowedchildtype>PeriodicalVolume</allowedchildtype>
+    <allowedchildtype>PeriodicalIssue</allowedchildtype>
+    <allowedchildtype>PeriodicalPart</allowedchildtype>
     <metadata num="1o">_digitalOrigin</metadata>
     <metadata num="1o">_purl</metadata>
     <metadata num="*">_urn</metadata>
@@ -1891,6 +1912,7 @@
     <metadata num="*" DefaultDisplay="true">CurrentNoSorting</metadata>
     <metadata num="*" DefaultDisplay="true">PublicationYear</metadata>
     <metadata num="*">Description</metadata>
+    <metadata num="*">relatedSeries</metadata>
   </DocStrctType>
   <DocStrctType>
     <Name>Introduction</Name>
@@ -1947,7 +1969,7 @@
     <metadata num="*">Creator</metadata>
     <metadata num="*">FormatSourcePrint</metadata>
     <metadata num="*" DefaultDisplay="true">Author</metadata>
-    <metadata num="+">_urn</metadata>
+    <metadata num="1o">_urn</metadata>
     <metadata num="*">_ucc_id</metadata>
     <metadata num="1o">TitleDocSub1</metadata>
     <metadata num="*">singleDigCollection</metadata>
@@ -2161,6 +2183,7 @@
     <language name="de">Mehrbändiges Werk</language>
     <language name="en">Multivolume Work</language>
     <language name="es">Obra con varios volúmenes</language>
+    <allowedchildtype>Volume</allowedchildtype>
     <metadata num="1o">_digitalOrigin</metadata>
     <metadata num="1o">CatalogIDAllegro</metadata>
     <metadata num="*">CatalogIDSource</metadata>
@@ -2281,7 +2304,6 @@
     <metadata num="*">Creator</metadata>
     <metadata num="*">IllustratorArtist</metadata>
     <metadata num="*">Translator</metadata>
-    <metadata num="1o" DefaultDisplay="true">Dating</metadata>
     <metadata num="*">ExtraterrestrialArea</metadata>
     <metadata num="1o">Description</metadata>
     <metadata num="*">Contintent</metadata>
@@ -2291,7 +2313,6 @@
     <metadata num="1o" DefaultDisplay="true">TitleDocMain</metadata>
     <metadata num="*" DefaultDisplay="true">Content</metadata>
     <metadata num="1o">DocLanguage</metadata>
-    <metadata num="*">Material</metadata>
     <metadata num="1o">PublisherName</metadata>
     <metadata num="1o" DefaultDisplay="true">shelfmarksource</metadata>
     <metadata num="*">Type</metadata>
@@ -2744,10 +2765,8 @@
     <allowedchildtype>Seal</allowedchildtype>
     <metadata num="1m" DefaultDisplay="true">CatalogIDDigital</metadata>
     <metadata num="*">DocLanguage</metadata>
-    <metadata num="*">Material</metadata>
     <metadata num="1o" DefaultDisplay="true">shelfmarksource</metadata>
     <metadata num="1o">Date</metadata>
-    <metadata num="+" DefaultDisplay="true">Dating</metadata>
     <metadata num="+" DefaultDisplay="true">PlaceOfPublication</metadata>
     <metadata num="*">RegistrationNote</metadata>
     <metadata num="*">ChambersNote</metadata>
@@ -2777,11 +2796,9 @@
     <metadata num="+" DefaultDisplay="true">TitleDocMain</metadata>
     <metadata num="+" DefaultDisplay="true">TitleDocSub1</metadata>
     <metadata num="1o">Scale</metadata>
-    <metadata num="*">Material</metadata>
     <metadata num="+" DefaultDisplay="true">shelfmarksource</metadata>
     <metadata num="*">Person</metadata>
     <metadata num="1o">Origin</metadata>
-    <metadata num="1o" DefaultDisplay="true">Dating</metadata>
     <metadata num="*" DefaultDisplay="true">singleDigCollection</metadata>
     <metadata num="*">Object</metadata>
     <metadata num="1o">Format</metadata>
@@ -2807,7 +2824,6 @@
     <metadata num="*" DefaultDisplay="true">singleDigCollection</metadata>
     <metadata num="*" DefaultDisplay="true">Witness</metadata>
     <metadata num="*">shelfmarksource</metadata>
-    <metadata num="+" DefaultDisplay="true">Dating</metadata>
     <metadata num="*">SealDescription</metadata>
     <metadata num="1m" DefaultDisplay="true">PlaceOfPublication</metadata>
     <metadata num="*">_urn</metadata>
@@ -2905,7 +2921,6 @@
     <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
     <metadata num="*">NotePhysical</metadata>
     <metadata num="*">SubjectGenre</metadata>
-    <metadata num="*">SubjectPerson</metadata>
     <metadata num="*">SubjectPersonAddress</metadata>
     <metadata num="*">SubjectPersonLifetime</metadata>
     <metadata num="*">SubjectTopic</metadata>
@@ -2981,13 +2996,13 @@
     <metadata num="*" DefaultDisplay="true">PersonOriginal</metadata>
     <metadata num="*" DefaultDisplay="true">CatalogIDSource</metadata>
     <metadata num="*" DefaultDisplay="true">TitleDocSub1</metadata>
-    <metadata num="+">TitleDocMainShort</metadata>
+    <metadata num="1o">TitleDocMainShort</metadata>
     <metadata num="1o">BibliographicCitation</metadata>
     <metadata num="1m" DefaultDisplay="true">TitleDocMain</metadata>
     <metadata num="*">TitleDocAbbreviated</metadata>
     <metadata num="*">_urn</metadata>
     <metadata num="*" DefaultDisplay="true">DocLanguage</metadata>
-    <metadata num="+">Sponsorship</metadata>
+    <metadata num="*">Sponsorship</metadata>
     <metadata num="1o">PublisherName</metadata>
     <metadata num="1o">SizeSourcePrint</metadata>
     <metadata num="1o" DefaultDisplay="true">PlaceOfPublication</metadata>
@@ -3012,7 +3027,6 @@
     <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
     <metadata num="*">NotePhysical</metadata>
     <metadata num="*">SubjectGenre</metadata>
-    <metadata num="*">SubjectPerson</metadata>
     <metadata num="*">SubjectPersonAddress</metadata>
     <metadata num="*">SubjectPersonLifetime</metadata>
     <metadata num="*">SubjectTopic</metadata>
@@ -3109,7 +3123,6 @@
     <metadata num="*">Footer</metadata>
     <metadata num="*">NotePhysical</metadata>
     <metadata num="*">SubjectGenre</metadata>
-    <metadata num="*">SubjectPerson</metadata>
     <metadata num="*">SubjectPersonAddress</metadata>
     <metadata num="*">SubjectPersonLifetime</metadata>
     <metadata num="*">SubjectTopic</metadata>
@@ -3123,6 +3136,7 @@
     <metadata num="*">recordContentSource</metadata>
     <metadata num="*">SubjectCorporate</metadata>
     <metadata num="*">SubjectGeneral</metadata>
+    <metadata num="*">relatedSeries</metadata>
   </DocStrctType>
   <DocStrctType topStruct="true">
     <Name>PeriodicalVolume</Name>
@@ -3215,7 +3229,6 @@
     <metadata num="*">Classification</metadata>
     <metadata num="*">NotePhysical</metadata>
     <metadata num="*">SubjectGenre</metadata>
-    <metadata num="*">SubjectPerson</metadata>
     <metadata num="*">SubjectPersonAddress</metadata>
     <metadata num="*">SubjectPersonLifetime</metadata>
     <metadata num="*">SubjectTopic</metadata>
@@ -3229,6 +3242,7 @@
     <metadata num="*">recordContentSource</metadata>
     <metadata num="*">SubjectCorporate</metadata>
     <metadata num="*">SubjectGeneral</metadata>
+    <metadata num="*">relatedSeries</metadata>
   </DocStrctType>
   <DocStrctType topStruct="true">
     <Name>Manuscript</Name>
@@ -3321,7 +3335,6 @@
     <metadata num="1o" DefaultDisplay="true">CurrentNoSorting</metadata>
     <metadata num="*">NotePhysical</metadata>
     <metadata num="*">SubjectGenre</metadata>
-    <metadata num="*">SubjectPerson</metadata>
     <metadata num="*">SubjectPersonAddress</metadata>
     <metadata num="*">SubjectPersonLifetime</metadata>
     <metadata num="*">SubjectTopic</metadata>
@@ -4406,11 +4419,6 @@
         <WriteXPath>./mods:mods/mods:subject[@authority="gdz"]/mods:topic</WriteXPath>
       </Metadata>
       <Metadata>
-        <InternalName>Dating</InternalName>
-        <XPath>./mods:mods/mods:originInfo/#mods:dateIssued[@encoding='w3cdtf'][@keyDate='yes']</XPath>
-        <WriteXPath>./mods:mods/mods:originInfo/#mods:dateIssued[@encoding='w3cdtf'][@keyDate='yes']</WriteXPath>
-      </Metadata>
-      <Metadata>
         <InternalName>Witness</InternalName>
         <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="wit"[@authority='marcrelator'][@type='code']]</WriteXPath>
         <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
@@ -4547,13 +4555,6 @@
         <WriteXPath>./mods:mods/mods:subject/#mods:topic</WriteXPath>
       </Metadata>
       <Metadata>
-        <InternalName>SubjectPerson</InternalName>
-        <XPath>./mods:mods/mods:subject/mods:name[@type='personal']/mode:namePart</XPath>
-        <WriteXPath>./mods:mods/mods:subject/mods:name[@type='personal']</WriteXPath>
-        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
-        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
-      </Metadata>
-      <Metadata>
         <InternalName>SubjectPersonAddress</InternalName>
         <WriteXPath>./mods:mods/mods:subject/#mods:name[@type='personal']/mods:namePart[@type='termsOfAddress']</WriteXPath>
       </Metadata>
@@ -4608,6 +4609,34 @@
       <Metadata>
         <InternalName>SucceedingVolume</InternalName>
         <WriteXPath>./mods:mods/mods:relatedItem[@type='succeeding']/mods:titleInfo/mods:title</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>placeOfManufacture</InternalName>
+        <WriteXPath>./mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='production']</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Material</InternalName>
+        <WriteXPath>./mods:mods/mods:physicalDescription/mods:form[@type='material']</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>AccessOptions</InternalName>
+        <WriteXPath>./mods:mods/mods:accessOptions</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Occupation</InternalName>
+        <WriteXPath>./mods:mods/mods:subject/#mods:occupation</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Dating</InternalName>
+        <XPath>./mods:mods/mods:originInfo/mods:dateIssued[@encoding='w3cdtf'][@keyDate='yes']</XPath>
+        <WriteXPath>./mods:mods/mods:originInfo/#mods:dateIssued[@encoding='w3cdtf'][@keyDate='yes']</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>SubjectPerson</InternalName>
+        <XPath>./mods:mods/mods:subject/mods:name[@type='personal']/mods:namePart</XPath>
+        <WriteXPath>./mods:mods/mods:subject/mods:name[@type='personal']</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
       </Metadata>
       <DocStruct>
         <InternalName>Binder</InternalName>

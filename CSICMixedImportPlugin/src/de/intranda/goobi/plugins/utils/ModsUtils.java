@@ -227,8 +227,12 @@ public class ModsUtils {
 							value = value.trim();
 							String[] valueParts = value.split("\\s");
 							seriesName = "";
+							HashMap<String, Boolean> valueMap = new HashMap<String, Boolean>();
 							for (int i = 0; i < valueParts.length; i++) {
-								seriesName += " " + valueParts[i];
+								if (!valueMap.containsKey(valueParts[i])) {
+									seriesName += " " + valueParts[i];
+									valueMap.put(valueParts[i], true);
+								}
 							}
 							seriesName = seriesName.trim();
 							logger.debug("related Series = " + seriesName);
@@ -386,15 +390,15 @@ public class ModsUtils {
 									if (value.length() > 0) {
 										Metadata metadata = new Metadata(mdType);
 										metadata.setValue(value);
-										logger.debug("Found metadata: " + metadata.getType().getName());
+//										logger.debug("Found metadata: " + metadata.getType().getName());
 										if (eleMetadata.getAttribute("logical") != null
 												&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-											logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
+//											logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
 											dsLogical.addMetadata(metadata);
 										}
 										if (eleMetadata.getAttribute("physical") != null
 												&& eleMetadata.getAttributeValue("physical").equalsIgnoreCase("true")) {
-											logger.debug("Added metadata \"" + metadata.getValue() + "\" to physical structure");
+//											logger.debug("Added metadata \"" + metadata.getValue() + "\" to physical structure");
 											dsPhysical.addMetadata(metadata);
 										}
 									}
