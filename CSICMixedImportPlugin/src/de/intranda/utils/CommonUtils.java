@@ -3,11 +3,13 @@ package de.intranda.utils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
@@ -15,7 +17,9 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
+import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.JDOMException;
@@ -76,6 +80,41 @@ public class CommonUtils {
 		}
 		return obj;
 	}
+	
+	public static String readTextFile(File file, String encoding) {
+		String result = "";
+
+		if(encoding == null)
+			encoding = CommonUtils.encoding;
+		
+		FileInputStream fis = null;
+		Scanner scanner = null;
+	    StringBuilder text = new StringBuilder();
+	    String NL = System.getProperty("line.separator");
+	    try {
+	    	fis = new FileInputStream(file);
+	    	scanner = new Scanner(fis, encoding);
+	      while (scanner.hasNextLine()){
+	        text.append(scanner.nextLine() + NL);
+	      }
+	    } catch (FileNotFoundException e) {
+			logger.error(e.toString());
+		}
+	    finally{
+	    	try {
+	    	if(fis != null) {
+	    		fis.close();
+	    	}
+	    	if(scanner != null) {	    		
+	    		scanner.close();
+	    	}
+	    	}catch(IOException e) {
+	    		logger.error("Error closing inputStream");
+	    	}
+	    }
+	    result = text.toString();
+		return result.trim();
+	}
 
 	/**
 	 * Read a text file and return content as String
@@ -125,8 +164,8 @@ public class CommonUtils {
 	 */
 	public static File writeTextFile(String string, File file) throws IOException {
 
-		FileWriter writer = null;
-		writer = new FileWriter(file);
+		FileWriterWithEncoding writer = null;
+		writer = new FileWriterWithEncoding(file, encoding);
 		writer.write(string);
 		if (writer != null)
 			writer.close();
@@ -180,6 +219,8 @@ public class CommonUtils {
 		Document document = null;
 
 		try {
+			FileInputStream fis = new FileInputStream(file);
+			StringBuilder sb = new StringBuilder();
 			document = builder.build(file);
 		} catch (JDOMException e) {
 			logger.error(e.toString(), e);
@@ -189,6 +230,22 @@ public class CommonUtils {
 			return null;
 		}
 		return document;
+	}
+
+	private static String readFileAsString(String filePath) throws java.io.IOException {
+		StringBuffer fileData = new StringBuffer(1000);
+		FileReader fileReader = new FileReader(filePath);
+		BufferedReader reader = new BufferedReader(fileReader);
+		char[] buf = new char[1024];
+		int numRead = 0;
+		while ((numRead = reader.read(buf)) != -1) {
+			String readData = String.valueOf(buf, 0, numRead);
+			fileData.append(readData);
+			buf = new char[1024];
+		}
+		fileReader.close();
+		reader.close();
+		return fileData.toString();
 	}
 
 	/**
@@ -250,5 +307,72 @@ public class CommonUtils {
 		}
 		return null;
 	}
+
+	public static FilenameFilter PdfFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			boolean validImage = false;
+			if (name.endsWith("pdf") || name.endsWith("PDF")) {
+				validImage = true;
+			}
+			return validImage;
+		}
+	};
+	public static FilenameFilter XmlFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			boolean validImage = false;
+			// jpeg
+			if (name.endsWith("xml") || name.endsWith("XML")) {
+				validImage = true;
+			}
+			return validImage;
+		}
+	};
+	public static FilenameFilter ZipFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			boolean validImage = false;
+			// jpeg
+			if (name.endsWith("zip") || name.endsWith("ZIP")) {
+				validImage = true;
+			}
+			return validImage;
+		}
+	};
+	public static FilenameFilter ImageFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			boolean validImage = false;
+			// jpeg
+			if (name.endsWith("jpg") || name.endsWith("JPG") || name.endsWith("jpeg") || name.endsWith("JPEG")) {
+				validImage = true;
+			}
+			if (name.endsWith(".tif") || name.endsWith(".TIF")) {
+				validImage = true;
+			}
+			// png
+			if (name.endsWith(".png") || name.endsWith(".PNG")) {
+				validImage = true;
+			}
+			// gif
+			if (name.endsWith(".gif") || name.endsWith(".GIF")) {
+				validImage = true;
+			}
+			// jpeg2000
+			if (name.endsWith(".jp2") || name.endsWith(".JP2")) {
+				validImage = true;
+			}
+
+			return validImage;
+		}
+	};
+
+	// Filters for file searches
+	public static FileFilter DirFilter = new FileFilter() {
+		public boolean accept(File file) {
+			return file.isDirectory();
+		}
+	};
 
 }

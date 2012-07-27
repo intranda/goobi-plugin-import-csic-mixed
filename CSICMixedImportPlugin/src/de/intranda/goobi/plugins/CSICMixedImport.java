@@ -90,9 +90,11 @@ import ugh.fileformats.mets.MetsModsImportExport;
 import de.intranda.goobi.plugins.utils.ModsUtils;
 import de.intranda.utils.CommonUtils;
 import de.sub.goobi.Beans.Prozess;
+import de.sub.goobi.Beans.Prozesseigenschaft;
 import de.sub.goobi.Import.ImportOpac;
 import de.sub.goobi.Persistence.ProzessDAO;
 import de.sub.goobi.config.ConfigMain;
+import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 
@@ -103,7 +105,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "1.0.20120724";
+	private static final String VERSION = "1.0.20120727.2";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
 	// private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
 	// private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
@@ -112,7 +114,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 	private final static boolean deleteOriginalImages = true;
 	private final static boolean deleteTempFiles = true;
-	private final static boolean logConversionLoss = true;
+	private final static boolean logConversionLoss = false;
 	private final static boolean copyImages = true;
 	private final static boolean updateExistingRecords = false;
 
@@ -143,11 +145,15 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private ArrayList<File> imageDirs = new ArrayList<File>();
 	public int currentVolume = 1;
 	public int totalVolumes = 1;
+	private String projectName;
 
 	/**
 	 * Directory containing the image files (possibly in TIFF/JPEG subfolders)
 	 */
-	public File exportFolder = new File("/mnt/csic/0015_FAG/");
+	// public File exportFolder = new File("/mnt/csic/");
+	// public File exportFolder = new File("/opt/digiverso/ftp-import");
+	public File exportFolder = new File(ConfigPlugins.getPluginConfig(this).getString("importFolder", "/opt/digiverso/ftp-import/"));
+	public String projectIdentifierTitle = (ConfigPlugins.getPluginConfig(this).getString("projectIdentifier", "projectIdentifier"));
 	public File sourceFolder = null;
 	public File logFolder = new File("/opt/digiverso/logs/CSIC");
 
@@ -189,8 +195,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		topStructMap.put("MultiVolumeWork", "Volume");
 		topStructMap.put("Periodical", "PeriodicalVolume");
 		topStructMap.put("Series", "SerialVolume");
-		
-		projectsCollectionsMap.put("0001_POQ", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");  
+
+		projectsCollectionsMap.put("0001_POQ", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
 		projectsCollectionsMap.put("0005_BETN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
 		projectsCollectionsMap.put("0006_PMSC", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
 		projectsCollectionsMap.put("0006_PMSC_G_EEA", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
@@ -201,24 +207,24 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		projectsCollectionsMap.put("0012_CIP", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
 		projectsCollectionsMap.put("0013_JAE", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
 		projectsCollectionsMap.put("0014_FMTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-		projectsCollectionsMap.put("0015_FAEA", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
+		projectsCollectionsMap.put("0015_FAG", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
 		projectsCollectionsMap.put("0016_FAAD", "BIBLIOTECAS#Estación Experimental Aula Dei (Biblioteca) ");
 		projectsCollectionsMap.put("0017_FACN", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
-		projectsCollectionsMap.put("0018_ACN_PC", "ARCHIVOS#Museo Nacional de Ciencias Naturales (Archivo)#Fondo Personal Científico#Ignacio Bolivar y Urrutia");
+		projectsCollectionsMap.put("0018_ACN_PC",
+				"ARCHIVOS#Museo Nacional de Ciencias Naturales (Archivo)#Fondo Personal Científico#Ignacio Bolivar y Urrutia");
 		projectsCollectionsMap.put("0030_CETN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-
 
 	}
 
 	private static DecimalFormat volumeNumberFormat = new DecimalFormat("00");
 
-	private List<Record> generateRecords(Record r, String collectionName) {
+	private List<Record> generateRecords(Record r) {
 		ArrayList<Record> records = new ArrayList<Record>();
 		if (imageDirs == null || imageDirs.size() < 2) {
 			// if we have no image directories or only one, create exactly one record
 			records.add(r);
 			if (imageDirs != null && !imageDirs.isEmpty()) {
-				VolumeInfo info = new VolumeInfo(1, 1, imageDirs.get(0), identifierSuffix, collectionName);
+				VolumeInfo info = new VolumeInfo(1, 1, imageDirs.get(0), identifierSuffix, projectName);
 				recordMap.put(r.getId(), info);
 				logger.debug("Adding record " + r.getId() + " to recordmap");
 			}
@@ -232,7 +238,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				rec.setId(r.getId() + "_" + mySuffix);
 				rec.setData(r.getData());
 				records.add(rec);
-				VolumeInfo info = new VolumeInfo(counter, imageDirs.size(), imageDir, suffix, collectionName);
+				VolumeInfo info = new VolumeInfo(counter, imageDirs.size(), imageDir, suffix, projectName);
 				recordMap.put(rec.getId(), info);
 				logger.debug("Adding record " + rec.getId() + " to recordmap");
 				counter++;
@@ -294,13 +300,22 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		Fileformat innerff = null;
 		try {
 			doc = CommonUtils.getDocumentFromString(data);
+
+			// try {
+			// CommonUtils.writeTextFile(data, new File(importFolder, "marc.txt"));
+			// } catch (IOException e1) {
+			// // TODO Auto-generated catch block
+			// e1.printStackTrace();
+			// }
+
+			// System.out.println("Document from data-String:\n " + CommonUtils.getStringFromDocument(doc, encoding));
 			getNamespaces(doc.getRootElement());
 			marcDoc = getMarcDocument(doc);
 			String marcString = getStringFromDocument(marcDoc, encoding);
+			// System.out.println("String of MarcDocument:\n" + marcString);
 			innerff = convertData(marcString);
 			if (innerff != null) {
 				innerff.write(tempFile.getAbsolutePath());
-
 			} else {
 				logger.error("Failed to convert marc doc");
 				return null;
@@ -428,21 +443,17 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			DocStruct outerLogStruct = outerff.getDigitalDocument().getLogicalDocStruct();
 			List<DocStruct> innerChildren = innerLogStruct.getAllChildren();
 			List<DocStruct> outerChildren = outerLogStruct.getAllChildren();
-			
-			
-//			if(innerLogStruct.getType().isAnchor()) {
-//				if(imageDirs.size() < 2) {
-//					//The record contains only one volume, and has an anchor according to the marc-record
-//					// --> ignore the old anchor (if any) and use the marc anchor
-//					outerff.getDigitalDocument().setLogicalDocStruct(innerLogStruct);
-//					outerff.getDigitalDocument().getLogicalDocStruct().
-//					outerLogStruct = outerff.getDigitalDocument().getLogicalDocStruct();
-//					
-//				}
-//			}
-			
-			
 
+			// if(innerLogStruct.getType().isAnchor()) {
+			// if(imageDirs.size() < 2) {
+			// //The record contains only one volume, and has an anchor according to the marc-record
+			// // --> ignore the old anchor (if any) and use the marc anchor
+			// outerff.getDigitalDocument().setLogicalDocStruct(innerLogStruct);
+			// outerff.getDigitalDocument().getLogicalDocStruct().
+			// outerLogStruct = outerff.getDigitalDocument().getLogicalDocStruct();
+			//
+			// }
+			// }
 
 			if (innerLogStruct.getType().isAnchor() && outerLogStruct.getType().isAnchor()) {
 				if (imageDirs.size() < 2) {
@@ -529,9 +540,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			// sourceFolder =
 		}
 
-		for (String id : recordMap.keySet()) {
-			System.out.println(id);
-		}
+		// for (String id : recordMap.keySet()) {
+		// System.out.println(id);
+		// }
 
 		for (Record r : records) {
 			logger.info("Processing " + r.getId());
@@ -545,9 +556,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			}
 			currentVolume = info.volumeNumber;
 			totalVolumes = info.totalVolumes;
-			currentCollectionList = r.getCollections();
+			// currentCollectionList = r.getCollections();
+			currentCollectionList = new ArrayList<String>();
 			String collection = projectsCollectionsMap.get(info.projectName);
-			if(collection != null) {
+			if (collection != null) {
 				currentCollectionList.add(collection);
 			}
 			Fileformat ff = convertData();
@@ -555,10 +567,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			ImportObject io = new ImportObject();
 
 			if (ff != null) {
-				
-				//add collection as metadata
+
+				// add collection as metadata
 				addProject(ff, info.projectName);
-				
+
 				// writing converted data into Import("temp") folder
 				try {
 					MetsMods mm = new MetsMods(prefs);
@@ -571,6 +583,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					io.setProcessTitle(getProcessTitle().replace(".xml", ""));
 					io.setMetsFilename(fileName);
 					io.setImportReturnValue(ImportReturnValue.ExportFinished);
+
+					Prozesseigenschaft property = new Prozesseigenschaft();
+					property.setTitel(projectIdentifierTitle);
+					property.setWert(info.projectName);
+					ArrayList<Prozesseigenschaft> propertyList = new ArrayList<Prozesseigenschaft>();
+					propertyList.add(property);
+					io.setProcessProperties(propertyList);
+
 					if (importFile != null && sourceFolder != null) {
 						importFile.renameTo(new File(sourceFolder, importFile.getName()));
 					}
@@ -594,27 +614,28 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 	private void addProject(Fileformat ff, String projectName) {
 		try {
-		DocStruct topStruct = ff.getDigitalDocument().getLogicalDocStruct();
-		Metadata projectInfo = new Metadata(prefs.getMetadataTypeByName("ProjectIdentifier"));
-		projectInfo.setValue(projectName);
-		topStruct.addMetadata(projectInfo);
-		
-		//set also for first subSrtuct if topStruct was an anchor
-		if(topStruct.getType().isAnchor()) {
-			DocStruct subStruct = topStruct.getAllChildren().get(0);
-			projectInfo = new Metadata(prefs.getMetadataTypeByName("ProjectIdentifier"));
+			DocStruct topStruct = ff.getDigitalDocument().getLogicalDocStruct();
+			Metadata projectInfo = new Metadata(prefs.getMetadataTypeByName("ProjectIdentifier"));
 			projectInfo.setValue(projectName);
-			subStruct.addMetadata(projectInfo);
-		}
-		
+			topStruct.addMetadata(projectInfo);
+
+			// set also for first subSrtuct if topStruct was an anchor
+			if (topStruct.getType().isAnchor()) {
+				DocStruct subStruct = topStruct.getAllChildren().get(0);
+				projectInfo = new Metadata(prefs.getMetadataTypeByName("ProjectIdentifier"));
+				projectInfo.setValue(projectName);
+				subStruct.addMetadata(projectInfo);
+			}
+
 		} catch (PreferencesException e) {
 			logger.error("Unable to add collection as metadata: " + e.getMessage(), e);
 		} catch (MetadataTypeNotAllowedException e) {
 			logger.error("Unable to add collection as metadata: " + e.getMessage(), e);
 		} catch (DocStructHasNoTypeException e) {
 			logger.error("Unable to add collection as metadata: " + e.getMessage(), e);
-		} finally {}
-		
+		} finally {
+		}
+
 	}
 
 	/**
@@ -625,13 +646,15 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	public List<Record> generateRecordsFromFile() {
 		List<Record> ret = new ArrayList<Record>();
 
-		String projectName = null;
-		projectName = importFile.getParentFile().getName();
-		if(projectName.toLowerCase().contains("mets")) {
-			projectName = importFile.getParentFile().getParentFile().getName();
-		}
-		logger.debug("Collection name is " + projectName);
-		
+		projectName = null;
+
+		// String projectName = null;
+		// projectName = importFile.getParentFile().getName();
+		// if(projectName.toLowerCase().contains("mets")) {
+		// projectName = importFile.getParentFile().getParentFile().getName();
+		// }
+		// logger.debug("Collection name is " + projectName);
+
 		if (importFile.getName().endsWith("zip")) {
 			logger.info("Extracting zip archive");
 			HashMap<String, byte[]> recordStrings = unzipFile(importFile);
@@ -666,8 +689,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					}
 				} else if (key.endsWith(".xml")) {
 					BufferedReader br = null;
+					// ByteArrayInputStream bais = null;
+					InputStreamReader isr = null;
 					try {
-						br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)));
+						bais = new ByteArrayInputStream(bytes);
+						isr = new InputStreamReader(bais);
+						br = new BufferedReader(isr);
 						StringBuffer sb = new StringBuffer();
 						String line;
 						while ((line = br.readLine()) != null) {
@@ -678,7 +705,15 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 						logger.error("Unable to read METS file from zip-Archive");
 					} finally {
 						try {
-							br.close();
+							if (bais != null) {
+								bais.close();
+							}
+							if (isr != null) {
+								isr.close();
+							}
+							if (br != null) {
+								br.close();
+							}
 						} catch (IOException e) {
 							logger.error("Error closing String reader");
 						}
@@ -695,18 +730,23 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				String importData = filteredRecordStrings.get(key);
 				logger.debug("Extracting record " + ++count);
 				Record rec = new Record();
+				// System.out.println("Data from Zip-File:\n " + importData);
 				rec.setData(importData);
 				logger.debug("Getting record " + importFileName);
 				rec.setId(importFileName.substring(0, importFileName.indexOf(".")));
-				String searchString = parseImagefolder(rec, projectName); // get the image folders corresponding to this record, plus an additional process
+				String searchString = parseImagefolder(rec); // get the image folders corresponding to this record, plus an additional process
+				logger.debug("Project name is " + projectName);
 				rec.setId(searchString); // identifer if necessary
-				List<Record> records = generateRecords(rec, projectName);
+				List<Record> records = generateRecords(rec);
 				// check for old records
 				for (Record record : records) {
 					File oldFile = searchForExistingData(record.getId());
-					if (updateExistingRecords && oldFile != null) {
-						logger.info("Found existing record. Updating.");
-						updateOldRecord(record, oldFile);
+					if (oldFile != null) {
+						if (updateExistingRecords) {
+							logger.info("Found existing record. Updating.");
+							updateOldRecord(record, oldFile);
+						}
+
 					} else {
 						ret.add(record);
 					}
@@ -726,15 +766,17 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				rec.setData(writer.toString());
 				rec.setId(importFileName.substring(0, importFileName.indexOf(".")));
 				// check for old records
-				String searchString = parseImagefolder(rec, projectName); // get the image folders corresponding to this record, plus an additional process
+				String searchString = parseImagefolder(rec); // get the image folders corresponding to this record, plus an additional process
 				rec.setId(searchString); // identifer if necessary
-				List<Record> records = generateRecords(rec, projectName);
+				List<Record> records = generateRecords(rec);
 				// check for old records
 				for (Record record : records) {
 					File oldFile = searchForExistingData(record.getId());
-					if (updateExistingRecords && oldFile != null) {
-						logger.info("Found existing record. Updating.");
-						updateOldRecord(record, oldFile);
+					if (oldFile != null) {
+						if (updateExistingRecords) {
+							logger.info("Found existing record. Updating.");
+							updateOldRecord(record, oldFile);
+						}
 					} else {
 						ret.add(record);
 					}
@@ -791,7 +833,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			title = currentIdentifier + ".xml";
 		}
 		if (identifierSuffix != null && !identifierSuffix.isEmpty()) {
-			return title + identifierSuffix;
+			return title + "_" + identifierSuffix;
 		} else {
 			return title;
 		}
@@ -827,6 +869,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	public List<ImportType> getImportTypes() {
 		List<ImportType> answer = new ArrayList<ImportType>();
 		answer.add(ImportType.FILE);
+		answer.add(ImportType.FOLDER);
 
 		return answer;
 	}
@@ -861,8 +904,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private Fileformat convertData(String inString) {
 		Fileformat ff = null;
 		Document doc;
+		StringReader sr = null;
 		try {
-			doc = new SAXBuilder().build(new StringReader(inString));
+			sr = new StringReader(inString);
+			doc = new SAXBuilder().build(sr);
 
 			// remove namespaces
 			Element docRoot = doc.getRootElement();
@@ -973,11 +1018,11 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				}
 
 				if (logConversionLoss) {
-					File marcLossFile = new File(logFolder, currentIdentifier + "_MarcLoss.xml");
-					Document lossDoc = getMarcModsLoss(doc, docMods);
-					CommonUtils.getFileFromDocument(marcLossFile, lossDoc);
-					File modsFile = new File(logFolder, currentIdentifier + "_Mods.xml");
 					try {
+						File marcLossFile = new File(logFolder, currentIdentifier + "_MarcLoss.xml");
+						Document lossDoc = getMarcModsLoss(doc, docMods);
+						CommonUtils.getFileFromDocument(marcLossFile, lossDoc);
+						File modsFile = new File(logFolder, currentIdentifier + "_Mods.xml");
 						CommonUtils.getFileFromDocument(modsFile, docMods);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -986,8 +1031,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				}
 
 				if (!deleteTempFiles) {
-					File modsFile = new File(sourceFolder, "modsTemp.xml");
 					try {
+						File modsFile = new File(sourceFolder, "modsTemp.xml");
 						CommonUtils.getFileFromDocument(modsFile, docMods);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -1012,6 +1057,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					for (String collection : currentCollectionList) {
 						Metadata mdCollection = new Metadata(mdTypeCollection);
 						mdCollection.setValue(collection);
+						dsVolume.addMetadata(mdCollection);
 						if (dsAnchor != null) {
 							dsAnchor.addMetadata(mdCollection);
 						}
@@ -1030,6 +1076,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			logger.error(e.getMessage(), e);
 		} catch (MetadataTypeNotAllowedException e) {
 			logger.error(e.getMessage(), e);
+		} finally {
+			// try{
+			if (sr != null) {
+				sr.close();
+			}
+			// } catch(IOException e) {
+			// logger.error("Error closing String reader");
+			// }
 		}
 
 		return ff;
@@ -1149,10 +1203,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		}
 		currentVolume = info.volumeNumber;
 		totalVolumes = info.totalVolumes;
-		currentCollectionList = record.getCollections();
 
 		data = record.getData();
-		currentCollectionList = record.getCollections();
+		// currentCollectionList = r.getCollections();
+		currentCollectionList = new ArrayList<String>();
+		String collection = projectsCollectionsMap.get(info.projectName);
+		if (collection != null) {
+			currentCollectionList.add(collection);
+		}
 		Fileformat ff = convertData();
 		logger.info("Replacing old matadata in metadata folder " + oldMetaFile.getParent() + " with new data");
 
@@ -1401,7 +1459,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 * @param r
 	 * @return
 	 */
-	private String parseImagefolder(Record r, String projectName) {
+	private String parseImagefolder(Record r) {
 
 		imageDirs = new ArrayList<File>();
 
@@ -1447,88 +1505,117 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			logger.warn("export folder does not exist. Cannot copy image files");
 			return identifier;
 		}
-		
-		if(projectName != null) {
-			for (File dir : exportFolder.listFiles()) {
-				if(dir.isDirectory() && dir.getName().contentEquals(projectName)) {
-					exportFolder = dir;
-					break;
-				}
-			}
-		}
 
-		List<File> folders = Arrays.asList(exportFolder.listFiles());
-		File tiffDir = null, jpegDir = null, parentImageDir = null;
-		for (File file : folders) {
-			if (file.isDirectory() && file.getName().toLowerCase().contentEquals("tiff")) {
-				logger.debug("found \"tiff\" directory in " + exportFolder.getName());
-				tiffDir = file;
+		File[] projectFolders = exportFolder.listFiles();
+		for (File folder : projectFolders) {
+			if (!folder.isDirectory() || !folder.getName().startsWith("00")) {
+				continue;
 			}
-			if (file.isDirectory() && (file.getName().toLowerCase().contentEquals("jpg") || file.getName().toLowerCase().contentEquals("difusion"))) {
-				logger.debug("found \"jpeg\" directory in " + exportFolder.getName());
-				jpegDir = file;
-			}
-		}
 
-		// set the appropriate parent directory containing the image archives
-		if (tiffDir == null || !tiffDir.isDirectory()) {
-			// if (jpegDir == null || !jpegDir.isDirectory()) {
-			parentImageDir = exportFolder;
-			// } else {
-			// parentImageDir = jpegDir;
+			projectName = folder.getName();
+			identifierSuffix = null;
+			logger.debug("Found project " + projectName);
+
+			// if(projectName != null) {
+			// for (File dir : exportFolder.listFiles()) {
+			// if(dir.isDirectory() && dir.getName().contentEquals(projectName)) {
+			// exportFolder = dir;
+			// break;
 			// }
-		} else {
-			parentImageDir = tiffDir;
-		}
+			// }
+			// }
 
-		List<File> processFolders = Arrays.asList(parentImageDir.listFiles());
-		ArrayList<File> idImageDirs = new ArrayList<File>();
-		// Get image dirs matching the identifier
-		for (File file : processFolders) {
-			if (file.isDirectory() && file.getName().contains(identifier)) {
-				idImageDirs.add(file);
-				logger.debug("found export folder " + file.getName() + " in " + parentImageDir);
-			}
-		}
-
-		// from these, get image dirs actually matching the metadata-file
-		for (File dir : idImageDirs) {
-			if (pieceDesignation == null || dir.getName().contains("_" + pieceDesignation)) {
-				if (volumeIdentifier == null || dir.getName().contains("_" + volumeIdentifier)) {
-					imageDirs.add(dir);
+			List<File> folders = Arrays.asList(folder.listFiles());
+			File tiffDir = null, jpegDir = null, parentImageDir = null;
+			for (File file : folders) {
+				if (file.isDirectory() && file.getName().toLowerCase().contentEquals("tiff")) {
+					logger.debug("found \"tiff\" directory in " + folder.getName());
+					tiffDir = file;
+				}
+				if (file.isDirectory()
+						&& (file.getName().toLowerCase().contentEquals("jpg") || file.getName().toLowerCase().contentEquals("difusion"))) {
+					logger.debug("found \"jpeg\" directory in " + folder.getName());
+					jpegDir = file;
 				}
 			}
-		}
 
-		// sort imageDirs by name
-		if (imageDirs != null && !imageDirs.isEmpty()) {
-			Collections.sort(imageDirs);
-		}
+			// // set the appropriate parent directory containing the image archives
+			// if (tiffDir == null || !tiffDir.isDirectory()) {
+			// // if (jpegDir == null || !jpegDir.isDirectory()) {
+			// parentImageDir = exportFolder;
+			// // } else {
+			// // parentImageDir = jpegDir;
+			// // }
+			// } else {
+			// parentImageDir = tiffDir;
+			// }
 
-		if (idImageDirs.size() > imageDirs.size()) {
-			// there is at least one other process with the same identifier. Add volume or pieceDesignation to this identifier
-			if (volumeIdentifier != null) {
-				identifierSuffix = volumeIdentifier;
+			List<File> processFolders = Arrays.asList(folder.listFiles());
+			List<File> tiffFolders = null;
+			if (tiffDir != null) {
+				tiffFolders = Arrays.asList(tiffDir.listFiles());
+			}
+			ArrayList<File> idImageDirs = new ArrayList<File>();
+			// Get image dirs matching the identifier
+			for (File file : processFolders) {
+				if (file.isDirectory() && file.getName().contains(identifier)) {
+					idImageDirs.add(file);
+					logger.debug("found export folder " + file.getName() + " in " + folder.getAbsolutePath());
+				}
+			}
+			if (tiffFolders != null) {
+				for (File file : tiffFolders) {
+					if (file.isDirectory() && file.getName().contains(identifier)) {
+						idImageDirs.add(file);
+						logger.debug("found export folder " + file.getName() + " in " + tiffDir.getAbsolutePath());
+					}
+				}
+			}
+
+			if (idImageDirs == null || idImageDirs.isEmpty()) {
+				continue;
+			}
+
+			// from these, get image dirs actually matching the metadata-file
+			for (File dir : idImageDirs) {
+				if (pieceDesignation == null || dir.getName().contains("_" + pieceDesignation)) {
+					if (volumeIdentifier == null || dir.getName().contains("_" + volumeIdentifier)) {
+						imageDirs.add(dir);
+					}
+				}
+			}
+
+			// sort imageDirs by name
+			if (imageDirs != null && !imageDirs.isEmpty()) {
+				Collections.sort(imageDirs);
+			}
+
+			if (idImageDirs.size() > imageDirs.size()) {
+				// there is at least one other process with the same identifier. Add volume or pieceDesignation to this identifier
+				if (volumeIdentifier != null) {
+					identifierSuffix = volumeIdentifier;
+				} else {
+					identifierSuffix = pieceDesignation;
+				}
+			}
+
+			String logString = "Found the following image directories:";
+			if (imageDirs != null && !imageDirs.isEmpty()) {
+				for (File file : imageDirs) {
+					logString += ("\n" + file.getAbsolutePath());
+				}
 			} else {
-				identifierSuffix = pieceDesignation;
+				logString += "\nNONE";
+			}
+			logger.debug(logString);
+
+			if (identifierSuffix != null) {
+				return identifier + "_" + identifierSuffix;
+			} else {
+				return identifier;
 			}
 		}
-
-		String logString = "Found the following image directories:";
-		if (imageDirs != null && !imageDirs.isEmpty()) {
-			for (File file : imageDirs) {
-				logString += ("\n" + file.getAbsolutePath());
-			}
-		} else {
-			logString += "\nNONE";
-		}
-		logger.debug(logString);
-
-		if (identifierSuffix != null) {
-			return identifier + "_" + identifierSuffix;
-		} else {
-			return identifier;
-		}
+		return null;
 	}
 
 	/**
@@ -1557,11 +1644,15 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		for (File imageFile : images) {
 			try {
 				String filename = imageFile.getName();
-				copyFile(imageFile, new File(tempTiffDir, filename));
-				logger.debug("Copying image " + filename);
-				if (deleteOriginalImages) {
-					imageFile.delete();
+				if (!deleteOriginalImages) {
+					copyFile(imageFile, new File(tempTiffDir, filename));
+					logger.debug("Copying image " + filename);
+				} else {
+					imageFile.renameTo(new File(tempTiffDir, filename));
 				}
+				// if (deleteOriginalImages) {
+				// imageFile.delete();
+				// }
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
@@ -1675,11 +1766,11 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				if (topContent instanceof Element) {
 					Element topElement = (Element) topContent;
 					String type = topElement.getAttributeValue("TYPE");
-					if(anchorMap.containsValue(type)) {
+					if (anchorMap.containsValue(type)) {
 						logger.debug("Logical DocStruct contains an anchor");
-						anchorElement = (Element)logStruct.removeContent(0);
+						anchorElement = (Element) logStruct.removeContent(0);
 						List<? extends Content> contentList = anchorElement.removeContent();
-						logStruct.addContent(contentList.get(currentVolume-1));
+						logStruct.addContent(contentList.get(currentVolume - 1));
 					} else {
 						logger.debug("No anchor in logical DocStruct");
 					}
@@ -1842,8 +1933,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		ArrayList<String> filenames = new ArrayList<String>();
 		HashMap<String, byte[]> contentMap = new HashMap<String, byte[]>();
 
+		FileInputStream fis = null;
+		BufferedInputStream bis = null;
+		ZipInputStream in = null;
 		try {
-			ZipInputStream in = new ZipInputStream(new BufferedInputStream(new FileInputStream(source)));
+			fis = new FileInputStream(source);
+			bis = new BufferedInputStream(fis);
+			in = new ZipInputStream(bis);
 			ZipEntry entry;
 			while ((entry = in.getNextEntry()) != null) {
 				filenames.add(entry.getName());
@@ -1877,8 +1973,21 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			}
 		} catch (IOException e) {
 			logger.error(e.toString(), e);
+		} finally {
+			try {
+				if (fis != null) {
+					fis.close();
+				}
+				if (bis != null) {
+					bis.close();
+				}
+				if (in != null) {
+					in.close();
+				}
+			} catch (IOException e) {
+				logger.error(e.toString(), e);
+			}
 		}
-
 		return contentMap;
 	}
 
@@ -1887,8 +1996,11 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		ArrayList<String> filenames = new ArrayList<String>();
 		HashMap<String, String> contentMap = new HashMap<String, String>();
 
+		BufferedInputStream bis = null;
+		ZipInputStream in  = null;
 		try {
-			ZipInputStream in = new ZipInputStream(new BufferedInputStream(iStream));
+			bis = new BufferedInputStream(iStream);
+			in = new ZipInputStream(bis);
 			ZipEntry entry;
 			while ((entry = in.getNextEntry()) != null) {
 				filenames.add(entry.getName());
@@ -1903,6 +2015,17 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			}
 		} catch (IOException e) {
 			logger.error(e.toString(), e);
+		} finally {
+			try{
+				if(bis != null) {
+					bis.close();
+				}
+				if(in != null) {
+					in.close();
+				}
+			} catch(IOException e) {
+				logger.error("Error closing zip input stream");
+			}
 		}
 
 		return contentMap;
@@ -2063,7 +2186,17 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			return validImage;
 		}
 	};
+	public static FilenameFilter MetsFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			boolean validImage = false;
+			if (name.endsWith("XML") || name.endsWith("xml")) {
+				validImage = true;
+			}
 
+			return validImage;
+		}
+	};
 	// Filters for file searches
 	public static FileFilter DirFilter = new FileFilter() {
 		public boolean accept(File file) {
@@ -2073,8 +2206,46 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 	@Override
 	public List<Record> generateRecordsFromFilenames(List<String> filenames) {
-		// TODO Auto-generated method stub
-		return null;
+		
+//		String filesToImport = "Files to import:";
+//		for (String record : filenames) {
+//			filesToImport += ("\n" + record);
+//		}
+//		System.out.println(filesToImport);
+		
+		ArrayList<Record> recordList = new ArrayList<Record>();
+		for (String filename : filenames) {
+			if (filename.contentEquals("Dummy")) {
+				continue;
+			}
+			String[] parts = filename.split("::");
+			if (parts == null || parts.length != 2) {
+				// return recordList;
+				continue;
+			}
+			String projectName = parts[0].trim();
+			String fileName = parts[1].trim();
+			File projectDir = new File(exportFolder, projectName);
+			if (projectDir.isDirectory()) {
+				File xmlDir = projectDir;
+				File[] subDirs = projectDir.listFiles(MetsDirFilter);
+				if (subDirs != null && subDirs.length > 0) {
+					xmlDir = subDirs[0];
+				}
+				File file = new File(projectDir, fileName);
+				importFile = file;
+				List<Record> tempList = generateRecordsFromFile();
+				if (tempList != null) {
+					recordList.addAll(tempList);
+				}
+			}
+		}
+//		String imports = "Files to import:";
+//		for (Record record : recordList) {
+//			imports += ("\n" + record.getId());
+//		}
+//		System.out.println(imports);
+		return recordList;
 	}
 
 	@Override
@@ -2083,10 +2254,54 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return null;
 	}
 
+	// @Override
+	// public List<String> getAllFilenames() {
+	// List<String> answer = new ArrayList<String>();
+	// String folder = "/mnt/csic/0008_PCTN";
+	// File f = new File(folder);
+	// if (f.exists() && f.isDirectory()) {
+	// String[] files = f.list();
+	// for (String file : files) {
+	// answer.add(file);
+	// }
+	// Collections.sort(answer);
+	// }
+	// return answer;
+	// }
+
 	@Override
 	public List<String> getAllFilenames() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<String> projectList = new ArrayList<String>(projectsCollectionsMap.keySet());
+		ArrayList<String> filenameList = new ArrayList<String>();
+		// filenameList.add("Dummy");
+		// filenameList.add(exportFolder.getAbsolutePath());
+		try {
+			for (String project : projectList) {
+				File projectDir = new File(exportFolder, project);
+				if (projectDir.isDirectory()) {
+					File xmlDir = projectDir;
+					File[] subDirs = projectDir.listFiles(MetsDirFilter);
+					if (subDirs != null && subDirs.length > 0) {
+						xmlDir = subDirs[0];
+					}
+					filenameList.add(xmlDir.getAbsolutePath());
+					File[] fileList = projectDir.listFiles(MetsFilter);
+					if (fileList != null && fileList.length > 0) {
+						for (File file : fileList) {
+							filenameList.add(project + "::\t" + file.getName());
+							// filenameList.add(file.getAbsolutePath());
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			filenameList.add("ERROR: " + e.getMessage());
+			return filenameList;
+		} catch (Error e) {
+			filenameList.add("ERROR: " + e.getMessage());
+			return filenameList;
+		}
+		return filenameList;
 	}
 
 	@Override
@@ -2130,4 +2345,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		// TODO Auto-generated method stub
 
 	}
+
+	// Filters for file searches
+	public static FileFilter MetsDirFilter = new FileFilter() {
+		public boolean accept(File file) {
+			if (file.isDirectory() && file.getName().toLowerCase().contains("mets")) {
+				return true;
+			}
+			return false;
+		}
+	};
 }
