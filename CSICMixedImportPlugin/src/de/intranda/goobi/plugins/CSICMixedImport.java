@@ -105,7 +105,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "1.0.20120727.2";
+	private static final String VERSION = "1.0.20120814";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
 	// private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
 	// private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
@@ -113,7 +113,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
 
 	private final static boolean deleteOriginalImages = true;
-	private final static boolean deleteTempFiles = true;
+	private final static boolean deleteTempFiles = false;
 	private final static boolean logConversionLoss = false;
 	private final static boolean copyImages = true;
 	private final static boolean updateExistingRecords = false;
@@ -136,6 +136,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private Map<String, String> logicalStructTypeMap = new HashMap<String, String>();
 	private Map<String, VolumeInfo> recordMap = new HashMap<String, VolumeInfo>();
 	private Map<String, String> projectsCollectionsMap = new HashMap<String, String>();
+	private Map<String, Integer> pageVolumeMap = new HashMap<String, Integer>();
 	private String currentIdentifier;
 	private String currentTitle;
 	private String currentAuthor;
@@ -351,7 +352,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			}
 		}
 		if (deleteTempFiles && tempFile.exists()) {
-			tempFile.delete();
+			if (!tempFile.delete()) {
+				logger.error("Unable to delete temp file");
+			}
 		} else if (tempFile.exists() && sourceFolder != null && sourceFolder.isDirectory()) {
 			tempFile.renameTo(new File(sourceFolder, tempFile.getName()));
 		}
@@ -363,6 +366,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			outerff = new MetsMods(prefs);
 			outerff.read(tempFile.getAbsolutePath());
 			compareFileFormats(innerff, outerff, anchorElement);
+			removeOtherVolumes(outerff);
 		} catch (PreferencesException e) {
 			logger.error(e.toString());
 		} catch (ReadException e) {
@@ -380,6 +384,30 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		}
 
 		return outerff;
+	}
+
+	private void removeOtherVolumes(Fileformat outerff) throws PreferencesException {
+		
+		//remove logical structures
+		DocStruct topStruct = outerff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0);
+		if(topStruct.getType().isAnchor() && topStruct.getAllChildren().size() > 1) {
+			for (int i = 1; i <= topStruct.getAllChildren().size(); i++) {
+				if(i != currentVolume) {
+					topStruct.removeChild(topStruct.getAllChildren().get(i-1));
+				}
+			}
+		}
+		
+		//remove phyiscal structures
+		DocStruct bookStruct = outerff.getDigitalDocument().getPhysicalDocStruct().getAllChildren().get(0);
+		for (DocStruct page : bookStruct.getAllChildren()) {
+			String id = page.getIdentifier();
+			System.out.println("Checking page with id = " + id);
+			Integer pageVolume = pageVolumeMap.get(id);
+			if(pageVolume != null && pageVolume != currentVolume) {
+				bookStruct.removeChild(page);
+			}
+		}
 	}
 
 	// private static DecimalFormat volumeNumberFormat = new DecimalFormat("00");
@@ -444,69 +472,101 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			List<DocStruct> innerChildren = innerLogStruct.getAllChildren();
 			List<DocStruct> outerChildren = outerLogStruct.getAllChildren();
 
-			// if(innerLogStruct.getType().isAnchor()) {
-			// if(imageDirs.size() < 2) {
-			// //The record contains only one volume, and has an anchor according to the marc-record
-			// // --> ignore the old anchor (if any) and use the marc anchor
-			// outerff.getDigitalDocument().setLogicalDocStruct(innerLogStruct);
-			// outerff.getDigitalDocument().getLogicalDocStruct().
-			// outerLogStruct = outerff.getDigitalDocument().getLogicalDocStruct();
-			//
-			// }
-			// }
-
-			if (innerLogStruct.getType().isAnchor() && outerLogStruct.getType().isAnchor()) {
-				if (imageDirs.size() < 2) {
-					outerLogStruct.setType(innerLogStruct.getType());
-					if (outerChildren != null && innerChildren != null) {
-						for (DocStruct docStruct : outerChildren) {
-							docStruct.setType(innerChildren.get(0).getType());
+			if (anchorElement == null) {
+				// no outer anchor. Anchor is the inner (marcdoc) anchor
+				if (innerLogStruct.getType().isAnchor()) {
+					DocStruct newAnchor = innerLogStruct.copy(true, false);
+					try {
+						newAnchor.addChild(outerLogStruct);
+					} catch (TypeNotAllowedAsChildException e) {
+						String allowedStruct = topStructMap.get(newAnchor.getType().getName());
+						outerLogStruct.setType(prefs.getDocStrctTypeByName(allowedStruct));
+						try {
+							newAnchor.addChild(outerLogStruct);
+						} catch (TypeNotAllowedAsChildException e1) {
+							logger.error(e1);
 						}
 					}
+					outerff.getDigitalDocument().setLogicalDocStruct(newAnchor);
 				} else {
+					// no anchor, leave outer logStruct as is
+				}
+
+			} else {
+				// There is an outer anchor.
+				DocStruct newAnchor;
+				try {
+					newAnchor = outerff.getDigitalDocument().createDocStruct(prefs.getDocStrctTypeByName(anchorElement.getAttributeValue("Type")));
 					int counter = 1;
-					for (DocStruct docStruct : outerChildren) {
-						if (counter != 1) {
-							logger.warn("Unexpectedly found more than one logical DocStruct");
-							outerLogStruct.removeChild(docStruct);
-						} else if (innerChildren != null) {
-							docStruct.setType(innerChildren.get(0).getType());
-							if (!isChildTypeAllowed(outerLogStruct, docStruct)) {
-								String parentType = anchorMap.get(docStruct.getType().getName());
-								if (parentType != null) {
-									outerLogStruct.setType(prefs.getDocStrctTypeByName(parentType));
-								}
-							}
+					for (DocStruct docStruct : innerChildren) {
+						if (innerChildren.size() == 1 || counter == currentVolume) {
+							newAnchor.addChild(docStruct);
+							newAnchor.setAllMetadata(docStruct.getAllMetadata());
 						}
 						counter++;
 					}
-				}
-			} else if (outerLogStruct.getType().isAnchor()) {
-				if (imageDirs.size() > 1) {
-					int counter = 1;
-					for (DocStruct docStruct : outerChildren) {
-						if (counter != currentVolume) {
-							outerLogStruct.removeChild(docStruct);
-						} else if (innerChildren != null) {
-							docStruct.setType(innerLogStruct.getType());
-						}
-					}
-				}
-			} else if (innerLogStruct.getType().isAnchor()) {
-				DocStruct newAnchor = innerLogStruct.copy(true, false);
-				try {
-					newAnchor.addChild(outerLogStruct);
+					outerff.getDigitalDocument().setLogicalDocStruct(newAnchor);
+				} catch (TypeNotAllowedForParentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				} catch (TypeNotAllowedAsChildException e) {
-					String allowedStruct = topStructMap.get(newAnchor.getType().getName());
-					outerLogStruct.setType(prefs.getDocStrctTypeByName(allowedStruct));
-					try {
-						newAnchor.addChild(outerLogStruct);
-					} catch (TypeNotAllowedAsChildException e1) {
-						logger.error(e1);
-					}
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				outerff.getDigitalDocument().setLogicalDocStruct(newAnchor);
 			}
+
+			// if (innerLogStruct.getType().isAnchor() && outerLogStruct.getType().isAnchor()) {
+			// if (imageDirs.size() < 2) {
+			// outerLogStruct.setType(innerLogStruct.getType());
+			// if (outerChildren != null && innerChildren != null) {
+			// for (DocStruct docStruct : outerChildren) {
+			// docStruct.setType(innerChildren.get(0).getType());
+			// }
+			// }
+			// } else {
+			// int counter = 1;
+			// for (DocStruct docStruct : outerChildren) {
+			// if (counter != 1) {
+			// logger.warn("Unexpectedly found more than one logical DocStruct");
+			// outerLogStruct.removeChild(docStruct);
+			// } else if (innerChildren != null) {
+			// docStruct.setType(innerChildren.get(0).getType());
+			// if (!isChildTypeAllowed(outerLogStruct, docStruct)) {
+			// String parentType = anchorMap.get(docStruct.getType().getName());
+			// if (parentType != null) {
+			// outerLogStruct.setType(prefs.getDocStrctTypeByName(parentType));
+			// }
+			// }
+			// }
+			// counter++;
+			// }
+			// }
+			// } else if (outerLogStruct.getType().isAnchor()) {
+			// if (imageDirs.size() > 1) {
+			// int counter = 1;
+			// for (DocStruct docStruct : outerChildren) {
+			// if (counter != currentVolume) {
+			// outerLogStruct.removeChild(docStruct);
+			// } else if (innerChildren != null) {
+			// docStruct.setType(innerLogStruct.getType());
+			// }
+			// }
+			// }
+			// } else if (innerLogStruct.getType().isAnchor()) {
+			// DocStruct newAnchor = innerLogStruct.copy(true, false);
+			// try {
+			// newAnchor.addChild(outerLogStruct);
+			// } catch (TypeNotAllowedAsChildException e) {
+			// String allowedStruct = topStructMap.get(newAnchor.getType().getName());
+			// outerLogStruct.setType(prefs.getDocStrctTypeByName(allowedStruct));
+			// try {
+			// newAnchor.addChild(outerLogStruct);
+			// } catch (TypeNotAllowedAsChildException e1) {
+			// logger.error(e1);
+			// }
+			// }
+			// outerff.getDigitalDocument().setLogicalDocStruct(newAnchor);
+			// }
 		} catch (PreferencesException e) {
 			logger.error(e);
 		}
@@ -556,6 +616,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			}
 			currentVolume = info.volumeNumber;
 			totalVolumes = info.totalVolumes;
+			identifierSuffix = info.identifierSuffix;
 			// currentCollectionList = r.getCollections();
 			currentCollectionList = new ArrayList<String>();
 			String collection = projectsCollectionsMap.get(info.projectName);
@@ -1768,9 +1829,36 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					String type = topElement.getAttributeValue("TYPE");
 					if (anchorMap.containsValue(type)) {
 						logger.debug("Logical DocStruct contains an anchor");
-						anchorElement = (Element) logStruct.removeContent(0);
-						List<? extends Content> contentList = anchorElement.removeContent();
-						logStruct.addContent(contentList.get(currentVolume - 1));
+
+						List<? extends Content> list = logStruct.getContent();
+						for (int i = 0; i < list.size(); i++) {
+							Content content = list.get(i);
+							if (content instanceof Element) {
+								anchorElement = (Element) logStruct.removeContent(i);
+								break;
+							}
+						}
+						if (anchorElement != null) {
+								List<? extends Content> contentList = anchorElement.removeContent();
+								logStruct.addContent(contentList);
+//								int counter = 1;
+//								for (Content content : contentList) {
+//									if(content instanceof Element) {	
+//										if(counter == currentVolume) {											
+//											logStruct.addContent(content);
+//										}
+//										counter++;
+//									} else {
+//										logStruct.addContent(content);
+//									}
+//								}
+								if (imageDirs.size() < 2) {
+									// only one volume, so ignore the anchor
+									anchorElement = null;
+								}
+						} else {
+							logger.error("Found no anchor element!");
+						}
 					} else {
 						logger.debug("No anchor in logical DocStruct");
 					}
@@ -1823,14 +1911,25 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		ArrayList<Element> pages = new ArrayList<Element>();
 
 		List children = parent.getChildren();
+		int volume = 0;
+		try {
+		volume = Integer.valueOf(parent.getAttributeValue("ORDER"));
+		}catch(Exception e) {
+			
+		}
 		for (Object object : children) {
 			if (object instanceof Element) {
 				Element child = (Element) object;
 				if (child.getAttributeValue("TYPE").toLowerCase().contentEquals("page")) {
 					// child is a page
 					pages.add(child);
+					if(volume != 0) {
+						//map the volume this page belongs to
+						pageVolumeMap.put(child.getAttributeValue("ID"), volume);
+					}
+					
 				} else {
-					pages.addAll(getPhysicalPages(child));
+						pages.addAll(getPhysicalPages(child));
 				}
 			}
 		}
@@ -1997,7 +2096,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		HashMap<String, String> contentMap = new HashMap<String, String>();
 
 		BufferedInputStream bis = null;
-		ZipInputStream in  = null;
+		ZipInputStream in = null;
 		try {
 			bis = new BufferedInputStream(iStream);
 			in = new ZipInputStream(bis);
@@ -2016,14 +2115,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		} catch (IOException e) {
 			logger.error(e.toString(), e);
 		} finally {
-			try{
-				if(bis != null) {
+			try {
+				if (bis != null) {
 					bis.close();
 				}
-				if(in != null) {
+				if (in != null) {
 					in.close();
 				}
-			} catch(IOException e) {
+			} catch (IOException e) {
 				logger.error("Error closing zip input stream");
 			}
 		}
@@ -2206,13 +2305,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 	@Override
 	public List<Record> generateRecordsFromFilenames(List<String> filenames) {
-		
-//		String filesToImport = "Files to import:";
-//		for (String record : filenames) {
-//			filesToImport += ("\n" + record);
-//		}
-//		System.out.println(filesToImport);
-		
+
+		// String filesToImport = "Files to import:";
+		// for (String record : filenames) {
+		// filesToImport += ("\n" + record);
+		// }
+		// System.out.println(filesToImport);
+
 		ArrayList<Record> recordList = new ArrayList<Record>();
 		for (String filename : filenames) {
 			if (filename.contentEquals("Dummy")) {
@@ -2240,11 +2339,11 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				}
 			}
 		}
-//		String imports = "Files to import:";
-//		for (Record record : recordList) {
-//			imports += ("\n" + record.getId());
-//		}
-//		System.out.println(imports);
+		// String imports = "Files to import:";
+		// for (Record record : recordList) {
+		// imports += ("\n" + record.getId());
+		// }
+		// System.out.println(imports);
 		return recordList;
 	}
 
