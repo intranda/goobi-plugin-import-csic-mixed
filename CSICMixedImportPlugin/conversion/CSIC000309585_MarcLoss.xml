@@ -1,2 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Lost-in-MarcMods-Conversion><leader>     nam a22      i 4500</leader><controlfield tag="008">920606s1982    ita           000 0 ita d</controlfield><datafield tag="040" ind1=" " ind2=" "><subfield code="d">A2 0088894</subfield></datafield><datafield tag="852" ind1=" " ind2=" "><subfield code="h">821.134.2"15/17" Pér.0 PRO per</subfield></datafield></Lost-in-MarcMods-Conversion>
+<Lost-in-MarcMods-Conversion>
+	<leader> nam a22 i 4500</leader>
+	<controlfield tag="008">920606s1982 ita 000 0 ita d
+	</controlfield>
+	<datafield tag="040" ind1=" " ind2=" ">
+		<subfield code="d">A2 0088894</subfield>
+	</datafield>
+	<datafield tag="852" ind1=" " ind2=" ">
+		<subfield code="h">821.134.2"15/17" Pér.0 PRO per</subfield>
+	</datafield>
+</Lost-in-MarcMods-Conversion>

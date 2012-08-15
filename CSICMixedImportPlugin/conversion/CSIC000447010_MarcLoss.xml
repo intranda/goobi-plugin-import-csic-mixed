@@ -1,2 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Lost-in-MarcMods-Conversion><leader>     nam a22      i 4500</leader><controlfield tag="008">970522s1977    esp           000 0 spa d</controlfield><datafield tag="080" ind1="2" ind2="4"><subfield code="a">017.1(467.11)I.T.:860-2"16"</subfield></datafield><datafield tag="080" ind1="2" ind2="4"><subfield code="a">091:860-2"16":016</subfield></datafield><datafield tag="080" ind1="2" ind2="4"><subfield code="a">016:091:860-2"16"</subfield></datafield><datafield tag="080" ind1="2" ind2="4"><subfield code="a">860-2"16":017.1(467.11)I.T.</subfield></datafield><datafield tag="650" ind1=" " ind2="4"><subfield code="y">16...</subfield></datafield></Lost-in-MarcMods-Conversion>
+<Lost-in-MarcMods-Conversion>
+	<leader> nam a22 i 4500</leader>
+	<controlfield tag="008">970522s1977 esp 000 0 spa d
+	</controlfield>
+	<datafield tag="080" ind1="2" ind2="4">
+		<subfield code="a">017.1(467.11)I.T.:860-2"16"</subfield>
+	</datafield>
+	<datafield tag="080" ind1="2" ind2="4">
+		<subfield code="a">091:860-2"16":016</subfield>
+	</datafield>
+	<datafield tag="080" ind1="2" ind2="4">
+		<subfield code="a">016:091:860-2"16"</subfield>
+	</datafield>
+	<datafield tag="080" ind1="2" ind2="4">
+		<subfield code="a">860-2"16":017.1(467.11)I.T.</subfield>
+	</datafield>
+	<datafield tag="650" ind1=" " ind2="4">
+		<subfield code="y">16...</subfield>
+	</datafield>
+</Lost-in-MarcMods-Conversion>

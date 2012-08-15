@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Lost-in-MarcMods-Conversion><leader>     nam a22      i 4500</leader><controlfield tag="008">900615s1973    esp           000 0 spa d</controlfield></Lost-in-MarcMods-Conversion>
+<Lost-in-MarcMods-Conversion>
+	<leader> nam a22 i 4500</leader>
+	<controlfield tag="008">900615s1973 esp 000 0 spa d
+	</controlfield>
+</Lost-in-MarcMods-Conversion>
