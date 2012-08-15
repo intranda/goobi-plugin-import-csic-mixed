@@ -96,6 +96,7 @@ import de.sub.goobi.Import.ImportOpac;
 import de.sub.goobi.Persistence.ProzessDAO;
 import de.sub.goobi.config.ConfigMain;
 import de.sub.goobi.config.ConfigPlugins;
+import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 
@@ -117,7 +118,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private final static boolean deleteTempFiles = true;
 	private final static boolean logConversionLoss = false;
 	private final static boolean copyImages = true;
-	private final static boolean updateExistingRecords = false;
+	private final static boolean updateExistingRecords = true;
 
 	// Namespaces
 	private Namespace mets;
@@ -735,9 +736,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					if (oldFile != null) {
 						if (updateExistingRecords) {
 							logger.info("Found existing record. Updating.");
-							updateOldRecord(record, oldFile);
+							if(!updateOldRecord(record, oldFile)) {
+								Helper.setFehlerMeldung("Error updating record " + record.getId());
+							} else {
+								Helper.setMeldung("Updated process " + record.getId());
+							}
+						} else {
+							Helper.setFehlerMeldung("Cannot import record " + record.getId() + " : A process with this title already exists.");
 						}
-
 					} else {
 						ret.add(record);
 					}
@@ -766,7 +772,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					if (oldFile != null) {
 						if (updateExistingRecords) {
 							logger.info("Found existing record. Updating.");
-							updateOldRecord(record, oldFile);
+							if(!updateOldRecord(record, oldFile)) {
+								Helper.setFehlerMeldung("Error updating record " + record.getId());
+							} else {
+								Helper.setMeldung("Updated process " + record.getId());
+							}
+						} else {
+							Helper.setFehlerMeldung("Cannot import record " + record.getId() + " : A process with this title already exists.");
 						}
 					} else {
 						ret.add(record);
@@ -1185,15 +1197,16 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 * @param record
 	 * @param oldMetaFile
 	 */
-	private void updateOldRecord(Record record, File oldMetaFile) {
+	private boolean updateOldRecord(Record record, File oldMetaFile) {
 
 		VolumeInfo info = recordMap.get(record.getId());
 		if (info == null) {
 			logger.error("Unable to find information to that record");
-			return;
+			return false;
 		}
 		currentVolume = info.volumeNumber;
 		totalVolumes = info.totalVolumes;
+		identifierSuffix = info.identifierSuffix;
 
 		data = record.getData();
 		// currentCollectionList = r.getCollections();
@@ -1264,21 +1277,24 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				}
 
 				// purging old temp files
-				// for (File file : importDir.listFiles(XmlFilter)) {
-				// if(file.getName().contains(record.getId()))
-				// file.delete();
-				// }
+				 for (File file : importDir.listFiles(XmlFilter)) {
+				 if(file.getName().contains(record.getId()))
+				 file.delete();
+				 }
 			}
 
 			// ret.put(getProcessTitle(), ImportReturnValue.ExportFinished);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
+			return false;
 		} catch (WriteException e) {
 			logger.error(e.getMessage(), e);
+			return false;
 		} catch (PreferencesException e) {
 			logger.error(e.getMessage(), e);
+			return false;
 		}
-
+		return true;
 	}
 
 	/**
