@@ -1,5 +1,4 @@
 /**
- * This file is part of CamImportPlugins/SotonImportPlugins.
  * 
  * Copyright (C) 2011 intranda GmbH
  * 
@@ -107,7 +106,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
 	private static final String NAME = "CSICMixedImport";
-	private static final String VERSION = "1.0.20120815";
+	private static final String VERSION = "1.0.20120828";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
 	// private static final String XSLT_PATH = "resources/" + "MARC21slim2MODS3.xsl";
 	// private static final String MODS_MAPPING_FILE = "resources/" + "mods_map.xml";
@@ -118,6 +117,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private final static boolean deleteTempFiles = true;
 	private final static boolean logConversionLoss = false;
 	private final static boolean copyImages = true;
+	private final static boolean copyPdfs = true;
 	private final static boolean updateExistingRecords = true;
 
 	// Namespaces
@@ -146,6 +146,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private List<String> currentCollectionList;
 	private String encoding = "utf-8";
 	private ArrayList<File> imageDirs = new ArrayList<File>();
+	private File pdfFile;
 	public int currentVolume = 1;
 	public int totalVolumes = 1;
 	private String projectName;
@@ -222,12 +223,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static DecimalFormat volumeNumberFormat = new DecimalFormat("00");
 
 	private List<Record> generateRecords(Record r) {
+		
 		ArrayList<Record> records = new ArrayList<Record>();
 		if (imageDirs == null || imageDirs.size() < 2) {
 			// if we have no image directories or only one, create exactly one record
 			records.add(r);
 			if (imageDirs != null && !imageDirs.isEmpty()) {
-				VolumeInfo info = new VolumeInfo(1, 1, imageDirs.get(0), identifierSuffix, projectName);
+				VolumeInfo info = new VolumeInfo(1, 1, imageDirs.get(0), pdfFile, identifierSuffix, projectName);
 				recordMap.put(r.getId(), info);
 				logger.debug("Adding record " + r.getId() + " to recordmap");
 			}
@@ -241,7 +243,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				rec.setId(r.getId() + "_" + mySuffix);
 				rec.setData(r.getData());
 				records.add(rec);
-				VolumeInfo info = new VolumeInfo(counter, imageDirs.size(), imageDir, suffix, projectName);
+				VolumeInfo info = new VolumeInfo(counter, imageDirs.size(), imageDir, pdfFile, suffix, projectName);
 				recordMap.put(rec.getId(), info);
 				logger.debug("Adding record " + rec.getId() + " to recordmap");
 				counter++;
@@ -355,34 +357,33 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	}
 
 	private void removeOtherVolumes(Fileformat outerff) throws PreferencesException {
-		
-		//remove logical structures
+
+		// remove logical structures
 		DocStruct topStruct = outerff.getDigitalDocument().getLogicalDocStruct();
 		ArrayList<DocStruct> invalidDocStructs = new ArrayList<DocStruct>();
-		if(topStruct.getType().isAnchor() && topStruct.getAllChildren().size() > 1) {
+		if (topStruct.getType().isAnchor() && topStruct.getAllChildren().size() > 1) {
 			for (int i = 1; i <= topStruct.getAllChildren().size(); i++) {
-				if(i != currentVolume) {
-					invalidDocStructs.add(topStruct.getAllChildren().get(i-1));
-//					topStruct.removeChild(topStruct.getAllChildren().get(i-1));
+				if (i != currentVolume) {
+					invalidDocStructs.add(topStruct.getAllChildren().get(i - 1));
+					// topStruct.removeChild(topStruct.getAllChildren().get(i-1));
 				}
 			}
 			for (DocStruct docStruct : invalidDocStructs) {
 				topStruct.removeChild(docStruct);
 			}
-			
-			
+
 		}
-		
-		//remove physical structures
+
+		// remove physical structures
 		DocStruct bookStruct = outerff.getDigitalDocument().getPhysicalDocStruct();
 		ArrayList<DocStruct> invalidPages = new ArrayList<DocStruct>();
 		for (DocStruct page : bookStruct.getAllChildren()) {
 			String id = page.getIdentifier();
-//			System.out.println("Checking page with id = " + id);
+			// System.out.println("Checking page with id = " + id);
 			Integer pageVolume = pageVolumeMap.get(id);
-			if(pageVolume != null && pageVolume != currentVolume) {
+			if (pageVolume != null && pageVolume != currentVolume) {
 				invalidPages.add(page);
-//				bookStruct.removeChild(page);
+				// bookStruct.removeChild(page);
 			}
 		}
 		for (DocStruct docStruct : invalidPages) {
@@ -454,47 +455,48 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 			DocStructType innerAnchorType = null;
 			DocStructType innerTopStructType = null;
-			if(innerLogStruct.getType().isAnchor()) {
+			if (innerLogStruct.getType().isAnchor()) {
 				innerAnchorType = innerLogStruct.getType();
 				innerTopStructType = innerChildren.get(0).getType();
 			} else {
 				innerTopStructType = innerLogStruct.getType();
 			}
-			
-			if(outerChildren != null && outerChildren.size() > 1 && outerChildren.size() == imageDirs.size()) {
-				//each child ("item") corresponds to one volume
-				
-				//force DocTypes to MultiVolumeWork and Volume
+
+			if (outerChildren != null && outerChildren.size() > 1 && outerChildren.size() == imageDirs.size()) {
+				// each child ("item") corresponds to one volume
+
+				// force DocTypes to MultiVolumeWork and Volume
 				innerAnchorType = prefs.getDocStrctTypeByName("MultiVolumeWork");
-//				innerTopStructType = prefs.getDocStrctTypeByName("Volume");
-				
+				// innerTopStructType = prefs.getDocStrctTypeByName("Volume");
+
 				int counter = 1;
-				for (DocStruct docStruct : outerChildren) {					
-					//remove ds if not the current volume
-//					if(counter != currentVolume) {
-//						outerLogStruct.removeChild(docStruct);
-//					}
+				for (DocStruct docStruct : outerChildren) {
+					// remove ds if not the current volume
+					// if(counter != currentVolume) {
+					// outerLogStruct.removeChild(docStruct);
+					// }
 					docStruct.setType(innerTopStructType);
 					counter++;
 				}
-				//the outer anchor is not the inner anchor, which is only kept as metadata
+				// the outer anchor is not the inner anchor, which is only kept as metadata
 				outerLogStruct.setType(innerAnchorType);
 				outerLogStruct.setAllMetadata(outerLogStruct.getAllChildren().get(0).getAllMetadata());
-			
+
 			} else {
-				//If we have children, they are probably divisions within one volume, so we leave them 
+				// If we have children, they are probably divisions within one volume, so we leave them
 				outerLogStruct.setType(innerTopStructType);
-				if(innerAnchorType != null) {
-				DocStruct anchor = innerLogStruct.copy(true, false);
-				anchor.addChild(outerLogStruct.copy(true, true));
-				outerff.getDigitalDocument().setLogicalDocStruct(anchor);
+				if (innerAnchorType != null) {
+					DocStruct anchor = innerLogStruct.copy(true, false);
+					anchor.addChild(outerLogStruct.copy(true, true));
+					outerff.getDigitalDocument().setLogicalDocStruct(anchor);
 				}
-				
-			} 
-			
-			System.out.println("new level 1 docStruct = " + outerff.getDigitalDocument().getLogicalDocStruct().getType().getName());
-			System.out.println("new level 2 docStruct = " + outerff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0).getType().getName());
-			
+
+			}
+
+			// System.out.println("new level 1 docStruct = " + outerff.getDigitalDocument().getLogicalDocStruct().getType().getName());
+			// System.out.println("new level 2 docStruct = " +
+			// outerff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0).getType().getName());
+
 		} catch (PreferencesException e) {
 			logger.error(e);
 		} catch (TypeNotAllowedAsChildException e) {
@@ -572,6 +574,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					mm.write(fileName);
 					logger.debug("copying image files from " + info.imageDir.getAbsolutePath() + "...");
 					copyImageFiles(info.imageDir);
+					copyPdfs(info.pdfFile);
 					io.setProcessTitle(getProcessTitle().replace(".xml", ""));
 					io.setMetsFilename(fileName);
 					io.setImportReturnValue(ImportReturnValue.ExportFinished);
@@ -726,6 +729,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				rec.setData(importData);
 				logger.debug("Getting record " + importFileName);
 				rec.setId(importFileName.substring(0, importFileName.indexOf(".")));
+				identifierSuffix = null;
 				String searchString = parseImagefolder(rec); // get the image folders corresponding to this record, plus an additional process
 				logger.debug("Project name is " + projectName);
 				rec.setId(searchString); // identifer if necessary
@@ -736,7 +740,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					if (oldFile != null) {
 						if (updateExistingRecords) {
 							logger.info("Found existing record. Updating.");
-							if(!updateOldRecord(record, oldFile)) {
+							if (!updateOldRecord(record, oldFile)) {
 								Helper.setFehlerMeldung("Error updating record " + record.getId());
 							} else {
 								Helper.setMeldung("Updated process " + record.getId());
@@ -763,6 +767,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				rec.setData(writer.toString());
 				rec.setId(importFileName.substring(0, importFileName.indexOf(".")));
 				// check for old records
+				identifierSuffix = null;
 				String searchString = parseImagefolder(rec); // get the image folders corresponding to this record, plus an additional process
 				rec.setId(searchString); // identifer if necessary
 				List<Record> records = generateRecords(rec);
@@ -772,7 +777,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					if (oldFile != null) {
 						if (updateExistingRecords) {
 							logger.info("Found existing record. Updating.");
-							if(!updateOldRecord(record, oldFile)) {
+							if (!updateOldRecord(record, oldFile)) {
 								Helper.setFehlerMeldung("Error updating record " + record.getId());
 							} else {
 								Helper.setMeldung("Updated process " + record.getId());
@@ -1232,12 +1237,22 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			String fileName = newMetaFileName;
 			logger.debug("Writing '" + fileName + "' into existing folder...");
 			ff.write(fileName);
-
+			copyImageFiles(info.imageDir);
+			copyPdfs(info.pdfFile);
 			// getting anchor file
 			File importDir = new File(importFolder);
 			if (!importDir.isDirectory()) {
 				logger.warn("no hotfolder found. Cannot get anchor files");
 			} else {
+				
+				File tempFolder = new File(importFolder, getProcessTitle().replace(".xml", ""));
+				if(tempFolder.isDirectory()) {
+					for (File dir : tempFolder.listFiles(DirFilter)) {
+						org.apache.commons.io.FileUtils.copyDirectory(dir, new File(oldMetaFile.getParentFile(), dir.getName()));
+					}
+				}
+				
+				
 				// for (File file : importDir.listFiles(XmlFilter)) {
 				// if (file.getName().contains(record.getId() + "_anchor")) {
 				// logger.debug("Moving file " + file.getName() + " to metadata folder");
@@ -1247,40 +1262,40 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				// }
 
 				// updating import folders
-				if (sourceFolder != null && sourceFolder.isDirectory()) {
-					File tempDir = sourceFolder.getParentFile();
-					File metadataDir = oldMetaFile.getParentFile();
-
-					File[] files = tempDir.listFiles();
-					if (files != null) {
-						for (File file : files) {
-							File newFile = new File(metadataDir, file.getName());
-							if (file.isDirectory()) {
-								int counter = 0;
-								while (newFile.isDirectory()) {
-									newFile = new File(newFile.getParent(), newFile.getName() + counter);
-									counter++;
-								}
-								org.apache.commons.io.FileUtils.copyDirectory(file, newFile);
-							} else if (file.isFile()) {
-								int counter = 0;
-								while (newFile.isFile()) {
-									String fileNameTrunk = newFile.getName().substring(0, newFile.getName().indexOf("."));
-									String fileNameExt = newFile.getName().substring(newFile.getName().indexOf("."));
-									newFile = new File(newFile.getParent(), fileNameTrunk + counter + fileNameExt);
-									counter++;
-								}
-								org.apache.commons.io.FileUtils.copyDirectory(file, newFile);
-							}
-						}
-					}
-				}
+//				if (sourceFolder != null && sourceFolder.isDirectory()) {
+//					File tempDir = sourceFolder.getParentFile();
+//					File metadataDir = oldMetaFile.getParentFile();
+//
+//					File[] files = tempDir.listFiles();
+//					if (files != null) {
+//						for (File file : files) {
+//							File newFile = new File(metadataDir, file.getName());
+//							if (file.isDirectory()) {
+////								int counter = 0;
+////								while (newFile.isDirectory()) {
+////									newFile = new File(newFile.getParent(), newFile.getName() + counter);
+////									counter++;
+////								}
+//								org.apache.commons.io.FileUtils.copyDirectory(file, newFile);
+//							} else if (file.isFile()) {
+//								int counter = 0;
+//								while (newFile.isFile()) {
+//									String fileNameTrunk = newFile.getName().substring(0, newFile.getName().indexOf("."));
+//									String fileNameExt = newFile.getName().substring(newFile.getName().indexOf("."));
+//									newFile = new File(newFile.getParent(), fileNameTrunk + counter + fileNameExt);
+//									counter++;
+//								}
+//								org.apache.commons.io.FileUtils.copyDirectory(file, newFile);
+//							}
+//						}
+//					}
+//				}
 
 				// purging old temp files
-				 for (File file : importDir.listFiles(XmlFilter)) {
-				 if(file.getName().contains(record.getId()))
-				 file.delete();
-				 }
+				for (File file : importDir.listFiles(XmlFilter)) {
+					if (file.getName().contains(record.getId()))
+						file.delete();
+				}
 			}
 
 			// ret.put(getProcessTitle(), ImportReturnValue.ExportFinished);
@@ -1533,16 +1548,20 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			// }
 
 			List<File> folders = Arrays.asList(folder.listFiles());
-			File tiffDir = null, jpegDir = null, parentImageDir = null;
+			File tiffDir = null, jpegDir = null, pdfDir = null, parentImageDir = null;
 			for (File file : folders) {
 				if (file.isDirectory() && file.getName().toLowerCase().contentEquals("tiff")) {
 					logger.debug("found \"tiff\" directory in " + folder.getName());
 					tiffDir = file;
-				}
+				} 
 				if (file.isDirectory()
 						&& (file.getName().toLowerCase().contentEquals("jpg") || file.getName().toLowerCase().contentEquals("difusion"))) {
 					logger.debug("found \"jpeg\" directory in " + folder.getName());
 					jpegDir = file;
+				}
+				if(file.isDirectory() && file.getName().toLowerCase().contentEquals("pdf")) {
+					logger.debug("found \"pdf\" directory in " + folder.getName());
+					pdfDir = file;
 				}
 			}
 
@@ -1615,6 +1634,20 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				logString += "\nNONE";
 			}
 			logger.debug(logString);
+			
+			//get pdfFile if one exists
+			if(pdfDir != null) {
+				for (File file : pdfDir.listFiles(pdfFilter)) {
+					if(file.getName().contains(identifier)) {
+						//pdf has the correct identifier, check if is matches the volume as well
+						if(idImageDirs.size() < 2 || file.getName().contains(volumeIdentifier) || file.getName().contains(pieceDesignation)) {
+							pdfFile = file;
+							logger.debug("Found pdf-file " + file.getAbsolutePath());
+							break;
+						}
+					}
+				}
+			}
 
 			if (identifierSuffix != null) {
 				return identifier + "_" + identifierSuffix;
@@ -1633,7 +1666,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	 */
 	private void copyImageFiles(File imageDir) {
 
-		if (!copyImages || imageDir == null) {
+		if (!copyImages || imageDir == null || imageDir.listFiles(ImageFilter) == null || imageDir.listFiles(ImageFilter).length == 0) {
 			logger.debug("No images to copy");
 			return;
 		}
@@ -1682,6 +1715,29 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		fos.close();
 		bis.close();
 	}
+	
+	private void copyPdfs(File pdfFile) {
+
+		if (!copyPdfs || pdfFile == null) {
+			logger.debug("No pdf to copy");
+			return;
+		}
+
+		// get temp dir
+		File tempDir = new File(importFolder, getProcessTitle().replace(".xml", ""));
+		File tempOcrDir = new File(tempDir, "ocr");
+		File tempPdfDir = new File(tempOcrDir, getProcessTitle().replace(".xml", "") + "_pdf");
+		tempPdfDir.mkdirs();
+
+			try {
+				splitPdf(pdfFile, tempPdfDir);
+				if(deleteOriginalImages) {
+					pdfFile.delete();
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
 
 	/**
 	 * 
@@ -1762,59 +1818,59 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			}
 		}
 
-//		// verify logical names
-//		verifyStructureNames(logStruct);
-//
-//		// remove the anchor to be able to read the file as ff
-//		List<? extends Content> logChildren = logStruct.getChildren();
-//		if (logChildren != null && logChildren.size() > 0) {
-//			if (logChildren.size() == 1) {
-//				Content topContent = logChildren.get(0);
-//				if (topContent instanceof Element) {
-//					Element topElement = (Element) topContent;
-//					String type = topElement.getAttributeValue("TYPE");
-//					if (anchorMap.containsValue(type)) {
-//						logger.debug("Logical DocStruct contains an anchor");
-//
-//						List<? extends Content> list = logStruct.getContent();
-//						for (int i = 0; i < list.size(); i++) {
-//							Content content = list.get(i);
-//							if (content instanceof Element) {
-//								anchorElement = (Element) logStruct.removeContent(i);
-//								break;
-//							}
-//						}
-//						if (anchorElement != null) {
-//								List<? extends Content> contentList = anchorElement.removeContent();
-//								logStruct.addContent(contentList);
-////								int counter = 1;
-////								for (Content content : contentList) {
-////									if(content instanceof Element) {	
-////										if(counter == currentVolume) {											
-////											logStruct.addContent(content);
-////										}
-////										counter++;
-////									} else {
-////										logStruct.addContent(content);
-////									}
-////								}
-//								if (imageDirs.size() < 2) {
-//									// only one volume, so ignore the anchor
-//									anchorElement = null;
-//								}
-//						} else {
-//							logger.error("Found no anchor element!");
-//						}
-//					} else {
-//						logger.debug("No anchor in logical DocStruct");
-//					}
-//				}
-//			} else {
-//				logger.error("Logical DocStruct has more than one child element");
-//			}
-//		} else {
-//			logger.error("Logical DocStruct does not appear to have any child elements");
-//		}
+		// // verify logical names
+		// verifyStructureNames(logStruct);
+		//
+		// // remove the anchor to be able to read the file as ff
+		// List<? extends Content> logChildren = logStruct.getChildren();
+		// if (logChildren != null && logChildren.size() > 0) {
+		// if (logChildren.size() == 1) {
+		// Content topContent = logChildren.get(0);
+		// if (topContent instanceof Element) {
+		// Element topElement = (Element) topContent;
+		// String type = topElement.getAttributeValue("TYPE");
+		// if (anchorMap.containsValue(type)) {
+		// logger.debug("Logical DocStruct contains an anchor");
+		//
+		// List<? extends Content> list = logStruct.getContent();
+		// for (int i = 0; i < list.size(); i++) {
+		// Content content = list.get(i);
+		// if (content instanceof Element) {
+		// anchorElement = (Element) logStruct.removeContent(i);
+		// break;
+		// }
+		// }
+		// if (anchorElement != null) {
+		// List<? extends Content> contentList = anchorElement.removeContent();
+		// logStruct.addContent(contentList);
+		// // int counter = 1;
+		// // for (Content content : contentList) {
+		// // if(content instanceof Element) {
+		// // if(counter == currentVolume) {
+		// // logStruct.addContent(content);
+		// // }
+		// // counter++;
+		// // } else {
+		// // logStruct.addContent(content);
+		// // }
+		// // }
+		// if (imageDirs.size() < 2) {
+		// // only one volume, so ignore the anchor
+		// anchorElement = null;
+		// }
+		// } else {
+		// logger.error("Found no anchor element!");
+		// }
+		// } else {
+		// logger.debug("No anchor in logical DocStruct");
+		// }
+		// }
+		// } else {
+		// logger.error("Logical DocStruct has more than one child element");
+		// }
+		// } else {
+		// logger.error("Logical DocStruct does not appear to have any child elements");
+		// }
 
 		return doc;
 	}
@@ -1859,9 +1915,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		List children = parent.getChildren();
 		int volume = 0;
 		try {
-		volume = Integer.valueOf(parent.getAttributeValue("ORDER"));
-		}catch(Exception e) {
-			
+			volume = Integer.valueOf(parent.getAttributeValue("ORDER"));
+		} catch (Exception e) {
+
 		}
 		for (Object object : children) {
 			if (object instanceof Element) {
@@ -1869,13 +1925,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				if (child.getAttributeValue("TYPE").toLowerCase().contentEquals("page")) {
 					// child is a page
 					pages.add(child);
-					if(volume != 0) {
-						//map the volume this page belongs to
+					if (volume != 0) {
+						// map the volume this page belongs to
 						pageVolumeMap.put(child.getAttributeValue("ID"), volume);
 					}
-					
+
 				} else {
-						pages.addAll(getPhysicalPages(child));
+					pages.addAll(getPhysicalPages(child));
 				}
 			}
 		}
@@ -2150,40 +2206,31 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		converter.prefs = new Prefs();
 
 		try {
-			converter.prefs.loadPrefs("resources/rulesetCSIC.xml");
-			File inFile = new File("/opt/digiverso/goobi/metadata/5960/meta.xml");
-			MetsMods mm = new MetsMods(converter.prefs);
-			mm.read(inFile.getAbsolutePath());
-			// mm.write("test.xml");
-			MetsModsImportExport export = new MetsModsImportExport(converter.prefs);
-			export.setDigitalDocument(mm.getDigitalDocument());
-			export.write("test-export.xml");
+			converter.prefs.loadPrefs("/opt/digiverso/goobi/rulesets/rulesetCSIC.xml");
 		} catch (PreferencesException e) {
 			logger.error(e.getMessage(), e);
-		} catch (ReadException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 
-		// converter.setImportFolder("output/");
-		// List<Record> records = new ArrayList<Record>();
-		// if (!converter.exportFolder.isDirectory()) {
-		// logger.warn("No export directory found. Aborting");
-		// return;
-		// }
-		//
-		// for (File file : converter.exportFolder.listFiles(XmlFilter)) {
-		//
-		// // converter.createFileformat(file);
-		// converter.setFile(file);
-		// records.addAll(converter.generateRecordsFromFile());
-		// }
-		//
-		// List<ImportObject> results = converter.generateFiles(records);
-		//
-		// for (ImportObject record : results) {
-		// System.out.println(record.getProcessTitle() + " \t \t " + record.getImportReturnValue());
-		// }
+		 converter.setImportFolder("output/");
+		 List<Record> records = new ArrayList<Record>();
+		 if (!converter.exportFolder.isDirectory()) {
+		 logger.warn("No export directory found. Aborting");
+		 return;
+		 }
+		
+//		 for (File file : converter.exportFolder.listFiles(XmlFilter)) {
+		
+		 // converter.createFileformat(file);
+		 File file = new File("/mnt/csic/0017_FACN/000009800_9800001020.xml");
+		 converter.setFile(file);
+		 records.addAll(converter.generateRecordsFromFile());
+//		 }
+		
+		 List<ImportObject> results = converter.generateFiles(records);
+		
+		 for (ImportObject record : results) {
+		 System.out.println(record.getProcessTitle() + " \t \t " + record.getImportReturnValue());
+		 }
 	}
 
 	// private Document getModsMetsLoss(Document modsDoc, Document metsDoc) {
@@ -2225,6 +2272,17 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		public boolean accept(File dir, String name) {
 			boolean validImage = false;
 			if (name.endsWith("zip") || name.endsWith("ZIP")) {
+				validImage = true;
+			}
+
+			return validImage;
+		}
+	};
+	public static FilenameFilter pdfFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			boolean validImage = false;
+			if (name.endsWith("pdf") || name.endsWith("PDF")) {
 				validImage = true;
 			}
 
@@ -2347,6 +2405,22 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 			return filenameList;
 		}
 		return filenameList;
+	}
+
+	private boolean splitPdf(File pdfFile, File destDir) {
+
+		if (pdfFile == null || !pdfFile.isFile()) {
+			return false;
+		}
+
+		if (destDir == null || !destDir.exists()) {
+			destDir.mkdirs();
+		}
+
+		PdfExtractor extractor = new PdfExtractor();
+
+		return extractor.extractPdfs(pdfFile, destDir, null);
+
 	}
 
 	@Override
