@@ -170,10 +170,11 @@ public class ModsUtils {
 	public static void parseModsSection(String mappingFileName, Prefs prefs, DocStruct dsLogical, DocStruct dsPhysical, DocStruct dsSeries,
 			Element eleMods) throws JDOMException, IOException {
 		// logger.debug(new XMLOutputter().outputString(eleMods));
+		boolean isPartOfSeries = false;
 		File mappingFile = new File(mappingFileName);
 
 		// Get seriesInfo from File
-		File tempDir = new File(mappingFile.getParentFile().getParentFile(), "temp");
+		File tempDir = new File(mappingFile.getParentFile().getParentFile(), "tmp");
 		if (!tempDir.isDirectory()) {
 			tempDir.mkdirs();
 		}
@@ -198,7 +199,7 @@ public class ModsUtils {
 
 			// Code to handle related works, e.g. series
 			if (mdName.contentEquals("relatedSeries")) {
-				boolean isPartOfSeries = false;
+//				boolean isPartOfSeries = false;
 				if (dsLogical.getType() == prefs.getDocStrctTypeByName("Volume") || dsLogical.getType() == prefs.getDocStrctTypeByName("Periodical")) {
 					isPartOfSeries = true;
 				}
@@ -415,13 +416,15 @@ public class ModsUtils {
 		}
 
 		// write seriesInfo to file
-		if (dsSeries != null) {
+		if (isPartOfSeries && dsSeries != null) {
 			seriesInfo.put(seriesName, seriesID);
 			if (seriesInfoFile.isFile()) {
 				logger.debug("deleting old seriesInfoFile");
 				seriesInfoFile.delete();
 			}
 			writeFile(seriesInfoFile, seriesInfo);
+		} else {
+			dsSeries = null;
 		}
 	}
 
