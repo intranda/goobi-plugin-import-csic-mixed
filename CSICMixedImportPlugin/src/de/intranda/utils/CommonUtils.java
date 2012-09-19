@@ -264,7 +264,65 @@ public class CommonUtils {
 	}
 
 	/**
-	 * Moves (actually renames) all files (and directories) within directory dir to another directory destDir
+	 * Moves a file to another directory, either by renaming it, or, failing that, by copying it and deleting the old file.
+	 * 	 * 
+	 * @param sourceFile	The file to be moved
+	 * @param destFile		The path to move the file to. If this denotes an existing directory, the file will be moved into this directory under the original filename		
+	 * @param force		Overwrites any possibly existing old file, and creates directories if necessary
+	 * @return
+	 */
+	public static void moveFile(File sourceFile, File destFile, boolean force)  throws FileNotFoundException, IOException {
+		
+		String destFileName = null;
+		File destDir = null;
+		
+		if(sourceFile == null || !sourceFile.isFile()) {
+			throw new FileNotFoundException("Invalid source file specified");
+		}
+		
+		if(destFile == null) {
+			throw new FileNotFoundException("Invalid destination file specified");
+		}
+		
+		if(destFile.isDirectory()) {
+			destDir = destFile;
+			destFileName = sourceFile.getName();
+		} else {
+			destDir = destFile.getParentFile();
+			destFileName = destFile.getName();
+		}
+		
+		if(destDir == null || !destDir.isDirectory()) {
+			if(!force) {
+				throw new FileNotFoundException("Invalid destination directory specified");
+			} else if(!destDir.mkdirs()) {
+				throw new IOException("Unable to create destination file");
+			}
+		} 
+		
+		File targetFile = new File(destDir, destFileName);
+		if(targetFile.isFile() && !force) {
+			throw new IOException("Destination file already exists");
+		} else {
+			if(!sourceFile.renameTo(targetFile)) {
+				//renaming failed, try copying and deleting
+				if(targetFile.isFile()) {
+					if(!targetFile.delete()) {
+						throw new IOException("Unable to overwrite destination file");
+					}
+				}
+				copyFile(sourceFile, targetFile);
+				if(targetFile.exists()) {
+					sourceFile.delete();
+				} else {
+					throw new IOException("Copy operation failed");
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Moves (either by simply renaming or by copy and delete) all files (and directories) within directory dir to another directory destDir
 	 * 
 	 * @param sourcedir
 	 * @param destDir
@@ -284,7 +342,7 @@ public class CommonUtils {
 
 		if (files == null || files.length == 0) {
 
-			// don't move id destDir already exists - the source Dir is empty anyway
+			// don't move if destDir already exists - the source Dir is empty anyway
 			if (destDir != null && destDir.isDirectory()) {
 				sourcedir.delete();
 				return;
@@ -297,22 +355,34 @@ public class CommonUtils {
 				throw new FileNotFoundException(e.getMessage());
 			}
 			if (!success) {
+				if(destDir.mkdir()) {
+					sourcedir.delete();
+				} else {
 				throw new IOException("Failed moving directory " + sourcedir.getAbsolutePath());
+				}
 			}
 			return;
 		}
 
-		destDir.mkdirs();
+		if(!destDir.mkdirs()) {
+			throw new IOException("Failed creating destination directories");
+		}
 		for (File file : files) {
 			if (file.isDirectory()) {
 				moveDir(file, new File(destDir, file.getName()), overwrite);
 			} else {
 				File destFile = new File(destDir, file.getName());
 				if (overwrite || !destFile.isFile()) {
-					if (!file.renameTo(new File(destDir, file.getName()))) {
+					
+					try {
+						moveFile(file, destDir, overwrite);
+					} catch(IOException e) {
 						throw new IOException("Unable to move file " + file.getAbsolutePath() + " to directory " + destDir.getAbsolutePath());
-
-					}
+					}				
+//					if (!file.renameTo(new File(destDir, file.getName()))) {
+//						throw new IOException("Unable to move file " + file.getAbsolutePath() + " to directory " + destDir.getAbsolutePath());
+//
+//					}
 				}
 			}
 		}
