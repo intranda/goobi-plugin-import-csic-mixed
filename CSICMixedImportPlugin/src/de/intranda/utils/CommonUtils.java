@@ -264,55 +264,62 @@ public class CommonUtils {
 	}
 
 	/**
-	 * Moves a file to another directory, either by renaming it, or, failing that, by copying it and deleting the old file.
-	 * 	 * 
-	 * @param sourceFile	The file to be moved
-	 * @param destFile		The path to move the file to. If this denotes an existing directory, the file will be moved into this directory under the original filename		
-	 * @param force		Overwrites any possibly existing old file, and creates directories if necessary
+	 * Moves a file to another directory, either by renaming it, or, failing that, by copying it and deleting the old file. *
+	 * 
+	 * @param sourceFile
+	 *            The file to be moved
+	 * @param destFile
+	 *            The path to move the file to. If this denotes an existing directory, the file will be moved into this directory under the original
+	 *            filename
+	 * @param force
+	 *            Overwrites any possibly existing old file, and creates directories if necessary
 	 * @return
 	 */
-	public static void moveFile(File sourceFile, File destFile, boolean force)  throws FileNotFoundException, IOException {
-		
+	public static void moveFile(File sourceFile, File destFile, boolean force) throws FileNotFoundException, IOException {
+
 		String destFileName = null;
 		File destDir = null;
-		
-		if(sourceFile == null || !sourceFile.isFile()) {
+
+		if (sourceFile == null || !sourceFile.isFile()) {
 			throw new FileNotFoundException("Invalid source file specified");
 		}
-		
-		if(destFile == null) {
+
+		if (destFile == null) {
 			throw new FileNotFoundException("Invalid destination file specified");
 		}
-		
-		if(destFile.isDirectory()) {
+
+		if (destFile.isDirectory()) {
 			destDir = destFile;
 			destFileName = sourceFile.getName();
 		} else {
 			destDir = destFile.getParentFile();
 			destFileName = destFile.getName();
 		}
-		
-		if(destDir == null || !destDir.isDirectory()) {
-			if(!force) {
+
+		if (destDir == null || !destDir.isDirectory()) {
+			if (!force) {
 				throw new FileNotFoundException("Invalid destination directory specified");
-			} else if(!destDir.mkdirs()) {
-				throw new IOException("Unable to create destination file");
+			} else {
+				destDir.mkdirs();
+				if (!destDir.isDirectory()) {
+					throw new IOException("Unable to create destination file");
+				}
 			}
-		} 
-		
+		}
+
 		File targetFile = new File(destDir, destFileName);
-		if(targetFile.isFile() && !force) {
+		if (targetFile.isFile() && !force) {
 			throw new IOException("Destination file already exists");
 		} else {
-			if(!sourceFile.renameTo(targetFile)) {
-				//renaming failed, try copying and deleting
-				if(targetFile.isFile()) {
-					if(!targetFile.delete()) {
+			if (!sourceFile.renameTo(targetFile)) {
+				// renaming failed, try copying and deleting
+				if (targetFile.isFile()) {
+					if (!targetFile.delete()) {
 						throw new IOException("Unable to overwrite destination file");
 					}
 				}
 				copyFile(sourceFile, targetFile);
-				if(targetFile.exists()) {
+				if (targetFile.exists()) {
 					sourceFile.delete();
 				} else {
 					throw new IOException("Copy operation failed");
@@ -320,7 +327,7 @@ public class CommonUtils {
 			}
 		}
 	}
-	
+
 	/**
 	 * Moves (either by simply renaming or by copy and delete) all files (and directories) within directory dir to another directory destDir
 	 * 
@@ -355,16 +362,17 @@ public class CommonUtils {
 				throw new FileNotFoundException(e.getMessage());
 			}
 			if (!success) {
-				if(destDir.mkdir()) {
+				if (destDir.mkdir()) {
 					sourcedir.delete();
 				} else {
-				throw new IOException("Failed moving directory " + sourcedir.getAbsolutePath());
+					throw new IOException("Failed moving directory " + sourcedir.getAbsolutePath());
 				}
 			}
 			return;
 		}
 
-		if(!destDir.mkdirs()) {
+		destDir.mkdirs();
+		if (!destDir.isDirectory()) {
 			throw new IOException("Failed creating destination directories");
 		}
 		for (File file : files) {
@@ -373,20 +381,20 @@ public class CommonUtils {
 			} else {
 				File destFile = new File(destDir, file.getName());
 				if (overwrite || !destFile.isFile()) {
-					
+
 					try {
 						moveFile(file, destDir, overwrite);
-					} catch(IOException e) {
+					} catch (IOException e) {
 						throw new IOException("Unable to move file " + file.getAbsolutePath() + " to directory " + destDir.getAbsolutePath());
-					}				
-//					if (!file.renameTo(new File(destDir, file.getName()))) {
-//						throw new IOException("Unable to move file " + file.getAbsolutePath() + " to directory " + destDir.getAbsolutePath());
-//
-//					}
+					}
+					// if (!file.renameTo(new File(destDir, file.getName()))) {
+					// throw new IOException("Unable to move file " + file.getAbsolutePath() + " to directory " + destDir.getAbsolutePath());
+					//
+					// }
 				}
 			}
 		}
-		if(sourcedir.listFiles().length == 0) {
+		if (sourcedir.listFiles().length == 0) {
 			sourcedir.delete();
 		}
 		return;
@@ -402,7 +410,7 @@ public class CommonUtils {
 			return false;
 		}
 		if (dir.isFile()) {
-			logger.error("Unable to delete directory " + dir.getAbsolutePath());
+//			logger.error("Unable to delete directory " + dir.getAbsolutePath());
 			return dir.delete();
 		}
 		boolean success = true;
