@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,7 +52,9 @@ import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
 import ugh.dl.Person;
 import ugh.dl.Prefs;
+import ugh.dl.RomanNumeral;
 import ugh.exceptions.DocStructHasNoTypeException;
+import ugh.exceptions.IncompletePersonObjectException;
 import ugh.exceptions.MetadataTypeNotAllowedException;
 
 public class ModsUtils {
@@ -65,6 +68,7 @@ public class ModsUtils {
 	private static String seriesInfoFilename = "seriesInfo.ser";
 	private static ArrayList<String> anchorMetadataList = new ArrayList<String>(Arrays.asList("singleDigCollection", "PublisherName",
 			"PublicationStart", "PublicationEnd", "PublicationRun"));
+	private static DecimalFormat volumeNumberFormat = new DecimalFormat("00");
 
 	/**
 	 * Writes the given JDOM document into a file.
@@ -171,7 +175,7 @@ public class ModsUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void parseModsSection(String mappingFileName, Prefs prefs, DocStruct dsLogical, DocStruct dsPhysical, DocStruct dsSeries,
-			Element eleMods) throws JDOMException, IOException {
+			Element eleMods, int volumeNo, String pieceDesignation) throws JDOMException, IOException {
 
 		// logger.debug(new XMLOutputter().outputString(eleMods));
 		boolean isPartOfSeries = dsSeries == null ? false : true;
@@ -200,6 +204,111 @@ public class ModsUtils {
 		for (Object obj : mapDoc.getRootElement().getChildren("metadata", null)) {
 			Element eleMetadata = (Element) obj;
 			String mdName = eleMetadata.getChildTextTrim("name", null);
+
+			if (mdName.contentEquals("location")) {
+				// write location info
+				int counter = 0;
+				List<Element> eleXpathList = eleMetadata.getChildren("xpath", null);
+				if (eleXpathList == null || eleXpathList.isEmpty()) {
+					continue;
+				}
+
+				String query = eleXpathList.get(0).getTextTrim();
+				XPath xpath = XPath.newInstance(query);
+				xpath.addNamespace(NS_MODS);
+				List<Element> eleValueList = xpath.selectNodes(doc);
+
+				for (Element element : eleValueList) {
+
+					String shelfmarkSource = null;
+					String physicalLocation = null;
+					String physicalCollection = null;
+					String localPieceDesignation = null;
+					int localVolumeNo = -1;
+					boolean isCurrentColume = true;
+
+					Element eleShelfmarkSource = element.getChild("shelfLocator", NS_MODS);
+					if (eleShelfmarkSource != null) {
+						shelfmarkSource = eleShelfmarkSource.getValue();
+					}
+					Element elePhysLocation = element.getChild("physicalLocation", NS_MODS);
+					if (elePhysLocation != null) {
+						physicalLocation = elePhysLocation.getValue();
+					}
+					Element eleHoldingSimple = element.getChild("holdingSimple", NS_MODS);
+					if (eleHoldingSimple != null) {
+						Element eleCopyInformation = eleHoldingSimple.getChild("copyInformation", NS_MODS);
+						if (eleCopyInformation != null) {
+							Element elePhysicalCollection = eleCopyInformation.getChild("subLocation", NS_MODS);
+							if (elePhysicalCollection != null) {
+								physicalCollection = elePhysicalCollection.getValue();
+							}
+							Element elePieceDesignation = eleCopyInformation.getChild("pieceDesignation", NS_MODS);
+							if (elePieceDesignation != null) {
+								localPieceDesignation = elePieceDesignation.getValue();
+							}
+							Element eleVolumeNo = eleCopyInformation.getChild("VolumeNo", NS_MODS);
+							if (eleVolumeNo == null) {
+								eleVolumeNo = eleCopyInformation.getChild("VolumeLabel", NS_MODS);
+							}
+							if (eleVolumeNo != null) {
+								String volumeString = eleVolumeNo.getValue().replaceAll("\\D", "");
+								if (volumeString != null && !volumeString.isEmpty()) {
+									localVolumeNo = Integer.valueOf(volumeString);
+								}
+							}
+						}
+					}
+
+					if (localPieceDesignation == null) {
+						localPieceDesignation = pieceDesignation;
+					}
+
+					// if (pieceDesignation != null && localPieceDesignation.contentEquals(pieceDesignation)) {
+					// This is either the correct volume or no volume is specified.
+					try {
+						String mdPrefix = "";
+						if (counter > 0) {
+							mdPrefix = "copy" + volumeNumberFormat.format(counter);
+						}
+
+						if (shelfmarkSource != null) {
+							MetadataType shelfmarkSourceType = prefs.getMetadataTypeByName(mdPrefix + "shelfmarksource");
+							Metadata shelfmarkSourceMetadata = new Metadata(shelfmarkSourceType);
+							shelfmarkSourceMetadata.setValue(shelfmarkSource);
+							dsPhysical.addMetadata(shelfmarkSourceMetadata);
+						}
+						if (physicalLocation != null) {
+							MetadataType physicalLocationType = prefs.getMetadataTypeByName(mdPrefix + "physicalLocation");
+							Metadata physicalLocationMetadata = new Metadata(physicalLocationType);
+							physicalLocationMetadata.setValue(physicalLocation);
+							dsPhysical.addMetadata(physicalLocationMetadata);
+						}
+						if (physicalCollection != null) {
+							MetadataType physicalCollectionType = prefs.getMetadataTypeByName(mdPrefix + "physicalCollection");
+							Metadata physicalCollectionMetadata = new Metadata(physicalCollectionType);
+							physicalCollectionMetadata.setValue(physicalCollection);
+							dsPhysical.addMetadata(physicalCollectionMetadata);
+						}
+
+						if (localPieceDesignation != null) {
+							MetadataType pieceDesignationType = prefs.getMetadataTypeByName(mdPrefix + "pieceDesignation");
+							Metadata pieceDesignationMetadata = new Metadata(pieceDesignationType);
+							pieceDesignationMetadata.setValue(localPieceDesignation);
+							dsPhysical.addMetadata(pieceDesignationMetadata);
+						}
+
+						if (counter < 10) {
+							counter++;
+						}
+
+					} catch (MetadataTypeNotAllowedException e) {
+						logger.error(e);
+					}
+					// }
+				}
+				continue;
+			}
 
 			// Code to handle related works, e.g. series
 			if (mdName.contentEquals("relatedSeries")) {
@@ -238,41 +347,6 @@ public class ModsUtils {
 							logger.debug("related Series = " + seriesName);
 							seriesID = seriesInfo.get(seriesName);
 						}
-					}
-				}
-
-				if (isPartOfSeries) {
-					if (seriesID == null) {
-						seriesID = "CSIC" + System.currentTimeMillis();
-						logger.debug("Series not found. creating new one: " + seriesID);
-					}
-					if (seriesName == null) {
-						seriesName = seriesID;
-					}
-
-					// Creating metadata for series
-					try {
-						MetadataType titleType = prefs.getMetadataTypeByName("TitleDocMain");
-						MetadataType idType = prefs.getMetadataTypeByName("CatalogIDDigital");
-						Metadata mdTitle;
-						mdTitle = new Metadata(titleType);
-						Metadata mdID = new Metadata(idType);
-						mdTitle.setValue(seriesName);
-						mdID.setValue(seriesID);
-
-						logger.debug("Found metadata: " + mdTitle.getType().getName());
-						if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-							logger.debug("Added metadata \"" + mdTitle.getValue() + "\" to logical structure");
-							dsSeries.addMetadata(mdTitle);
-						}
-						logger.debug("Found metadata: " + mdID.getType().getName());
-						if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-							logger.debug("Added metadata \"" + mdID.getValue() + "\" to logical structure");
-							dsSeries.addMetadata(mdID);
-						}
-
-					} catch (MetadataTypeNotAllowedException e) {
-						logger.error(e.toString(), e);
 					}
 				}
 			}
@@ -323,7 +397,9 @@ public class ModsUtils {
 										person.setRole(mdType.getName());
 										if (eleMetadata.getAttribute("logical") != null
 												&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+
 											dsLogical.addPerson(person);
+
 										}
 									} catch (MetadataTypeNotAllowedException e) {
 										logger.warn(e.getMessage());
@@ -372,7 +448,10 @@ public class ModsUtils {
 										value = title;
 									} else
 										continue;
+								} else if (mdType.getName().contentEquals("CurrentNoSorting")) {
+									value = correctCurrentNoSorting(value);
 								}
+								
 
 								// Add singleDigCollection to series also
 								if (anchorMetadataList.contains(mdType.getName()) && dsSeries != null) {
@@ -400,7 +479,9 @@ public class ModsUtils {
 										if (eleMetadata.getAttribute("logical") != null
 												&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
 											// logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
+
 											dsLogical.addMetadata(metadata);
+
 										}
 										if (eleMetadata.getAttribute("physical") != null
 												&& eleMetadata.getAttributeValue("physical").equalsIgnoreCase("true")) {
@@ -418,6 +499,33 @@ public class ModsUtils {
 
 			} else {
 				logger.warn("Metadata '" + mdName + "' is not defined in the ruleset.");
+			}
+		}
+
+		if (isPartOfSeries && dsSeries != null) {
+			if (seriesID == null) {
+				seriesID = "CSIC" + System.currentTimeMillis();
+				logger.debug("Series not found. creating new one: " + seriesID);
+			}
+			if (seriesName == null) {
+				seriesName = seriesID;
+			}
+
+			// Creating metadata for series
+			try {
+				MetadataType titleType = prefs.getMetadataTypeByName("TitleDocMain");
+				MetadataType idType = prefs.getMetadataTypeByName("CatalogIDDigital");
+				Metadata mdTitle;
+				mdTitle = new Metadata(titleType);
+				Metadata mdID = new Metadata(idType);
+				mdTitle.setValue(seriesName);
+				mdID.setValue(seriesID);
+
+				dsSeries.addMetadata(mdTitle);
+				dsSeries.addMetadata(mdID);
+
+			} catch (MetadataTypeNotAllowedException e) {
+				logger.warn(e.getMessage());
 			}
 		}
 
@@ -674,5 +782,37 @@ public class ModsUtils {
 		}
 
 		return ret;
+	}
+	
+	private static String correctCurrentNoSorting(String inString) {
+
+		String outString = null;
+		try {
+			//Try to read a number
+			int n = Integer.valueOf(inString);
+			outString = "" + n;
+		} catch (NumberFormatException e) {
+			logger.trace("No arabic numeral");
+			try {
+				//Try to read a roman numeral
+				RomanNumeral rn = new RomanNumeral(inString);
+				outString = "" + rn.intValue();
+			} catch (NumberFormatException e1) {
+				logger.trace("No roman numeral");
+				//Just get the first arabic number
+				String[] split = inString.split("\\D");
+				if(split==null || split.length==0) {
+					//There are no numbers in this String, try again with roman numerals
+					split = inString.split("\\W");
+					if(split==null || split.length==0) {
+						//Nothing found. return empty
+						return "";
+					}
+				}
+				return correctCurrentNoSorting(split[0]);
+			}
+			
+		}
+		return outString;
 	}
 }
