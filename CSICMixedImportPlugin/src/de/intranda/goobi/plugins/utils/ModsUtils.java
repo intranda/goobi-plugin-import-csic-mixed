@@ -68,6 +68,7 @@ public class ModsUtils {
 	private static String seriesInfoFilename = "seriesInfo.ser";
 	private static ArrayList<String> anchorMetadataList = new ArrayList<String>(Arrays.asList("singleDigCollection", "PublisherName",
 			"PublicationStart", "PublicationEnd", "PublicationRun"));
+	private static ArrayList<String> taxonomyFieldsList = new ArrayList<String>(Arrays.asList("topic", "genre", "geographic", "temporal"));
 	private static DecimalFormat volumeNumberFormat = new DecimalFormat("00");
 
 	/**
@@ -411,8 +412,11 @@ public class ModsUtils {
 
 				} else {
 					// Regular metadata
-					String titleArticle = null, title = null;
-					String id1 = null, id2 = null;
+					List<String> values = new ArrayList<String>();
+					String separator = " ";
+					if(eleMetadata.getAttribute("separator") != null) {
+						separator = eleMetadata.getAttributeValue("separator");
+					}
 					for (Element eleXpath : eleXpathList) {
 						String query = eleXpath.getTextTrim();
 						// logger.debug("XPath: " + query);
@@ -420,85 +424,100 @@ public class ModsUtils {
 						xpath.addNamespace(NS_MODS);
 						List<Element> eleValueList = xpath.selectNodes(doc);
 						if (eleValueList != null) {
-							List<String> values = new ArrayList<String>();
-							for (Element eleValue : eleValueList) {
 
-								logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
-								// values.add(eleValue.getTextTrim());
-								// }
-								// String value = "";
-								// for (String s : values) {
-								// if (StringUtils.isNotEmpty(s)) {
-								// value += " " + s;
-								// }
-								// }
-								// value = value.trim();
-								String value = eleValue.getTextTrim();
-
-								// if we have the title, get both nonSort (article) and title before writing metadata
-								if (mdType.getName().contentEquals("TitleDocMain")) {
-									if (eleXpath.getValue().contains("nonSort")) {
-										titleArticle = value;
-									} else if (eleXpath.getValue().contains("title")) {
-										title = value;
+							if (mdName.contentEquals("Taxonomy")) {
+								for (Element eleValue : eleValueList) {
+									List<Element> subjectChildren = eleValue.getChildren();
+									String value = "";
+									for (Element element : subjectChildren) {
+										if (taxonomyFieldsList.contains(element.getName().toLowerCase())) {
+											value = value + separator + element.getValue();
+										}
 									}
-									if (titleArticle != null && title != null) {
-										value = titleArticle + " " + title;
-									} else if (title != null) {
-										value = title;
-									} else
-										continue;
-								} else if (mdType.getName().contentEquals("CurrentNoSorting")) {
-									value = correctCurrentNoSorting(value);
-								} else if (mdType.getName().contentEquals("TitleDocParallel")) {
-									seriesName = value;
-									String serId = seriesInfo.get(seriesName);
-									if(serId != null && !serId.isEmpty()) {
-										seriesID = serId;
+									if(value.length() > separator.length()) {
+									value = value.substring(separator.length()).trim();
+									values.add(value);
 									}
 								}
-								
-
-								// Add singleDigCollection to series also
-								if (anchorMetadataList.contains(mdType.getName()) && dsSeries != null) {
-									// if (mdType.getName().contentEquals("singleDigCollection") && dsSeries != null) {
-									try {
-										if (value.length() > 0) {
-											Metadata metadata = new Metadata(mdType);
-											metadata.setValue(value);
-											logger.debug("Found metadata: " + metadata.getType().getName());
-											if (eleMetadata.getAttribute("logical") != null
-													&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-												logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
-												dsSeries.addMetadata(metadata);
-											}
-										}
-									} catch (MetadataTypeNotAllowedException e) {
-										logger.warn(e.getMessage());
+							} else {
+								int count = 0;
+								for (Element eleValue : eleValueList) {
+									logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
+									String value = eleValue.getTextTrim();
+									if (values.size() <= count) {
+										values.add(value);
+									} else {
+										value = values.get(count) + separator + value;
+										values.set(count, value);
 									}
-								}
-								try {
-									if (value.length() > 0) {
-										Metadata metadata = new Metadata(mdType);
-										metadata.setValue(value);
-										// logger.debug("Found metadata: " + metadata.getType().getName());
-										if (eleMetadata.getAttribute("logical") != null
-												&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-											// logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
-
-											dsLogical.addMetadata(metadata);
-
-										}
-										if (eleMetadata.getAttribute("physical") != null
-												&& eleMetadata.getAttributeValue("physical").equalsIgnoreCase("true")) {
-											// logger.debug("Added metadata \"" + metadata.getValue() + "\" to physical structure");
-											dsPhysical.addMetadata(metadata);
-										}
-									}
-								} catch (MetadataTypeNotAllowedException e) {
-									logger.warn(e.getMessage());
+									count++;
 								}
 							}
+						}
+					}
+					for (String value : values) {
+						
+//						 //if we have the title, get both nonSort (article) and title before writing metadata
+//						if (mdType.getName().contentEquals("TitleDocMain")) {
+//							if (eleXpath.getValue().contains("nonSort")) {
+//								titleArticle = value;
+//							} else if (eleXpath.getValue().contains("title")) {
+//								title = value;
+//							}
+//							if (titleArticle != null && title != null) {
+//								value = titleArticle + " " + title;
+//							} else if (title != null) {
+//								value = title;
+//							} else
+//								continue;
+//						} else
+						if (mdType.getName().contentEquals("CurrentNoSorting")) {
+							value = correctCurrentNoSorting(value);
+						} else if (mdType.getName().contentEquals("TitleDocParallel")) {
+							seriesName = value;
+							String serId = seriesInfo.get(seriesName);
+							if (serId != null && !serId.isEmpty()) {
+								seriesID = serId;
+							}
+						}
+
+						// Add singleDigCollection to series also
+						if (anchorMetadataList.contains(mdType.getName()) && dsSeries != null) {
+							// if (mdType.getName().contentEquals("singleDigCollection") && dsSeries != null) {
+							try {
+								if (value.length() > 0) {
+									Metadata metadata = new Metadata(mdType);
+									metadata.setValue(value);
+									logger.debug("Found metadata: " + metadata.getType().getName());
+									if (eleMetadata.getAttribute("logical") != null
+											&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+										logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
+										dsSeries.addMetadata(metadata);
+									}
+								}
+							} catch (MetadataTypeNotAllowedException e) {
+								logger.warn(e.getMessage());
+							}
+						}
+						try {
+							if (value.length() > 0) {
+								Metadata metadata = new Metadata(mdType);
+								metadata.setValue(value);
+								// logger.debug("Found metadata: " + metadata.getType().getName());
+								if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+									// logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
+
+									dsLogical.addMetadata(metadata);
+
+								}
+								if (eleMetadata.getAttribute("physical") != null
+										&& eleMetadata.getAttributeValue("physical").equalsIgnoreCase("true")) {
+									// logger.debug("Added metadata \"" + metadata.getValue() + "\" to physical structure");
+									dsPhysical.addMetadata(metadata);
+								}
+							}
+						} catch (MetadataTypeNotAllowedException e) {
+							logger.warn(e.getMessage());
 						}
 					}
 				}
@@ -789,39 +808,39 @@ public class ModsUtils {
 
 		return ret;
 	}
-	
+
 	public static String correctCurrentNoSorting(String inString) {
 
 		String outString = null;
 		try {
-			//Try to read a number
+			// Try to read a number
 			int n = Integer.valueOf(inString);
 			outString = "" + n;
 		} catch (NumberFormatException e) {
 			logger.trace("No arabic numeral");
 			try {
-				//Try to read a roman numeral
+				// Try to read a roman numeral
 				RomanNumeral rn = new RomanNumeral(inString);
 				outString = "" + rn.intValue();
 			} catch (NumberFormatException e1) {
 				logger.trace("No roman numeral");
-				//Just get the first arabic number
+				// Just get the first arabic number
 				String[] split = inString.split("\\D");
-				if(split==null || split.length==0) {
-					//There are no numbers in this String, try again with roman numerals
+				if (split == null || split.length == 0) {
+					// There are no numbers in this String, try again with roman numerals
 					split = inString.split("\\W");
-					if(split==null || split.length==0) {
-						//Nothing found. return empty
+					if (split == null || split.length == 0) {
+						// Nothing found. return empty
 						return "";
 					}
 				}
-				if(split.length > 1) {					
+				if (split.length > 1) {
 					return correctCurrentNoSorting(split[0]);
 				} else {
 					return "";
 				}
 			}
-			
+
 		}
 		return outString;
 	}

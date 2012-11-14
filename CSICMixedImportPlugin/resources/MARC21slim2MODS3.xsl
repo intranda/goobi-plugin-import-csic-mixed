@@ -15,7 +15,6 @@
 		with single quotes to perform integer check before assigning Revision 1.70 
 		- Added mapping for OCLC numbers in 035s to go into <identifier type="oclc"> 
 		2011/02/27 - tmee Revision 1.69 - Added mapping for untyped identifiers for 
-		024 - 2011/02/27 tmee Revision 1.68 - Added <subject><titleInfo> mapping 
 		for 600/610/611 subfields t,p,n - 2010/12/22 tmee Revision 1.67 - Added frequency 
 		values and authority="marcfrequency" for 008/18 - 2010/12/09 tmee Revision 
 		1.66 - Fixed 008/06=c,d,i,m,k,u, from dateCreated to dateIssued - 2010/12/06 
@@ -38,7 +37,7 @@
 		tmee Revision 1.49 - Aquifer revision 1.14 - Added 240s (version) data to 
 		<titleInfo type="uniform"><title> 2009/11/23 tmee Revision 1.48 - Aquifer 
 		revision 1.27 - Added mapping of 242 second indicator (for nonfiling characters) 
-		to <titleInfo><nonSort > subelement 2007/08/08 tmee/dlf Revision 1.47 - Aquifer 
+		to <titleInfo><nonSort > subelement 2007/08/08 tmee/dlf Revision 1.47 - Aquifer CR
 		revision 1.26 - Mapped 300 subfield f (type of unit) - and g (size of unit) 
 		2009 ntra Revision 1.46 - Aquifer revision 1.25 - Changed mapping of 767 
 		so that <type="otherVersion> 2009/11/20 tmee Revision 1.45 - Aquifer revision 
@@ -168,7 +167,6 @@
 				</xsl:when>
 			</xsl:choose>
 		</xsl:variable>
-
 		<!-- titleInfo -->
 
 		<xsl:for-each select="datafield[@tag='245']">
@@ -313,6 +311,11 @@
 			<xsl:if
 				test="$leader6='d' or $leader6='f' or $leader6='p' or $leader6='t'">
 				<xsl:attribute name="manuscript">yes</xsl:attribute>
+			</xsl:if>
+			<xsl:if test="$typeOf008!=''">
+			<xsl:attribute name="displayLabel">
+				<xsl:value-of select="$typeOf008"/>
+			</xsl:attribute>
 			</xsl:if>
 			<xsl:choose>
 				<xsl:when test="$leader6='a' or $leader6='t'">
@@ -694,20 +697,6 @@
 					</placeTerm>
 				</place>
 			</xsl:for-each>
-						<xsl:for-each select="datafield[@tag=260]/subfield[@code='e']">
-				<place>
-					<placeTerm>
-						<xsl:attribute name="type">production</xsl:attribute>
-						<xsl:call-template name="chopPunctuationFront">
-							<xsl:with-param name="chopString">
-								<xsl:call-template name="chopPunctuation">
-									<xsl:with-param name="chopString" select="." />
-								</xsl:call-template>
-							</xsl:with-param>
-						</xsl:call-template>
-					</placeTerm>
-				</place>
-			</xsl:for-each>
 			<xsl:for-each select="datafield[@tag=046]/subfield[@code='m']">
 				<dateValid point="start">
 					<xsl:value-of select="." />
@@ -894,6 +883,7 @@
 					<xsl:value-of select="." />
 				</edition>
 			</xsl:for-each>
+			<xsl:if test="$typeOf008='SE'">
 			<xsl:for-each select="leader">
 				<issuance>
 					<xsl:choose>
@@ -920,6 +910,7 @@
 					</xsl:choose>
 				</issuance>
 			</xsl:for-each>
+			</xsl:if>
 			<xsl:for-each select="datafield[@tag=310]|datafield[@tag=321]">
 				<frequency authority="marcfrequency">
 					<xsl:call-template name="subfieldSelect">
@@ -930,6 +921,7 @@
 				</frequency>
 			</xsl:for-each>
 			<!-- 1.67 -->
+			<xsl:if test="$typeOf008='SE'">
 			<xsl:for-each select="controlfield[@tag=008]">
 				<xsl:variable name="controlField008-18" select="substring($controlField008,19,1)" />
 				<frequency>
@@ -990,6 +982,63 @@
 						</xsl:when>
 					</xsl:choose>
 				</frequency>
+			</xsl:for-each>
+			</xsl:if>
+		</originInfo>
+		
+				
+		<!-- manufacturer -->
+		<originInfo displayLabel="manufacturer">
+			<xsl:for-each select="datafield[@tag=260]/subfield[@code='e']">
+				<place>
+					<placeTerm>
+						<xsl:attribute name="type">text</xsl:attribute>
+					<xsl:variable name="choppedString">
+						<xsl:call-template name="chopPunctuationFront">
+							<xsl:with-param name="chopString">
+								<xsl:call-template name="chopPunctuation">
+									<xsl:with-param name="chopString" select="." />
+								</xsl:call-template>
+							</xsl:with-param>
+						</xsl:call-template>
+					</xsl:variable>
+						<xsl:call-template name="chopBrackets">
+							<xsl:with-param name="chopString" select="$choppedString"/>
+						</xsl:call-template>
+					</placeTerm>
+				</place>
+			</xsl:for-each>
+			<xsl:for-each select="datafield[@tag=260]/subfield[@code='f']">
+				<publisher>
+				<xsl:variable name="choppedString">
+						<xsl:call-template name="chopPunctuationFront">
+							<xsl:with-param name="chopString">
+								<xsl:call-template name="chopPunctuation">
+									<xsl:with-param name="chopString" select="." />
+								</xsl:call-template>
+							</xsl:with-param>
+						</xsl:call-template>
+				</xsl:variable>
+				<xsl:call-template name="chopBrackets">
+					<xsl:with-param name="chopString" select="$choppedString"/>
+				</xsl:call-template>
+				</publisher>
+			</xsl:for-each>
+			<xsl:for-each select="datafield[@tag=260]/subfield[@code='g']">
+				<dateOther type="manufacture">
+				<xsl:variable name="choppedString">
+						<xsl:call-template name="chopPunctuationFront">
+							<xsl:with-param name="chopString">
+								<xsl:call-template name="chopPunctuation">
+									<xsl:with-param name="chopString" select="." />
+								</xsl:call-template>
+							</xsl:with-param>
+						</xsl:call-template>
+				</xsl:variable>
+				<xsl:call-template name="chopBrackets">
+					<xsl:with-param name="chopString" select="$choppedString"/>
+				</xsl:call-template>
+				</dateOther>
 			</xsl:for-each>
 		</originInfo>
 
@@ -1706,15 +1755,6 @@
 			<xsl:call-template name="createNoteFrom245c" />
 		</xsl:for-each>
 		
-				<xsl:for-each select="datafield[@tag=594]">
-			<xsl:call-template name="createNoteFrom594a" />
-		</xsl:for-each>
-				<xsl:for-each select="datafield[@tag=595]">
-			<xsl:call-template name="createNoteFrom595a" />
-		</xsl:for-each>
-				<xsl:for-each select="datafield[@tag=599]">
-			<xsl:call-template name="createNoteFrom599a" />
-		</xsl:for-each>
 		<xsl:for-each select="datafield[@tag=596]">
 			<xsl:call-template name="createNoteFrom596a" />
 		</xsl:for-each>
@@ -1809,6 +1849,10 @@
 
 		<xsl:for-each select="datafield[@tag=585]">
 			<xsl:call-template name="createNoteFrom585" />
+		</xsl:for-each>
+		
+		<xsl:for-each select="datafield[@tag=590 or @tag=591 or  @tag=592 or  @tag=593 or  @tag=594 or  @tag=595 or  @tag=596 or  @tag=597 or  @tag=598 or  @tag=599]">
+			<xsl:call-template name="createNoteFrom5XX" />
 		</xsl:for-each>
 
 		<xsl:for-each
@@ -1993,10 +2037,7 @@
 		</xsl:for-each>
 		
 		<xsl:for-each select="datafield[@tag=563]">
-			<xsl:call-template name="physicalNoteFrom563"/>
-		</xsl:for-each>
-		<xsl:for-each select="datafield[@tag=853]">
-			<xsl:call-template name="physicalNoteFrom852g"/>
+		<xsl:call-template name="physicalNoteFrom563"/>
 		</xsl:for-each>
 
 		<xsl:for-each select="datafield[@tag=700][subfield[@code='t']]">
@@ -2872,15 +2913,6 @@
 			</physicalDescription>
 		</xsl:for-each>
 	</xsl:template>
-	<xsl:template name="physicalNoteFrom852g">
-		<xsl:for-each select="subfield[@code='g']">
-			<physicalDescription>
-				<note>
-					<xsl:value-of select="." />
-				</note>
-			</physicalDescription>
-		</xsl:for-each>
-	</xsl:template>
 	<xsl:template name="relatedNote">
 		<xsl:for-each select="subfield[@code='n']">
 			<note>
@@ -3200,7 +3232,7 @@
 		<xsl:variable name="str">
 			<xsl:for-each select="subfield">
 				<xsl:if
-					test="contains($anyCodes, @code) or (contains($beforeCodes,@code) and following-sibling::subfield[contains($axis,@code)])      or (contains($afterCodes,@code) and preceding-sibling::subfield[contains($axis,@code)])">
+					test="contains($anyCodes, @code) or (contains($beforeCodes,@code) and following-sibling::subfield[contains($axis,@code)])      or (contains($afterCodes,@code) and preceding-sibling::subfield[@code=$axis])">
 					<xsl:value-of select="text()" />
 					<xsl:text> </xsl:text>
 				</xsl:if>
@@ -3485,11 +3517,20 @@
 				<xsl:with-param name="chopString" select="$chopString" />
 			</xsl:call-template>
 		</xsl:variable>
-		<xsl:if test="substring($string, 1,1)='['">
-			<xsl:value-of select="substring($string,2, string-length($string)-2)" />
+		<xsl:variable name="choppedFront">
+		<xsl:if test="substring($string, 1,1)='[' or substring($string, 1,1)='('">
+			<xsl:value-of select="substring($string,2, string-length($string)-1)" />
 		</xsl:if>
-		<xsl:if test="substring($string, 1,1)!='['">
+		<xsl:if test="substring($string, 1,1)!='[' and substring($string, 1,1)!='('">
 			<xsl:value-of select="$string" />
+		</xsl:if>
+		</xsl:variable>
+		<xsl:variable name="length" select="string-length($choppedFront)"/>
+		<xsl:if test="substring($choppedFront, $length,1)=']' or substring($choppedFront, $length,1)=')'">
+			<xsl:value-of select="substring($string,1, $length - 1)" />
+		</xsl:if>
+		<xsl:if test="substring($choppedFront, $length,1)!=']' and substring($choppedFront, $length,1)!=')'">
+			<xsl:value-of select="$choppedFront" />
 		</xsl:if>
 	</xsl:template>
 	<xsl:template name="rfcLanguages">
@@ -4469,7 +4510,7 @@
 					</xsl:call-template>
 				</note>
 			</xsl:when>
-			<xsl:when test="datafield[@tag='245']/subfield[@code=c]">
+			<xsl:when test="subfield[@code='c']">
 				<note type="statement of responsibility">
 					<xsl:call-template name="scriptCode" />
 					<xsl:call-template name="subfieldSelect">
@@ -4479,6 +4520,7 @@
 					</xsl:call-template>
 				</note>
 			</xsl:when>
+			<xsl:otherwise>Failed to create note from 245c</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
@@ -4497,27 +4539,6 @@
 	</xsl:template>
 	
 	<xsl:template name="createNoteFrom596a">
-		<note>
-			<xsl:call-template name="xxx880" />
-			<xsl:call-template name="uri" />
-			<xsl:value-of select="subfield[@code='a']" />
-		</note>
-	</xsl:template>
-		<xsl:template name="createNoteFrom594a">
-		<note>
-			<xsl:call-template name="xxx880" />
-			<xsl:call-template name="uri" />
-			<xsl:value-of select="subfield[@code='a']" />
-		</note>
-	</xsl:template>
-		<xsl:template name="createNoteFrom595a">
-		<note>
-			<xsl:call-template name="xxx880" />
-			<xsl:call-template name="uri" />
-			<xsl:value-of select="subfield[@code='a']" />
-		</note>
-	</xsl:template>
-		<xsl:template name="createNoteFrom599a">
 		<note>
 			<xsl:call-template name="xxx880" />
 			<xsl:call-template name="uri" />
@@ -5392,7 +5413,7 @@
 				<shelfLocator>
 					<xsl:call-template name="subfieldSelect">
 						<xsl:with-param name="codes">
-							hijklmt
+							hjklmt
 						</xsl:with-param>
 					</xsl:call-template>
 				</shelfLocator>
@@ -5413,7 +5434,7 @@
 						<shelfLocator>
 							<xsl:call-template name="subfieldSelect">
 								<xsl:with-param name="codes">
-									hijklmt
+									hjklmt
 								</xsl:with-param>
 							</xsl:call-template>
 						</shelfLocator>
@@ -5444,6 +5465,26 @@
 								</xsl:with-param>
 							</xsl:call-template>
 						</pieceDesignation>
+					</xsl:if>
+					<xsl:if
+						test="subfield[@code='g']">
+						<VolumeLabel>
+							<xsl:call-template name="subfieldSelect">
+								<xsl:with-param name="codes">
+									g
+								</xsl:with-param>
+							</xsl:call-template>
+						</VolumeLabel>
+					</xsl:if>
+					<xsl:if
+						test="subfield[@code='g']">
+						<VolumeNo>
+							<xsl:call-template name="subfieldSelect">
+								<xsl:with-param name="codes">
+									i
+								</xsl:with-param>
+							</xsl:call-template>
+						</VolumeNo>
 					</xsl:if>
 				</copyInformation>
 			</holdingSimple>

@@ -3,6 +3,7 @@ package de.intranda.goobi.plugins;
 import java.io.File;
 
 public class VolumeInfo {
+	public String identifier;
 	public String pieceDesignation;
 	public int volumeNumber;
 	public int totalVolumes;
@@ -11,7 +12,8 @@ public class VolumeInfo {
 	public String identifierSuffix;
 	public String projectName;
 	
-	public VolumeInfo(int volumeNumber, int totalVolumes, String pieceDesignation, File imageDir, File pdfFile, String identifierSuffix, String projectName) {
+	public VolumeInfo(String identifier, int volumeNumber, int totalVolumes, String pieceDesignation, File imageDir, File pdfFile, String identifierSuffix, String projectName) {
+		this.identifier = identifier;
 		this.pieceDesignation = pieceDesignation;
 		this.volumeNumber = volumeNumber;
 		this.totalVolumes = totalVolumes;

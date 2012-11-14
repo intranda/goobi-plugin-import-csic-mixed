@@ -5,7 +5,7 @@
 		<xpath>/mods:mods/mods:recordInfo/mods:recordIdentifier</xpath>
 <!-- 		<xpath>/mods:mods/mods:location/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath> -->
 	</metadata>
-	<metadata logical="true">
+	<metadata logical="true" separator=" ">
 		<name>TitleDocMain</name>
 		<xpath>/mods:mods/mods:titleInfo[not(@type='alternative')]/mods:nonSort
 		</xpath>
@@ -41,138 +41,10 @@
 		<xpath>/mods:mods/mods:identifier[@type='LCCN' or @type='lccn']
 		</xpath>
 	</metadata>
-      <metadata physical="true">
-        <name>shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[1]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy01shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[2]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy02shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[3]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy03shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[4]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy04shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[5]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy05shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[6]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy06shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[7]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy07shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[8]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy08shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[9]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy09shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[10]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy10shelfmarksource</name>
-        <xpath>/mods:mods/mods:location[11]/mods:shelfLocator</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>physicalLocation</name>
-        <xpath>./mods:mods/mods:location[1]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy01physicalLocation</name>
-        <xpath>./mods:mods/mods:location[2]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy02physicalLocation</name>
-        <xpath>./mods:mods/mods:location[3]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy03physicalLocation</name>
-        <xpath>./mods:mods/mods:location[4]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy04physicalLocation</name>
-        <xpath>./mods:mods/mods:location[5]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy05physicalLocation</name>
-        <xpath>./mods:mods/mods:location[6]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy06physicalLocation</name>
-        <xpath>./mods:mods/mods:location[7]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy07physicalLocation</name>
-        <xpath>./mods:mods/mods:location[8]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy08physicalLocation</name>
-        <xpath>./mods:mods/mods:location[9]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy09physicalLocation</name>
-        <xpath>./mods:mods/mods:location[10]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy10physicalLocation</name>
-        <xpath>./mods:mods/mods:location[11]/mods:physicalLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>physicalCollection</name>
-        <xpath>./mods:mods/mods:location[1]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy01physicalCollection</name>
-        <xpath>./mods:mods/mods:location[2]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy02physicalCollection</name>
-        <xpath>./mods:mods/mods:location[3]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy03physicalCollection</name>
-        <xpath>./mods:mods/mods:location[4]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy04physicalCollection</name>
-        <xpath>./mods:mods/mods:location[5]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy05physicalCollection</name>
-        <xpath>./mods:mods/mods:location[6]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy06physicalCollection</name>
-        <xpath>./mods:mods/mods:location[7]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy07physicalCollection</name>
-        <xpath>./mods:mods/mods:location[8]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy08physicalCollection</name>
-        <xpath>./mods:mods/mods:location[9]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy09physicalCollection</name>
-        <xpath>./mods:mods/mods:location[10]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy10physicalCollection</name>
-        <xpath>./mods:mods/mods:location[11]/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-      </metadata>
+	<metadata physical="true">
+		<name>location</name>
+		<xpath>/mods:mods/mods:location</xpath>
+	</metadata>
 	<metadata logical="true">
 		<name>SizeSourcePrint</name>
 		<xpath>/mods:mods/mods:physicalDescription/mods:extent</xpath>
@@ -215,13 +87,12 @@
 		<name>PublicationRun</name>
 		<xpath>/mods:mods/mods:originInfo/mods:frequency
 		</xpath>
-	</metadata>
 	<metadata logical="true">
 		<name>PublisherName</name>
 		<xpath>/mods:mods/mods:originInfo/mods:publisher</xpath>
 	</metadata>
 	<metadata logical="true">
-		<name>PublisherName</name>
+		<name>Edition</name>
 		<xpath>/mods:mods/mods:originInfo/mods:edition</xpath>
 	</metadata>
 	<metadata logical="true">
@@ -230,8 +101,13 @@
 		</xpath>
 	</metadata>
 		<metadata logical="true">
-		<name>PlaceOfProduction</name>
-		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='production']
+		<name>DateOfManufacture</name>
+		<xpath>/mods:mods/mods:originInfo[@displayLabel='manufacturer']/mods:dateOther[@type='manufacture']
+		</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>PlaceOfManufacture</name>
+		<xpath>/mods:mods/mods:originInfo[@displayLabel='manufacturer']/mods:place/mods:placeTerm[@type='text']
 		</xpath>
 	</metadata>
 	<metadata logical="true">
@@ -246,7 +122,7 @@
 	</metadata>
 	<metadata logical="true">
 		<name>Author</name>
-		<xpath>/mods:mods/mods:name[@type='personal']/mods:namePart[not(@type)]
+		<xpath>/mods:mods/mods:name[@type='personal'][not(mods:role)]/mods:namePart[not(@type)]
 		</xpath>
 		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
 		</xpath>
@@ -263,8 +139,52 @@
 		</xpath>
 	</metadata>
 	<metadata logical="true">
-		<name>SubjectTopic</name>
-		<xpath>/mods:mods/mods:subject/mods:topic</xpath>
+		<name>Translator</name>
+		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="Translator"]/mods:namePart[not(@type)]
+		</xpath>
+		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
+		</xpath>
+		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>Translator</name>
+		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="Traductor"]/mods:namePart[not(@type)]
+		</xpath>
+		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
+		</xpath>
+		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
+		</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>Printer</name>
+		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="imp."]/mods:namePart[not(@type)]
+		</xpath>
+		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
+		</xpath>
+		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
+		</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>Printer</name>
+		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="prt"]/mods:namePart[not(@type)]
+		</xpath>
+		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
+		</xpath>
+		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>Manufacturer</name>
+		<xpath>/mods:mods/mods:originInfo[@displayLabel='manufacturer']/mods:publisher</xpath>
+	</metadata>
+	<metadata logical="true" separator="::">
+		<name>Taxonomy</name>
+		<xpath>/mods:mods/mods:subject</xpath>
+<!-- 		<xpath>/mods:topic</xpath> -->
+<!-- 		<xpath>/mods:genre</xpath> -->
+<!-- 		<xpath>/mods:geographic</xpath> -->
+<!-- 		<xpath>/mods:temporal</xpath> -->
 	</metadata>
 	<metadata logical="true">
 		<name>Occupation</name>
@@ -273,6 +193,18 @@
 	<metadata logical="true">
 		<name>SubjectGenre</name>
 		<xpath>/mods:mods/mods:subject/mods:genre</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>SubjectTopic</name>
+		<xpath>/mods:mods/mods:subject/mods:topic</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>SubjectLocation</name>
+		<xpath>/mods:mods/mods:subject/mods:geographic</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>SubjectTemporal</name>
+		<xpath>/mods:mods/mods:subject/mods:temporal</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>SubjectPerson</name>
@@ -338,10 +270,10 @@
 		<name>CurrentNoSorting</name>
 		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo/mods:partNumber</xpath>
 	</metadata>
-	<metadata logical="true">
+<!--	<metadata logical="true">
 		<name>singleDigCollection</name>
 		<xpath>/mods:mods/mods:location/mods:holdingSimple/mods:copyInformation/mods:subLocation</xpath>
-	</metadata>
+	</metadata> -->
 	<metadata logical="true">
 		<name>CountryCode</name>
 		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='code']</xpath>
@@ -353,49 +285,5 @@
 	<metadata logical="true">
 		<name>CatalogLanguage</name>
 		<xpath>/mods:mods/mods:originInfo/mods:languageOfCataloging/mods:languageTerm</xpath>
-</metadata>
-      <metadata physical="true">
-        <name>pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[1]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy01pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[2]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy02pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[3]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy03pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[4]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy04pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[5]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy05pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[6]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy06pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[7]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy07pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[8]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy08pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[9]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy09pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[10]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
-      <metadata physical="true">
-        <name>copy10pieceDesignation</name>
-        <xpath>./mods:mods/mods:location[11]/mods:holdingSimple/mods:copyInformation/mods:pieceDesignation</xpath>
-      </metadata>
+	</metadata>
 </map>
