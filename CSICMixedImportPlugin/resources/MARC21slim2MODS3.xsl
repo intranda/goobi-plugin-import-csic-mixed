@@ -2281,7 +2281,7 @@
 		</xsl:for-each>
 		<xsl:for-each select="datafield[@tag=800]">
 			<relatedItem type="series">
-				<titleInfo>
+				<titleInfo  type="uniform">
 					<title>
 						<xsl:call-template name="chopPunctuation">
 							<xsl:with-param name="chopString">
@@ -2328,7 +2328,7 @@
 		</xsl:for-each>
 		<xsl:for-each select="datafield[@tag=810]">
 			<relatedItem type="series">
-				<titleInfo>
+				<titleInfo  type="uniform">
 					<title>
 						<xsl:call-template name="chopPunctuation">
 							<xsl:with-param name="chopString">
@@ -2379,7 +2379,7 @@
 		</xsl:for-each>
 		<xsl:for-each select="datafield[@tag=811]">
 			<relatedItem type="series">
-				<titleInfo>
+				<titleInfo  type="uniform">
 					<title>
 						<xsl:call-template name="chopPunctuation">
 							<xsl:with-param name="chopString">
@@ -2420,7 +2420,7 @@
 		</xsl:for-each>
 		<xsl:for-each select="datafield[@tag='830']">
 			<relatedItem type="series">
-				<titleInfo>
+				<titleInfo  type="uniform">
 					<title>
 						<xsl:call-template name="chopPunctuation">
 							<xsl:with-param name="chopString">

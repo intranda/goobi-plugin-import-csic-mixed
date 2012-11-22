@@ -87,6 +87,7 @@
 		<name>PublicationRun</name>
 		<xpath>/mods:mods/mods:originInfo/mods:frequency
 		</xpath>
+	</metadata>
 	<metadata logical="true">
 		<name>PublisherName</name>
 		<xpath>/mods:mods/mods:originInfo/mods:publisher</xpath>
@@ -100,12 +101,12 @@
 		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='text']
 		</xpath>
 	</metadata>
-		<metadata logical="true">
+	<metadata logical="true">
 		<name>DateOfManufacture</name>
 		<xpath>/mods:mods/mods:originInfo[@displayLabel='manufacturer']/mods:dateOther[@type='manufacture']
 		</xpath>
 	</metadata>
-		<metadata logical="true">
+	<metadata logical="true">
 		<name>PlaceOfManufacture</name>
 		<xpath>/mods:mods/mods:originInfo[@displayLabel='manufacturer']/mods:place/mods:placeTerm[@type='text']
 		</xpath>
@@ -115,63 +116,68 @@
 		<xpath>/mods:mods/mods:physicalDescription/mods:form[@type='material']
 		</xpath>
 	</metadata>
-		<metadata logical="true">
+	<metadata logical="true">
 		<name>AccessOptions</name>
 		<xpath>/mods:mods/mods:accessOptions
 		</xpath>
 	</metadata>
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>Author</name> -->
+<!-- 		<xpath>/mods:mods/mods:name[@type='personal'][not(mods:role)]/mods:namePart[not(@type)] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family'] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given'] -->
+<!-- 		</xpath> -->
+<!-- 	</metadata> -->
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>Editor</name> -->
+<!-- 		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="Editor"]/mods:namePart[not(@type)] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family'] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given'] -->
+<!-- 		</xpath> -->
+<!-- 	</metadata> -->
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>Translator</name> -->
+<!-- 		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="Translator"]/mods:namePart[not(@type)] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family'] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given'] -->
+<!-- 		</xpath> -->
+<!-- 	</metadata> -->
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>Translator</name> -->
+<!-- 		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="Traductor"]/mods:namePart[not(@type)] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family'] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given'] -->
+<!-- 		</xpath> -->
+<!-- 	</metadata> -->
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>Printer</name> -->
+<!-- 		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="imp."]/mods:namePart[not(@type)] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family'] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given'] -->
+<!-- 		</xpath> -->
+<!-- 	</metadata> -->
+<!-- 		<metadata logical="true"> -->
+<!-- 		<name>Printer</name> -->
+<!-- 		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="prt"]/mods:namePart[not(@type)] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family'] -->
+<!-- 		</xpath> -->
+<!-- 		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given'] -->
+<!-- 		</xpath> -->
+<!-- 	</metadata> -->
 	<metadata logical="true">
-		<name>Author</name>
-		<xpath>/mods:mods/mods:name[@type='personal'][not(mods:role)]/mods:namePart[not(@type)]
-		</xpath>
-		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
-		</xpath>
-		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
-		</xpath>
-	</metadata>
-	<metadata logical="true">
-		<name>Editor</name>
-		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="Editor"]/mods:namePart[not(@type)]
-		</xpath>
-		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
-		</xpath>
-		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
-		</xpath>
-	</metadata>
-	<metadata logical="true">
-		<name>Translator</name>
-		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="Translator"]/mods:namePart[not(@type)]
-		</xpath>
-		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
-		</xpath>
-		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
-		</xpath>
-	</metadata>
-	<metadata logical="true">
-		<name>Translator</name>
-		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="Traductor"]/mods:namePart[not(@type)]
-		</xpath>
-		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
-		</xpath>
-		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
-		</xpath>
-	</metadata>
-		<metadata logical="true">
-		<name>Printer</name>
-		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="imp."]/mods:namePart[not(@type)]
-		</xpath>
-		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
-		</xpath>
-		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
-		</xpath>
-	</metadata>
-		<metadata logical="true">
-		<name>Printer</name>
-		<xpath>/mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="prt"]/mods:namePart[not(@type)]
-		</xpath>
-		<xpath type="family">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='family']
-		</xpath>
-		<xpath type="given">/mods:mods/mods:name[@type='personal']/mods:namePart[@type='given']
+		<name>ParticipantOther</name>
+		<xpath>/mods:mods/mods:name[@type='personal']
 		</xpath>
 	</metadata>
 	<metadata logical="true">
@@ -240,11 +246,23 @@
 	</metadata>
 	<metadata logical="true">
 		<name>AdditionalInformation</name>
-		<xpath>/mods:mods/mods:note</xpath>
+		<xpath>/mods:mods/mods:note[not(@type)]</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>StatementOfResponsibility</name>
+		<xpath>/mods:mods/mods:note[@type='statement of responsibility']</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>Corporation</name>
+		<xpath>/mods:mods/mods:name[@type='corporate']/mods:namePart</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>Conference</name>
+		<xpath>	/mods:mods/mods:name[@type='conference']/mods:namePart</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>relatedSeries</name>
-		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo/mods:title</xpath>
+		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[not(@type='uniform')]/mods:title</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>PrecedingVolume</name>
@@ -266,7 +284,7 @@
 		<name>CurrentNo</name>
 		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo/mods:partNumber</xpath>
 	</metadata>
-		<metadata logical="true">
+	<metadata logical="true">
 		<name>CurrentNoSorting</name>
 		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo/mods:partNumber</xpath>
 	</metadata>
@@ -278,7 +296,7 @@
 		<name>CountryCode</name>
 		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='code']</xpath>
 	</metadata>
-		<metadata logical="true">
+	<metadata logical="true">
 		<name>recordContentSource</name>
 		<xpath>/mods:mods/mods:recordInfo/mods:recordContentSource</xpath>
 	</metadata>

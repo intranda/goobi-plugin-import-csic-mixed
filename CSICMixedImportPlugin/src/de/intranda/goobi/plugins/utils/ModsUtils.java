@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -46,6 +48,7 @@ import org.jdom.xpath.XPath;
 
 import de.schlichtherle.io.FileInputStream;
 import de.sub.goobi.Import.ImportOpac;
+import de.sub.goobi.config.ConfigMain;
 
 import ugh.dl.DocStruct;
 import ugh.dl.Metadata;
@@ -63,6 +66,7 @@ public class ModsUtils {
 	private static final Logger logger = Logger.getLogger(ModsUtils.class);
 
 	private static final Namespace NS_MODS = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
+	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
 
 	private static HashMap<String, String> seriesInfo = new HashMap<String, String>(); // Name and identifier of related Item "series"
 	private static String seriesInfoFilename = "seriesInfo.ser";
@@ -70,6 +74,7 @@ public class ModsUtils {
 			"PublicationStart", "PublicationEnd", "PublicationRun"));
 	private static ArrayList<String> taxonomyFieldsList = new ArrayList<String>(Arrays.asList("topic", "genre", "geographic", "temporal"));
 	private static DecimalFormat volumeNumberFormat = new DecimalFormat("00");
+	private static HashMap<String, String> personRoleMap = new HashMap<String, String>();
 
 	/**
 	 * Writes the given JDOM document into a file.
@@ -164,6 +169,61 @@ public class ModsUtils {
 		return obj;
 	}
 
+	public static void fillPersonRoleMap() {
+		personRoleMap = new HashMap<String, String>();
+		personRoleMap.put("adaptor", null);
+		personRoleMap.put("adapt", null);
+		personRoleMap.put("arreglista musical", null);
+		personRoleMap.put("arr", null);
+		personRoleMap.put("autor", "Author");
+		personRoleMap.put("aut", "Author");
+		personRoleMap.put("autor literario", "Author");
+		personRoleMap.put("aut lit", "Author");
+		personRoleMap.put("colaborador", "Collaborator");
+		personRoleMap.put("col", "Collaborator");
+		personRoleMap.put("comentarista", null);
+		personRoleMap.put("com", null);
+		personRoleMap.put("compilador", null);
+		personRoleMap.put("comp", null);
+		personRoleMap.put("Continuador", null);
+		personRoleMap.put("cont", null);
+		personRoleMap.put("coordinador", null);
+		personRoleMap.put("coord", null);
+		personRoleMap.put("corrector", null);
+		personRoleMap.put("corr", null);
+		personRoleMap.put("dibujante", "IllustratorArtist");
+		personRoleMap.put("dib", "IllustratorArtist");
+		personRoleMap.put("director", null);
+		personRoleMap.put("dir", null);
+		personRoleMap.put("editor", "Editor");
+		personRoleMap.put("ed", "Editor");
+		personRoleMap.put("encuadernado", null);
+		personRoleMap.put("enc", null);
+		personRoleMap.put("fotógrafo", "Photographer");
+		personRoleMap.put("fot", "Photographer");
+		personRoleMap.put("impresor", "Printer");
+		personRoleMap.put("imp", "Printer");
+		personRoleMap.put("interprete", null);
+		personRoleMap.put("int", null);
+		personRoleMap.put("prologuista", null);
+		personRoleMap.put("pr", null);
+		personRoleMap.put("recopilador", null);
+		personRoleMap.put("rec", null);
+		personRoleMap.put("redactor", null);
+		personRoleMap.put("red", null);
+		personRoleMap.put("refundidor", null);
+		personRoleMap.put("ref", null);
+		personRoleMap.put("revisor", null);
+		personRoleMap.put("rev", null);
+		personRoleMap.put("seleccionador", null);
+		personRoleMap.put("sel", null);
+		personRoleMap.put("traductor", "Translator");
+		personRoleMap.put("trad", "Translator");
+		personRoleMap.put("transcriptor", null);
+		personRoleMap.put("transcript", null);
+
+	}
+
 	/**
 	 * 
 	 * @param pres
@@ -175,19 +235,16 @@ public class ModsUtils {
 	 * @throws JDOMException
 	 */
 	@SuppressWarnings("unchecked")
-	public static void parseModsSection(String mappingFileName, Prefs prefs, DocStruct dsLogical, DocStruct dsPhysical, DocStruct dsSeries,
-			Element eleMods, int volumeNo, String pieceDesignation) throws JDOMException, IOException {
-
-		// logger.debug(new XMLOutputter().outputString(eleMods));
-		boolean isPartOfSeries = dsSeries == null ? false : true;
+	public static void parseModsSection(String mappingFileName, Prefs prefs, DocStruct dsLogical, DocStruct dsAnchor, DocStruct dsPhysical,
+			Element eleMods, int volumeNo, String pieceDesignation, String suffix) throws JDOMException, IOException {
+		fillPersonRoleMap();
+		boolean writeAllMetadataToAnchor = false;
+		if (dsAnchor != null && dsAnchor.getType().getName().contentEquals("MultiVolumeWork")) {
+			writeAllMetadataToAnchor = true;
+		}
 		File mappingFile = new File(mappingFileName);
 
-		// Get seriesInfo from File
-		File tempDir = new File(mappingFile.getParentFile().getParentFile(), "tmp");
-		if (!tempDir.isDirectory()) {
-			tempDir.mkdirs();
-		}
-		File seriesInfoFile = new File(tempDir, seriesInfoFilename);
+		File seriesInfoFile = new File(TEMP_DIRECTORY, seriesInfoFilename);
 		if (seriesInfoFile.isFile()) {
 			logger.debug("Reading data from " + seriesInfoFile.getName());
 			Object obj = readFile(seriesInfoFile);
@@ -200,7 +257,7 @@ public class ModsUtils {
 		Element eleNewMods = (Element) eleMods.clone();
 		doc.setRootElement(eleNewMods);
 		Document mapDoc = new SAXBuilder().build(mappingFile);
-		String seriesName = null;
+		String seriesTitle = null;
 		String seriesID = null;
 		for (Object obj : mapDoc.getRootElement().getChildren("metadata", null)) {
 			Element eleMetadata = (Element) obj;
@@ -311,47 +368,6 @@ public class ModsUtils {
 				continue;
 			}
 
-			// Code to handle related works, e.g. series
-			if (mdName.contentEquals("relatedSeries")) {
-				List<Element> eleXpathList = eleMetadata.getChildren("xpath", null);
-				if (eleXpathList != null && !eleXpathList.isEmpty()) {
-					for (Element eleXpath : eleXpathList) {
-						String query = eleXpath.getTextTrim();
-						// logger.debug("XPath: " + query);
-						XPath xpath = XPath.newInstance(query);
-						xpath.addNamespace(NS_MODS);
-						List<Element> eleValueList = xpath.selectNodes(doc);
-						if (eleValueList != null && !eleValueList.isEmpty()) {
-							List<String> values = new ArrayList<String>();
-							for (Element eleValue : eleValueList) {
-								// logger.debug("Value: " + eleValue.getTextTrim());
-								values.add(eleValue.getTextTrim());
-							}
-
-							String value = "";
-							for (String s : values) {
-								if (StringUtils.isNotEmpty(s)) {
-									value += " " + s;
-								}
-							}
-							value = value.trim();
-							String[] valueParts = value.split("\\s");
-							seriesName = "";
-							HashMap<String, Boolean> valueMap = new HashMap<String, Boolean>();
-							for (int i = 0; i < valueParts.length; i++) {
-								if (!valueMap.containsKey(valueParts[i])) {
-									seriesName += " " + valueParts[i];
-									valueMap.put(valueParts[i], true);
-								}
-							}
-							seriesName = seriesName.trim();
-							logger.debug("related Series = " + seriesName);
-							seriesID = seriesInfo.get(seriesName);
-						}
-					}
-				}
-			}
-
 			MetadataType mdType = prefs.getMetadataTypeByName(mdName);
 			if (mdType != null) {
 				List<Element> eleXpathList = eleMetadata.getChildren("xpath", null);
@@ -369,14 +385,48 @@ public class ModsUtils {
 								String name = "";
 								String firstName = "";
 								String lastName = "";
+								String termsOfAddress = "";
+								String roleTerm = "";
+								String typeName = "";
 
-								if (eleXpath.getAttribute("family") != null) {
-									lastName = eleValue.getTextTrim();
-								} else if (eleXpath.getAttribute("given") != null) {
-									firstName = eleValue.getTextTrim();
-								} else {
-									name = eleValue.getTextTrim();
+								for (Object o : eleValue.getChildren()) {
+									Element eleNamePart = (Element) o;
+									if (eleNamePart.getName().contentEquals("role")) {
+										Element eleRoleTerm = eleNamePart.getChild("roleTerm", null);
+										if (eleRoleTerm != null) {
+											roleTerm = eleRoleTerm.getValue();
+										}
+									} else {
+										String type = eleNamePart.getAttributeValue("type");
+										if (type == null || type.isEmpty()) {
+											// no type
+											name = eleNamePart.getValue();
+										} else if (type.contentEquals("date")) {
+											// do nothing?
+										} else if (type.contentEquals("termsOfAddress")) {
+											termsOfAddress = eleNamePart.getValue();
+										} else if (type.contentEquals("given")) {
+											firstName = eleNamePart.getValue();
+										} else if (type.contentEquals("family")) {
+											lastName = eleNamePart.getValue();
+										}
+									}
 								}
+
+								// set metadata type to role
+								if (roleTerm != null && !roleTerm.isEmpty()) {
+									if(roleTerm.endsWith(".")) {
+										roleTerm = roleTerm.substring(0, roleTerm.length()-1);
+									}
+									typeName = personRoleMap.get(roleTerm.toLowerCase());
+									if (typeName == null) {
+										typeName = mdName;
+									}
+								} else {
+									// with no role specified, assume it is an author
+									typeName = "Author";
+								}
+								mdType = prefs.getMetadataTypeByName(typeName);
 
 								if (name.contains(",")) {
 									String[] nameSplit = name.split("[,]");
@@ -400,6 +450,9 @@ public class ModsUtils {
 												&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
 
 											dsLogical.addPerson(person);
+											if (writeAllMetadataToAnchor) {
+												dsAnchor.addPerson(person);
+											}
 
 										}
 									} catch (MetadataTypeNotAllowedException e) {
@@ -414,7 +467,7 @@ public class ModsUtils {
 					// Regular metadata
 					List<String> values = new ArrayList<String>();
 					String separator = " ";
-					if(eleMetadata.getAttribute("separator") != null) {
+					if (eleMetadata.getAttribute("separator") != null) {
 						separator = eleMetadata.getAttributeValue("separator");
 					}
 					for (Element eleXpath : eleXpathList) {
@@ -434,9 +487,9 @@ public class ModsUtils {
 											value = value + separator + element.getValue();
 										}
 									}
-									if(value.length() > separator.length()) {
-									value = value.substring(separator.length()).trim();
-									values.add(value);
+									if (value.length() > separator.length()) {
+										value = value.substring(separator.length()).trim();
+										values.add(value);
 									}
 								}
 							} else {
@@ -455,34 +508,17 @@ public class ModsUtils {
 							}
 						}
 					}
+
 					for (String value : values) {
-						
-//						 //if we have the title, get both nonSort (article) and title before writing metadata
-//						if (mdType.getName().contentEquals("TitleDocMain")) {
-//							if (eleXpath.getValue().contains("nonSort")) {
-//								titleArticle = value;
-//							} else if (eleXpath.getValue().contains("title")) {
-//								title = value;
-//							}
-//							if (titleArticle != null && title != null) {
-//								value = titleArticle + " " + title;
-//							} else if (title != null) {
-//								value = title;
-//							} else
-//								continue;
-//						} else
+
 						if (mdType.getName().contentEquals("CurrentNoSorting")) {
 							value = correctCurrentNoSorting(value);
-						} else if (mdType.getName().contentEquals("TitleDocParallel")) {
-							seriesName = value;
-							String serId = seriesInfo.get(seriesName);
-							if (serId != null && !serId.isEmpty()) {
-								seriesID = serId;
-							}
+						} else if (!writeAllMetadataToAnchor && mdType.getName().contentEquals("TitleDocParallel")) {
+							seriesTitle = value;
 						}
 
 						// Add singleDigCollection to series also
-						if (anchorMetadataList.contains(mdType.getName()) && dsSeries != null) {
+						if (!writeAllMetadataToAnchor && anchorMetadataList.contains(mdType.getName()) && dsAnchor != null) {
 							// if (mdType.getName().contentEquals("singleDigCollection") && dsSeries != null) {
 							try {
 								if (value.length() > 0) {
@@ -492,7 +528,7 @@ public class ModsUtils {
 									if (eleMetadata.getAttribute("logical") != null
 											&& eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
 										logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
-										dsSeries.addMetadata(metadata);
+										dsAnchor.addMetadata(metadata);
 									}
 								}
 							} catch (MetadataTypeNotAllowedException e) {
@@ -507,7 +543,24 @@ public class ModsUtils {
 								if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
 									// logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
 
-									dsLogical.addMetadata(metadata);
+									if (mdName.contentEquals("TitleDocMain") && writeAllMetadataToAnchor) {
+										if (suffix != null && !suffix.isEmpty()) {
+											metadata.setValue(value + " [" + suffix + "]");
+										}
+										dsLogical.addMetadata(metadata);
+										seriesTitle = value;
+									} else if (mdName.contentEquals("CatalogIDDigital")) {
+										if (suffix != null && !suffix.isEmpty()) {
+											metadata.setValue(value + "_" + suffix);
+											seriesID = value;
+										}
+										dsLogical.addMetadata(metadata);
+									} else {
+										dsLogical.addMetadata(metadata);
+										if (writeAllMetadataToAnchor) {
+											dsAnchor.addMetadata(metadata);
+										}
+									}
 
 								}
 								if (eleMetadata.getAttribute("physical") != null
@@ -527,13 +580,66 @@ public class ModsUtils {
 			}
 		}
 
-		if (isPartOfSeries && dsSeries != null) {
-			if (seriesID == null) {
-				seriesID = "CSIC" + System.currentTimeMillis();
-				logger.debug("Series not found. creating new one: " + seriesID);
+		// Code to handle related works, e.g. series, but only if we are not working within a MultiVolume
+		if (!writeAllMetadataToAnchor) {
+			String query = "/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[@type='uniform']";
+			XPath xpath = XPath.newInstance(query);
+			xpath.addNamespace(NS_MODS);
+			List<Element> eleValueList = xpath.selectNodes(doc);
+			List<String> values = new ArrayList<String>();
+			if (eleValueList == null || eleValueList.isEmpty()) {
+				query = "/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[not(@type)]";
+				xpath = XPath.newInstance(query);
+				xpath.addNamespace(NS_MODS);
+				eleValueList = xpath.selectNodes(doc);
 			}
-			if (seriesName == null) {
-				seriesName = seriesID;
+			if (eleValueList != null && !eleValueList.isEmpty()) {
+				for (Element eleValue : eleValueList) {
+					if (eleValue.getText() != null && !eleValue.getText().isEmpty()) {
+						values.add(eleValue.getTextTrim());
+					}
+					List<Element> eleSubList = eleValue.getChildren();
+					if (eleSubList != null && !eleSubList.isEmpty()) {
+						for (Element element : eleSubList) {
+							if (element.getText() != null && !element.getText().isEmpty()) {
+								values.add(element.getTextTrim());
+							}
+						}
+					}
+				}
+				String value = "";
+				for (String s : values) {
+					if (StringUtils.isNotEmpty(s)) {
+						value += " " + s;
+					}
+				}
+				value = value.trim();
+				String[] valueParts = value.split("\\s");
+				seriesTitle = "";
+				HashMap<String, Boolean> valueMap = new HashMap<String, Boolean>();
+				for (int i = 0; i < valueParts.length; i++) {
+					if (!valueMap.containsKey(valueParts[i])) {
+						seriesTitle += " " + valueParts[i];
+						valueMap.put(valueParts[i], true);
+					}
+				}
+				seriesTitle = seriesTitle.trim();
+				logger.debug("related Series = " + seriesTitle);
+			}
+		}
+
+		if (dsAnchor != null) {
+			if (seriesID == null) {
+				if (seriesTitle != null) {
+					seriesID = seriesInfo.get(seriesTitle);
+				}
+				if (seriesID == null) {
+					seriesID = "CSIC" + System.currentTimeMillis();
+					logger.debug("Series not found. creating new one: " + seriesID);
+				}
+			}
+			if (seriesTitle == null) {
+				seriesTitle = seriesID;
 			}
 
 			// Creating metadata for series
@@ -543,27 +649,61 @@ public class ModsUtils {
 				Metadata mdTitle;
 				mdTitle = new Metadata(titleType);
 				Metadata mdID = new Metadata(idType);
-				mdTitle.setValue(seriesName);
+				mdTitle.setValue(seriesTitle);
 				mdID.setValue(seriesID);
 
-				dsSeries.addMetadata(mdTitle);
-				dsSeries.addMetadata(mdID);
+				dsAnchor.addMetadata(mdTitle);
+				dsAnchor.addMetadata(mdID);
 
 			} catch (MetadataTypeNotAllowedException e) {
 				logger.warn(e.getMessage());
 			}
 		}
 
+		// Create CurrentNo and CurrentNoSorting if necessary
+		if (dsAnchor != null && suffix != null && !suffix.isEmpty()) {
+
+			List<? extends Metadata> mdCurrentNoList = dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("CurrentNo"));
+			if (mdCurrentNoList == null || mdCurrentNoList.isEmpty()) {
+				// No current Number, so we create one
+				try {
+					Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNo"));
+					md.setValue(suffix);
+					dsLogical.addMetadata(md);
+				} catch (MetadataTypeNotAllowedException e) {
+					logger.warn(e.toString());
+				}
+			}
+
+			List<? extends Metadata> mdCurrentNoSortList = dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("CurrentNoSorting"));
+			if (mdCurrentNoSortList == null || mdCurrentNoSortList.isEmpty()) {
+				// No current Number, so we create one
+				try {
+					Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNoSorting"));
+					String str = suffix;
+					if (str.contains("_")) {
+						str = suffix.split("_")[0];
+					}
+					if (str.startsWith("V")) {
+						str = str.substring(1);
+					}
+					str = correctCurrentNoSorting(str);
+					md.setValue(str);
+					dsLogical.addMetadata(md);
+				} catch (MetadataTypeNotAllowedException e) {
+					logger.warn(e.toString());
+				}
+			}
+		}
+
 		// write seriesInfo to file
-		if (isPartOfSeries && dsSeries != null) {
-			seriesInfo.put(seriesName, seriesID);
+		if (seriesTitle != null && !seriesTitle.isEmpty()) {
+			seriesInfo.put(seriesTitle, seriesID);
 			if (seriesInfoFile.isFile()) {
 				logger.debug("deleting old seriesInfoFile");
 				seriesInfoFile.delete();
 			}
 			writeFile(seriesInfoFile, seriesInfo);
-		} else {
-			dsSeries = null;
 		}
 	}
 
@@ -811,36 +951,38 @@ public class ModsUtils {
 
 	public static String correctCurrentNoSorting(String inString) {
 
-		String outString = null;
-		try {
-			// Try to read a number
-			int n = Integer.valueOf(inString);
-			outString = "" + n;
-		} catch (NumberFormatException e) {
-			logger.trace("No arabic numeral");
-			try {
-				// Try to read a roman numeral
-				RomanNumeral rn = new RomanNumeral(inString);
-				outString = "" + rn.intValue();
-			} catch (NumberFormatException e1) {
-				logger.trace("No roman numeral");
-				// Just get the first arabic number
-				String[] split = inString.split("\\D");
-				if (split == null || split.length == 0) {
-					// There are no numbers in this String, try again with roman numerals
-					split = inString.split("\\W");
-					if (split == null || split.length == 0) {
-						// Nothing found. return empty
-						return "";
-					}
-				}
-				if (split.length > 1) {
-					return correctCurrentNoSorting(split[0]);
-				} else {
-					return "";
+		String[] wsSplit = inString.split("\\s+");
+		if (wsSplit.length == 0) {
+			return "";
+		} else if (wsSplit.length > 1) {
+			for (String string : wsSplit) {
+				String result = correctCurrentNoSorting(string);
+				if (!result.isEmpty()) {
+					return result;
 				}
 			}
+		}
 
+		Pattern p = Pattern.compile("(\\D+)|(\\d+)");
+		Matcher m = p.matcher(inString);
+		String outString = "";
+		while (m.find() && outString.isEmpty()) {
+			String s = m.group();
+			try {
+				// Try to read a number
+				int n = Integer.valueOf(s);
+				outString = "" + n;
+			} catch (NumberFormatException e) {
+				logger.trace("No arabic numeral");
+				try {
+					// Try to read a roman numeral
+					RomanNumeral rn = new RomanNumeral(s);
+					outString = "" + rn.intValue();
+				} catch (NumberFormatException e1) {
+					logger.trace("No roman numeral");
+					outString = "";
+				}
+			}
 		}
 		return outString;
 	}
