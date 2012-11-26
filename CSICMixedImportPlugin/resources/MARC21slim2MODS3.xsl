@@ -878,10 +878,18 @@
 					<xsl:value-of select="." />
 				</dateCaptured>
 			</xsl:for-each>
-			<xsl:for-each select="datafield[@tag=250]/subfield[@code='a']">
-				<edition>
-					<xsl:value-of select="." />
-				</edition>
+			<xsl:for-each select="datafield[@tag=250]">
+<!-- 					<xsl:value-of select="." /> -->
+				<xsl:if test="subfield[@code='a']">
+					<edition>
+					<xsl:call-template name="subfieldSelect">
+						<xsl:with-param name="codes">
+							ab
+						</xsl:with-param>
+					</xsl:call-template>
+					</edition>
+				</xsl:if>
+
 			</xsl:for-each>
 			<xsl:if test="$typeOf008='SE'">
 			<xsl:for-each select="leader">
@@ -2002,9 +2010,7 @@
 
 		<xsl:for-each select="datafield[@tag=510]">
 			<relatedItem type="isReferencedBy">
-				<note>
 					<xsl:call-template name="relatedItem510" />
-				</note>
 			</relatedItem>
 		</xsl:for-each>
 
@@ -3162,6 +3168,13 @@
 				</dateOther>
 			</originInfo>
 		</xsl:for-each>
+		<xsl:for-each select="subfield[@code='c']">
+			<part>
+				<text>
+					<xsl:value-of select="." />
+				</text>
+			</part>
+		</xsl:for-each>
 	</xsl:template>
 	<xsl:template name="relatedLanguage">
 		<xsl:for-each select="subfield[@code='e']">
@@ -3518,20 +3531,25 @@
 			</xsl:call-template>
 		</xsl:variable>
 		<xsl:variable name="choppedFront">
-		<xsl:if test="substring($string, 1,1)='[' or substring($string, 1,1)='('">
-			<xsl:value-of select="substring($string,2, string-length($string)-1)" />
-		</xsl:if>
-		<xsl:if test="substring($string, 1,1)!='[' and substring($string, 1,1)!='('">
-			<xsl:value-of select="$string" />
-		</xsl:if>
+			<xsl:variable name="length" select="string-length($string)"/>
+			<xsl:choose>
+				<xsl:when test="substring($string, 1,1)='[' or substring($string, 1,1)='('">
+					<xsl:value-of select="substring($string,2, $length - 1)" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="$string" />
+				</xsl:otherwise>
+			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="length" select="string-length($choppedFront)"/>
-		<xsl:if test="substring($choppedFront, $length,1)=']' or substring($choppedFront, $length,1)=')'">
-			<xsl:value-of select="substring($string,1, $length - 1)" />
-		</xsl:if>
-		<xsl:if test="substring($choppedFront, $length,1)!=']' and substring($choppedFront, $length,1)!=')'">
-			<xsl:value-of select="$choppedFront" />
-		</xsl:if>
+		<xsl:variable name="length1" select="string-length($choppedFront)"/>
+		<xsl:choose>
+			<xsl:when test="substring($choppedFront, $length1,1)=']' or substring($choppedFront, $length1,1)=')'">
+				<xsl:value-of select="substring($choppedFront,1, $length1 - 1)" />
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="$choppedFront" />
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 	<xsl:template name="rfcLanguages">
 		<xsl:param name="nodeNum" />

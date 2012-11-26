@@ -20,6 +20,7 @@
 	<metadata logical="true">
 		<name>TitleDocSub1</name>
 		<xpath>/mods:mods/mods:titleInfo/mods:subTitle</xpath>
+		<xpath>/mods:mods/mods:titleInfo/mods:partName</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>TitleDocParallel</name>
@@ -65,8 +66,8 @@
 	</metadata>
 	<metadata logical="true">
 		<name>PublicationYear</name>
-		<xpath>/mods:mods/mods:originInfo/mods:dateIssued
-		</xpath>
+		<xpath>/mods:mods/mods:originInfo/mods:dateIssued[@encoding='marc']</xpath>
+		<xpath>/mods:mods/mods:originInfo/mods:dateIssued</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>PublicationStart</name>
@@ -207,6 +208,18 @@
 	<metadata logical="true">
 		<name>SubjectLocation</name>
 		<xpath>/mods:mods/mods:subject/mods:geographic</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:continent</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:country</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:province</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:region</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:state</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:territory</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:county</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:city</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:island</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:area</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:extraterrestrialArea</xpath>
+		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:citySection</xpath>
 	</metadata>
 		<metadata logical="true">
 		<name>SubjectTemporal</name>
@@ -214,7 +227,7 @@
 	</metadata>
 	<metadata logical="true">
 		<name>SubjectPerson</name>
-		<xpath>/mods:mods/mods:/subject[@type='personal']/mods:namePart[not(@type)]</xpath>
+		<xpath>/mods:mods/mods:subject/mods:name[@type='personal']/mods:namePart[not(@type)]</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>SubjectPersonLifetime</name>
@@ -249,6 +262,10 @@
 		<xpath>/mods:mods/mods:note[not(@type)]</xpath>
 	</metadata>
 	<metadata logical="true">
+		<name>BibliographicalNote</name>
+		<xpath>/mods:mods/mods:note[@type='bibliography']</xpath>
+	</metadata>
+	<metadata logical="true">
 		<name>StatementOfResponsibility</name>
 		<xpath>/mods:mods/mods:note[@type='statement of responsibility']</xpath>
 	</metadata>
@@ -263,6 +280,7 @@
 	<metadata logical="true">
 		<name>relatedSeries</name>
 		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[not(@type='uniform')]/mods:title</xpath>
+		<xpath>/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[@type='uniform']/mods:title</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>PrecedingVolume</name>
@@ -303,5 +321,42 @@
 	<metadata logical="true">
 		<name>CatalogLanguage</name>
 		<xpath>/mods:mods/mods:originInfo/mods:languageOfCataloging/mods:languageTerm</xpath>
+		<xpath>/mods:mods/mods:recordInfo/mods:languageOfCataloging/mods:languageTerm</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>TableOfContent</name>
+		<xpath>/mods:mods/mods:tableOfContents</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>Abstract</name>
+		<xpath>/mods:mods/mods:abstract</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>TargetAudience</name>
+		<xpath>/mods:mods/mods:targetAudience</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>Reference</name>
+		<xpath>/mods:mods/mods:relatedItem[@type='isReferencedBy']/mods:name/mods:namePart</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>ReferencePart</name>
+		<xpath>/mods:mods/mods:relatedItem[@type='isReferencedBy']/mods:part/mods:text</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>Ownership</name>
+		<xpath>/mods:mods/mods:note[@type='ownership']</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>Url</name>
+		<xpath>/mods:mods/mods:location/mods:url</xpath>
+	</metadata>
+		<metadata logical="true">
+		<name>UrlLabel</name>
+		<xpath>/mods:mods/mods:location/mods:url/@displayLabel</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>UrlNote</name>
+		<xpath>/mods:mods/mods:location/mods:url/@note</xpath>
 	</metadata>
 </map>

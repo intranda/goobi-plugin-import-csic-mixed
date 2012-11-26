@@ -36,6 +36,7 @@ public class LossParser {
 	};
 
 	private static Map<String, Element> existing = new HashMap<String, Element>();
+	private static Map<String, String> fileNameMap = new HashMap<String, String>();
 
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
@@ -56,6 +57,7 @@ public class LossParser {
 						String key = tag + "_" + ind1 + "_" + ind2 + "_" + subfieldCode;
 						if (!existing.containsKey(key)) {
 							existing.put(key, (Element) dataField.clone());
+							fileNameMap.put(key, f.getName());
 						}
 					}
 				} catch (JDOMException e) {
@@ -69,6 +71,9 @@ public class LossParser {
 			Collections.sort(keys);
 			for (String key : keys) {
 				outDoc.getRootElement().addContent(existing.get(key));
+				Element filePointer = new Element("fromFile");
+				filePointer.setText(fileNameMap.get(key));
+				existing.get(key).addContent(filePointer);
 			}
 			try {
 				new XMLOutputter().output(outDoc, new FileWriter(new File(path, "loss.xml")));
