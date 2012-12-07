@@ -4122,7 +4122,7 @@
 
 	<!-- 130 -->
 	<xsl:template name="createTitleInfoFrom130">
-		<xsl:for-each select="datafield[@tag='130'][@ind2!='2']">
+		<!-- <xsl:for-each select="datafield[@tag='130'][@ind2!='2']"> -->
 			<titleInfo type="uniform">
 				<title>
 					<xsl:variable name="str">
@@ -4146,7 +4146,7 @@
 				</title>
 				<xsl:call-template name="part" />
 			</titleInfo>
-		</xsl:for-each>
+<!-- 		</xsl:for-each> -->
 	</xsl:template>
 	<xsl:template name="createTitleInfoFrom730">
 		<titleInfo type="uniform">

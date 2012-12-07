@@ -1135,7 +1135,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					}
 				}
 
-				if (totalVolumes > 1 || (idMap.get(currentIdentifier) != null && idMap.get(currentIdentifier) == true)) {
+				if (totalVolumes > 1 || (idMap.get(currentIdentifier.replaceAll("\\D", "")) != null && (idMap.get(currentIdentifier.replaceAll("\\D", "")) == true || (identifierSuffix != null && identifierSuffix.startsWith("V"))))) {
 					// This volume is part of a Series/Multivolume work
 					if (!belongsToPeriodical) {
 						belongsToMultiVolume = true;

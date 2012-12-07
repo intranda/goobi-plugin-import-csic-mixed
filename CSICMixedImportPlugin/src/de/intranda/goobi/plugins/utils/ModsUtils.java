@@ -193,8 +193,8 @@ public class ModsUtils {
 		personRoleMap.put("corr", null);
 		personRoleMap.put("dibujante", "IllustratorArtist");
 		personRoleMap.put("dib", "IllustratorArtist");
-		personRoleMap.put("director", null);
-		personRoleMap.put("dir", null);
+		personRoleMap.put("director", "Director");
+		personRoleMap.put("dir", "Director");
 		personRoleMap.put("editor", "Editor");
 		personRoleMap.put("ed", "Editor");
 		personRoleMap.put("encuadernado", null);
@@ -664,7 +664,7 @@ public class ModsUtils {
 		if (dsAnchor != null && suffix != null && !suffix.isEmpty()) {
 
 			List<? extends Metadata> mdCurrentNoList = dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("CurrentNo"));
-			if (mdCurrentNoList == null || mdCurrentNoList.isEmpty()) {
+			if ((mdCurrentNoList == null || mdCurrentNoList.isEmpty()) && !writeAllMetadataToAnchor) {	//write CurrentNo only within Series or Periodical, MultiVolumeNo is written to title
 				// No current Number, so we create one
 				try {
 					Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNo"));

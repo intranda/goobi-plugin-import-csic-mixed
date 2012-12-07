@@ -7,9 +7,14 @@
 	</metadata>
 	<metadata logical="true" separator=" ">
 		<name>TitleDocMain</name>
-		<xpath>/mods:mods/mods:titleInfo[not(@type='alternative')]/mods:nonSort
+		<xpath>/mods:mods/mods:titleInfo[not(@type)]/mods:nonSort
 		</xpath>
-		<xpath>/mods:mods/mods:titleInfo[not(@type='alternative')]/mods:title
+		<xpath>/mods:mods/mods:titleInfo[not(@type)]/mods:title
+		</xpath>
+	</metadata>
+	<metadata logical="true">
+		<name>TitleDocUniform</name>
+		<xpath>/mods:mods/mods:titleInfo[@type='uniform']/mods:title
 		</xpath>
 	</metadata>
 	<metadata logical="true">
@@ -50,7 +55,7 @@
 		<name>SizeSourcePrint</name>
 		<xpath>/mods:mods/mods:physicalDescription/mods:extent</xpath>
 	</metadata>
-	<metadata physical="true">
+	<metadata  logical="true" physical="false">
 		<name>NotePhysical</name>
 		<xpath>/mods:mods/mods:physicalDescription/mods:note</xpath>
 	</metadata>
@@ -91,7 +96,7 @@
 	</metadata>
 	<metadata logical="true">
 		<name>PublisherName</name>
-		<xpath>/mods:mods/mods:originInfo/mods:publisher</xpath>
+		<xpath>/mods:mods/mods:originInfo[not(@displayLabel)]/mods:publisher</xpath>
 	</metadata>
 	<metadata logical="true">
 		<name>Edition</name>
@@ -99,7 +104,7 @@
 	</metadata>
 	<metadata logical="true">
 		<name>PlaceOfPublication</name>
-		<xpath>/mods:mods/mods:originInfo/mods:place/mods:placeTerm[@type='text']
+		<xpath>/mods:mods/mods:originInfo[not(@displayLabel)]/mods:place/mods:placeTerm[@type='text']
 		</xpath>
 	</metadata>
 	<metadata logical="true">
@@ -197,34 +202,34 @@
 		<name>Occupation</name>
 		<xpath>/mods:mods/mods:subject/mods:occupation</xpath>
 	</metadata>
-	<metadata logical="true">
-		<name>SubjectGenre</name>
-		<xpath>/mods:mods/mods:subject/mods:genre</xpath>
-	</metadata>
-	<metadata logical="true">
-		<name>SubjectTopic</name>
-		<xpath>/mods:mods/mods:subject/mods:topic</xpath>
-	</metadata>
-	<metadata logical="true">
-		<name>SubjectLocation</name>
-		<xpath>/mods:mods/mods:subject/mods:geographic</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:continent</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:country</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:province</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:region</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:state</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:territory</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:county</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:city</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:island</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:area</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:extraterrestrialArea</xpath>
-		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:citySection</xpath>
-	</metadata>
-		<metadata logical="true">
-		<name>SubjectTemporal</name>
-		<xpath>/mods:mods/mods:subject/mods:temporal</xpath>
-	</metadata>
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>SubjectGenre</name> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:genre</xpath> -->
+<!-- 	</metadata> -->
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>SubjectTopic</name> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:topic</xpath> -->
+<!-- 	</metadata> -->
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>SubjectLocation</name> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:geographic</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:continent</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:country</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:province</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:region</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:state</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:territory</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:county</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:city</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:island</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:area</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:extraterrestrialArea</xpath> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:citySection</xpath> -->
+<!-- 	</metadata> -->
+<!-- 		<metadata logical="true"> -->
+<!-- 		<name>SubjectTemporal</name> -->
+<!-- 		<xpath>/mods:mods/mods:subject/mods:temporal</xpath> -->
+<!-- 	</metadata> -->
 	<metadata logical="true">
 		<name>SubjectPerson</name>
 		<xpath>/mods:mods/mods:subject/mods:name[@type='personal']/mods:namePart[not(@type)]</xpath>
@@ -347,16 +352,28 @@
 		<name>Ownership</name>
 		<xpath>/mods:mods/mods:note[@type='ownership']</xpath>
 	</metadata>
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>Url</name> -->
+<!-- 		<xpath>/mods:mods/mods:location/mods:url</xpath> -->
+<!-- 	</metadata> -->
+<!-- 		<metadata logical="true"> -->
+<!-- 		<name>UrlLabel</name> -->
+<!-- 		<xpath>/mods:mods/mods:location/mods:url/@displayLabel</xpath> -->
+<!-- 	</metadata> -->
+<!-- 	<metadata logical="true"> -->
+<!-- 		<name>UrlNote</name> -->
+<!-- 		<xpath>/mods:mods/mods:location/mods:url/@note</xpath> -->
+<!-- 	</metadata> -->
 	<metadata logical="true">
-		<name>Url</name>
-		<xpath>/mods:mods/mods:location/mods:url</xpath>
+		<name>TimeNote</name>
+		<xpath>/mods:mods/mods:note[@type='venue']</xpath>
 	</metadata>
 		<metadata logical="true">
-		<name>UrlLabel</name>
-		<xpath>/mods:mods/mods:location/mods:url/@displayLabel</xpath>
+		<name>NoteAcquisition</name>
+		<xpath>/mods:mods/mods:note[@type='acquisition']</xpath>
 	</metadata>
-	<metadata logical="true">
-		<name>UrlNote</name>
-		<xpath>/mods:mods/mods:location/mods:url/@note</xpath>
+		<metadata logical="true">
+		<name>NoteLanguage</name>
+		<xpath>/mods:mods/mods:note[@type='language']</xpath>
 	</metadata>
 </map>
