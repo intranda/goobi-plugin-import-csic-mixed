@@ -71,7 +71,7 @@
 	</metadata>
 	<metadata logical="true">
 		<name>PublicationYear</name>
-		<xpath>/mods:mods/mods:originInfo/mods:dateIssued[@encoding='marc']</xpath>
+<!-- 		<xpath>/mods:mods/mods:originInfo/mods:dateIssued[@encoding='marc']</xpath> -->
 		<xpath>/mods:mods/mods:originInfo/mods:dateIssued</xpath>
 	</metadata>
 	<metadata logical="true">

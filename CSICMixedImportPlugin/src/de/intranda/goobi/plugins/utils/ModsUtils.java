@@ -36,8 +36,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.hdf.model.hdftypes.FileInformationBlock;
-import org.apache.poi.hssf.record.chart.SeriesIndexRecord;
+import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -46,10 +45,6 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
 
-import de.schlichtherle.io.FileInputStream;
-import de.sub.goobi.Import.ImportOpac;
-import de.sub.goobi.config.ConfigMain;
-
 import ugh.dl.DocStruct;
 import ugh.dl.Metadata;
 import ugh.dl.MetadataType;
@@ -57,8 +52,10 @@ import ugh.dl.Person;
 import ugh.dl.Prefs;
 import ugh.dl.RomanNumeral;
 import ugh.exceptions.DocStructHasNoTypeException;
-import ugh.exceptions.IncompletePersonObjectException;
 import ugh.exceptions.MetadataTypeNotAllowedException;
+import de.intranda.goobi.plugins.CSICMixedImport;
+import de.schlichtherle.io.FileInputStream;
+import de.sub.goobi.config.ConfigMain;
 
 public class ModsUtils {
 
@@ -235,9 +232,12 @@ public class ModsUtils {
 	 * @throws JDOMException
 	 */
 	@SuppressWarnings("unchecked")
-	public static void parseModsSection(String mappingFileName, Prefs prefs, DocStruct dsLogical, DocStruct dsAnchor, DocStruct dsPhysical,
-			Element eleMods, int volumeNo, String pieceDesignation, String suffix) throws JDOMException, IOException {
+	public static void parseModsSection(CSICMixedImport plugin, DocStruct dsLogical, DocStruct dsAnchor, DocStruct dsPhysical, Element eleMods,
+			int volumeNo, String pieceDesignation) throws JDOMException, IOException {
 		fillPersonRoleMap();
+		String mappingFileName = CSICMixedImport.MODS_MAPPING_FILE;
+		Prefs prefs = plugin.getPrefs();
+		String suffix = plugin.getCurrentSuffix();
 		boolean writeAllMetadataToAnchor = false;
 		if (dsAnchor != null && dsAnchor.getType().getName().contentEquals("MultiVolumeWork")) {
 			writeAllMetadataToAnchor = true;
@@ -415,8 +415,8 @@ public class ModsUtils {
 
 								// set metadata type to role
 								if (roleTerm != null && !roleTerm.isEmpty()) {
-									if(roleTerm.endsWith(".")) {
-										roleTerm = roleTerm.substring(0, roleTerm.length()-1);
+									if (roleTerm.endsWith(".")) {
+										roleTerm = roleTerm.substring(0, roleTerm.length() - 1);
 									}
 									typeName = personRoleMap.get(roleTerm.toLowerCase());
 									if (typeName == null) {
@@ -475,31 +475,41 @@ public class ModsUtils {
 						// logger.debug("XPath: " + query);
 						XPath xpath = XPath.newInstance(query);
 						xpath.addNamespace(NS_MODS);
-						List<Element> eleValueList = xpath.selectNodes(doc);
+						List eleValueList = xpath.selectNodes(doc);
 						if (eleValueList != null) {
-
 							if (mdName.contentEquals("Taxonomy")) {
-								for (Element eleValue : eleValueList) {
-									List<Element> subjectChildren = eleValue.getChildren();
-									String value = "";
-									for (Element element : subjectChildren) {
-										if (taxonomyFieldsList.contains(element.getName().toLowerCase())) {
-											value = value + separator + element.getValue();
+								for (Object objValue : eleValueList) {
+									if (objValue instanceof Element) {
+										Element eleValue = (Element) objValue;
+										List<Element> subjectChildren = eleValue.getChildren();
+										String value = "";
+										for (Element element : subjectChildren) {
+											if (taxonomyFieldsList.contains(element.getName().toLowerCase())) {
+												value = value + separator + element.getValue();
+											}
 										}
-									}
-									if (value.length() > separator.length()) {
-										value = value.substring(separator.length()).trim();
-										values.add(value);
+										if (value.length() > separator.length()) {
+											value = value.substring(separator.length()).trim();
+											values.add(value);
+										}
 									}
 								}
 							} else {
 								int count = 0;
-								for (Element eleValue : eleValueList) {
-									logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
-									String value = eleValue.getTextTrim();
-									if (values.size() <= count) {
+								for (Object objValue : eleValueList) {
+									String value = null;
+									if (objValue instanceof Element) {
+										Element eleValue = (Element) objValue;
+										logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
+										value = eleValue.getTextTrim();
+									} else if (objValue instanceof Attribute) {
+										Attribute atrValue = (Attribute) objValue;
+										logger.debug("mdType: " + mdType.getName() + "; Value: " + atrValue.getValue());
+										value = atrValue.getValue();
+									}
+									if (value != null && values.size() <= count) {
 										values.add(value);
-									} else {
+									} else if (value != null) {
 										value = values.get(count) + separator + value;
 										values.set(count, value);
 									}
@@ -543,22 +553,44 @@ public class ModsUtils {
 								if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
 									// logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
 
-									if (mdName.contentEquals("TitleDocMain") && writeAllMetadataToAnchor) {
-										if (suffix != null && !suffix.isEmpty()) {
-											metadata.setValue(value + " [" + suffix + "]");
+									if (mdName.contentEquals("TitleDocMain")) {
+										if (suffix != null && !suffix.isEmpty() && (plugin.addVolumeNoToTitle || !writeAllMetadataToAnchor)) {
+											if(plugin.useSquareBracketsForVolume) {												
+												metadata.setValue(value + " [" + suffix + "]");
+											} else {
+												metadata.setValue(value + " (" + suffix + ")");
+											}
 										}
-										dsLogical.addMetadata(metadata);
-										seriesTitle = value;
+										try {
+											dsLogical.addMetadata(metadata);
+											seriesTitle = value;
+										} catch (MetadataTypeNotAllowedException e) {
+											logger.warn(e.getMessage());
+										}
 									} else if (mdName.contentEquals("CatalogIDDigital")) {
 										if (suffix != null && !suffix.isEmpty()) {
 											metadata.setValue(value + "_" + suffix);
-											seriesID = value;
+											if (writeAllMetadataToAnchor) {
+												seriesID = value;
+											}
 										}
-										dsLogical.addMetadata(metadata);
+										try {
+											dsLogical.addMetadata(metadata);
+										} catch (MetadataTypeNotAllowedException e) {
+											logger.warn(e.getMessage());
+										}
 									} else {
-										dsLogical.addMetadata(metadata);
-										if (writeAllMetadataToAnchor) {
-											dsAnchor.addMetadata(metadata);
+										try {
+											dsLogical.addMetadata(metadata);
+										} catch (MetadataTypeNotAllowedException e) {
+											logger.warn(e.getMessage());
+										}
+										try {
+											if (writeAllMetadataToAnchor) {
+												dsAnchor.addMetadata(metadata);
+											}
+										} catch (MetadataTypeNotAllowedException e) {
+											logger.warn(e.getMessage());
 										}
 									}
 
@@ -601,8 +633,10 @@ public class ModsUtils {
 					List<Element> eleSubList = eleValue.getChildren();
 					if (eleSubList != null && !eleSubList.isEmpty()) {
 						for (Element element : eleSubList) {
-							if (element.getText() != null && !element.getText().isEmpty()) {
-								values.add(element.getTextTrim());
+							if (element.getName().contentEquals("title")) {
+								if (element.getText() != null && !element.getText().isEmpty()) {
+									values.add(element.getTextTrim());
+								}
 							}
 						}
 					}
@@ -664,34 +698,38 @@ public class ModsUtils {
 		if (dsAnchor != null && suffix != null && !suffix.isEmpty()) {
 
 			List<? extends Metadata> mdCurrentNoList = dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("CurrentNo"));
-			if ((mdCurrentNoList == null || mdCurrentNoList.isEmpty()) && !writeAllMetadataToAnchor) {	//write CurrentNo only within Series or Periodical, MultiVolumeNo is written to title
-				// No current Number, so we create one
-				try {
-					Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNo"));
-					md.setValue(suffix);
-					dsLogical.addMetadata(md);
-				} catch (MetadataTypeNotAllowedException e) {
-					logger.warn(e.toString());
+			if (!writeAllMetadataToAnchor || plugin.writeCurrentNoToMultiVolume) {
+				if ((mdCurrentNoList == null || mdCurrentNoList.isEmpty())) {
+					// No current Number, so we create one
+					try {
+						Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNo"));
+						md.setValue(suffix);
+						dsLogical.addMetadata(md);
+					} catch (MetadataTypeNotAllowedException e) {
+						logger.warn(e.toString());
+					}
 				}
 			}
 
 			List<? extends Metadata> mdCurrentNoSortList = dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("CurrentNoSorting"));
-			if (mdCurrentNoSortList == null || mdCurrentNoSortList.isEmpty()) {
-				// No current Number, so we create one
-				try {
-					Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNoSorting"));
-					String str = suffix;
-					if (str.contains("_")) {
-						str = suffix.split("_")[0];
+			if (!writeAllMetadataToAnchor || plugin.writeCurrentNoSortingToMultiVolume) {
+				if (mdCurrentNoSortList == null || mdCurrentNoSortList.isEmpty() && !writeAllMetadataToAnchor) {
+					// No current Number, so we create one
+					try {
+						Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNoSorting"));
+						String str = suffix;
+						if (str.contains("_")) {
+							str = suffix.split("_")[0];
+						}
+						if (str.startsWith("V")) {
+							str = str.substring(1);
+						}
+						str = correctCurrentNoSorting(str);
+						md.setValue(str);
+						dsLogical.addMetadata(md);
+					} catch (MetadataTypeNotAllowedException e) {
+						logger.warn(e.toString());
 					}
-					if (str.startsWith("V")) {
-						str = str.substring(1);
-					}
-					str = correctCurrentNoSorting(str);
-					md.setValue(str);
-					dsLogical.addMetadata(md);
-				} catch (MetadataTypeNotAllowedException e) {
-					logger.warn(e.toString());
 				}
 			}
 		}

@@ -108,8 +108,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 	private static final String NAME = "CSICMixedImport";
 	private static final String VERSION = "1.0.20121122";
 	private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
-	private static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
+	public static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
 	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
+	public final boolean writeCurrentNoToMultiVolume = (ConfigPlugins.getPluginConfig(this).getBoolean("writeCurrentNoToMultiVolume", false));
+	public final boolean writeCurrentNoSortingToMultiVolume = (ConfigPlugins.getPluginConfig(this).getBoolean("writeCurrentNoSortingToMultiVolume", false));
+	public final boolean useSquareBracketsForVolume = (ConfigPlugins.getPluginConfig(this).getBoolean("useSquareBracketsForVolume", false));
+	public final boolean addVolumeNoToTitle = (ConfigPlugins.getPluginConfig(this).getBoolean("addVolumeNoToTitle", false));
 
 	// Namespaces
 	private Namespace mets;
@@ -670,68 +674,68 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 		return ret;
 	}
 
-	public void correctId(Fileformat ff) {
-
-		try {
-			DocStruct topStruct = ff.getDigitalDocument().getLogicalDocStruct();
-			String anchorIdentifier = null;
-			String anchorName = null;
-			String logIdentifier = topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital")).get(0).getValue();
-			if (topStruct.getType().isAnchor()) {
-				anchorIdentifier = logIdentifier;
-				topStruct = ff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0);
-				logIdentifier = topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital")).get(0).getValue();
-				anchorName = ff.getDigitalDocument().getLogicalDocStruct().getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0)
-						.getValue();
-			}
-			if ((anchorIdentifier != null && anchorIdentifier.contentEquals(logIdentifier)) || idMap.get(logIdentifier.replaceAll("\\D", "")) != null
-					&& idMap.get(logIdentifier.replaceAll("\\D", "")) == true) {
-				// id already exists: add volume or pieceDesignation to it
-				String newId = logIdentifier + "_" + identifierSuffix;
-				newId = newId.replaceAll("__", "_");
-				topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital")).get(0).setValue(newId);
-				if (anchorIdentifier != null && anchorIdentifier.startsWith("CSIC13")) {
-					ff.getDigitalDocument().getLogicalDocStruct().getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital")).get(0)
-							.setValue(logIdentifier);
-				}
-				// String anchorName =
-				// ff.getDigitalDocument().getLogicalDocStruct().getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0).getValue();
-				if (anchorName != null && anchorName.startsWith("CSIC13")) {
-					ff.getDigitalDocument().getLogicalDocStruct().getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0)
-							.setValue(logIdentifier);
-				}
-			} else if (anchorName != null && anchorName.startsWith("CSIC13")) {
-				// irrelevant anchor. remove if the topStruct can exist on its own
-				if (topStruct.getType().getName().contentEquals("SerialVolume")) {
-					topStruct.setType(prefs.getDocStrctTypeByName("Monograph"));
-					ff.getDigitalDocument().setLogicalDocStruct(topStruct);
-					verifyDocStructIntegrity(topStruct);
-				}
-				if (topStruct.getType().getName().contentEquals("Manuscript")) {
-					topStruct.setType(prefs.getDocStrctTypeByName("SingleManuscript"));
-					ff.getDigitalDocument().setLogicalDocStruct(topStruct);
-					verifyDocStructIntegrity(topStruct);
-				}
-			}
-			// correct titles
-			if (anchorIdentifier != null && ff.getDigitalDocument().getLogicalDocStruct().getType().getName().contentEquals("MultiVolumeWork")) {
-				// we have a multivolume. Rename to anchor title to the child title and add the idSuffix to the child title
-				Metadata anchorTitle = ff.getDigitalDocument().getLogicalDocStruct()
-						.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0);
-				Metadata volumeTitle = topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0);
-				if (anchorTitle.getValue().replace("CSIC", "").replaceAll("\\d", "").isEmpty()) {
-					anchorTitle.setValue(volumeTitle.getValue());
-					if (identifierSuffix != null && !identifierSuffix.isEmpty()) {
-						volumeTitle.setValue(volumeTitle.getValue() + " (" + identifierSuffix + ")");
-					}
-				}
-			}
-		} catch (PreferencesException e) {
-			logger.error("Failed correcting PPN");
-		} catch (IndexOutOfBoundsException e) {
-			logger.error("Failed correcting PPN");
-		}
-	}
+//	public void correctId(Fileformat ff) {
+//
+//		try {
+//			DocStruct topStruct = ff.getDigitalDocument().getLogicalDocStruct();
+//			String anchorIdentifier = null;
+//			String anchorName = null;
+//			String logIdentifier = topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital")).get(0).getValue();
+//			if (topStruct.getType().isAnchor()) {
+//				anchorIdentifier = logIdentifier;
+//				topStruct = ff.getDigitalDocument().getLogicalDocStruct().getAllChildren().get(0);
+//				logIdentifier = topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital")).get(0).getValue();
+//				anchorName = ff.getDigitalDocument().getLogicalDocStruct().getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0)
+//						.getValue();
+//			}
+//			if ((anchorIdentifier != null && anchorIdentifier.contentEquals(logIdentifier)) || idMap.get(logIdentifier.replaceAll("\\D", "")) != null
+//					&& idMap.get(logIdentifier.replaceAll("\\D", "")) == true) {
+//				// id already exists: add volume or pieceDesignation to it
+//				String newId = logIdentifier + "_" + identifierSuffix;
+//				newId = newId.replaceAll("__", "_");
+//				topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital")).get(0).setValue(newId);
+//				if (anchorIdentifier != null && anchorIdentifier.startsWith("CSIC13")) {
+//					ff.getDigitalDocument().getLogicalDocStruct().getAllMetadataByType(prefs.getMetadataTypeByName("CatalogIDDigital")).get(0)
+//							.setValue(logIdentifier);
+//				}
+//				// String anchorName =
+//				// ff.getDigitalDocument().getLogicalDocStruct().getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0).getValue();
+//				if (anchorName != null && anchorName.startsWith("CSIC13")) {
+//					ff.getDigitalDocument().getLogicalDocStruct().getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0)
+//							.setValue(logIdentifier);
+//				}
+//			} else if (anchorName != null && anchorName.startsWith("CSIC13")) {
+//				// irrelevant anchor. remove if the topStruct can exist on its own
+//				if (topStruct.getType().getName().contentEquals("SerialVolume")) {
+//					topStruct.setType(prefs.getDocStrctTypeByName("Monograph"));
+//					ff.getDigitalDocument().setLogicalDocStruct(topStruct);
+//					verifyDocStructIntegrity(topStruct);
+//				}
+//				if (topStruct.getType().getName().contentEquals("Manuscript")) {
+//					topStruct.setType(prefs.getDocStrctTypeByName("SingleManuscript"));
+//					ff.getDigitalDocument().setLogicalDocStruct(topStruct);
+//					verifyDocStructIntegrity(topStruct);
+//				}
+//			}
+//			// correct titles
+//			if (anchorIdentifier != null && ff.getDigitalDocument().getLogicalDocStruct().getType().getName().contentEquals("MultiVolumeWork")) {
+//				// we have a multivolume. Rename to anchor title to the child title and add the idSuffix to the child title
+//				Metadata anchorTitle = ff.getDigitalDocument().getLogicalDocStruct()
+//						.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0);
+//				Metadata volumeTitle = topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("TitleDocMain")).get(0);
+//				if (anchorTitle.getValue().replace("CSIC", "").replaceAll("\\d", "").isEmpty()) {
+//					anchorTitle.setValue(volumeTitle.getValue());
+//					if (identifierSuffix != null && !identifierSuffix.isEmpty()) {
+//						volumeTitle.setValue(volumeTitle.getValue() + " (" + identifierSuffix + ")");
+//					}
+//				}
+//			}
+//		} catch (PreferencesException e) {
+//			logger.error("Failed correcting PPN");
+//		} catch (IndexOutOfBoundsException e) {
+//			logger.error("Failed correcting PPN");
+//		}
+//	}
 
 	private void addProject(Fileformat ff, String projectName) {
 		try {
@@ -1135,21 +1139,19 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					}
 				}
 
-				if (totalVolumes > 1 || (idMap.get(currentIdentifier.replaceAll("\\D", "")) != null && (idMap.get(currentIdentifier.replaceAll("\\D", "")) == true || (identifierSuffix != null && identifierSuffix.startsWith("V"))))) {
-					// This volume is part of a Series/Multivolume work
-					if (!belongsToPeriodical) {
+				if (idMap.get(currentIdentifier.replaceAll("\\D", "")) != null) {
+
+					if (idMap.get(currentIdentifier.replaceAll("\\D", "")) == true) {
+						belongsToMultiVolume = true;
+					} else if ((identifierSuffix != null && identifierSuffix.startsWith("V")) && ((!belongsToPeriodical && !belongsToSeries))) {
 						belongsToMultiVolume = true;
 					}
+					// This volume is part of a Series/Multivolume work
+					// if (!belongsToPeriodical && !belongsToSeries) {
+					// }
 				}
 
-				if (belongsToMultiVolume) {
-					dsAnchorType = "MultiVolumeWork";
-					if (isManuscript) {
-						dsType = "Manuscript";
-					} else {
-						dsType = "Volume";
-					}
-				} else if (belongsToPeriodical) {
+				if (belongsToPeriodical) {
 					dsAnchorType = "Periodical";
 					dsType = "PeriodicalVolume";
 				} else if (belongsToSeries) {
@@ -1161,6 +1163,26 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 					}
 				} else if (isManuscript) {
 					dsType = "SingleManuscript";
+				}
+				// Multivolume may be part of a Series or Periodical. In that case, attach teh volumes to the Series/Periodical
+				if (belongsToMultiVolume) {
+					if (!belongsToPeriodical && !belongsToSeries) {
+						dsAnchorType = "MultiVolumeWork";
+					}
+					if (isManuscript) {
+						dsType = "Manuscript";
+					} else {
+						dsType = "Volume";
+					}
+				}
+
+				// remove unnecessary suffixes for everything but multivolumes
+				if (!belongsToMultiVolume) {
+					if (idMap.get(currentIdentifier.replaceAll("\\D", "")) != null && idMap.get(currentIdentifier.replaceAll("\\D", "")) == true) {
+						// need suffix
+					} else {
+						identifierSuffix = null;
+					}
 				}
 
 				logger.debug("Docstruct type: " + dsType);
@@ -1188,8 +1210,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 				DocStruct dsBoundBook = dd.createDocStruct(prefs.getDocStrctTypeByName("BoundBook"));
 				dd.setPhysicalDocStruct(dsBoundBook);
 				// Collect MODS metadata
-				ModsUtils.parseModsSection(MODS_MAPPING_FILE, prefs, dsVolume, dsAnchor, dsBoundBook, eleMods, currentVolume,
-						currentPieceDesignation, identifierSuffix);
+				ModsUtils.parseModsSection(this, dsVolume, dsAnchor, dsBoundBook, eleMods, currentVolume,
+						currentPieceDesignation);
 				currentIdentifier = ModsUtils.getIdentifier(prefs, dsVolume);
 				currentTitle = ModsUtils.getTitle(prefs, dsVolume);
 				currentAuthor = ModsUtils.getAuthor(prefs, dsVolume);
@@ -2489,6 +2511,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
 	@Override
 	public void setDocstruct(DocstructElement dse) {
+	}
+	
+	public Prefs getPrefs() {
+		return prefs;
+	}
+	
+	public String getCurrentSuffix() {
+		return identifierSuffix;
 	}
 
 	// Filters for file searches
