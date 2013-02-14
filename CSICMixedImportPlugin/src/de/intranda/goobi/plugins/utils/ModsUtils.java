@@ -64,12 +64,13 @@ public class ModsUtils {
 
 	private static final Namespace NS_MODS = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
 	private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
+	private static final String PREFIX_SERIES = "Núm. Serie, ";
+    private static final String PREFIX_VOLUME = "Vol. ";
 
 	private static HashMap<String, String> seriesInfo = new HashMap<String, String>(); // Name and identifier of related Item "series"
 	private static String seriesInfoFilename = "seriesInfo.ser";
-	private static ArrayList<String> anchorMetadataList = new ArrayList<String>(Arrays.asList("singleDigCollection", "PublisherName",
-			"PublicationStart", "PublicationEnd", "PublicationRun"));
-	private static ArrayList<String> taxonomyFieldsList = new ArrayList<String>(Arrays.asList("topic", "genre", "geographic", "temporal"));
+	private static ArrayList<String> anchorMetadataList = new ArrayList<String>(Arrays.asList("singleDigCollection"));
+	private static ArrayList<String> taxonomyFieldsList = new ArrayList<String>(Arrays.asList("topic", "genre", "geographic", "temporal", "name", "occupation"));
 	private static DecimalFormat volumeNumberFormat = new DecimalFormat("00");
 	private static HashMap<String, String> personRoleMap = new HashMap<String, String>();
 
@@ -174,6 +175,7 @@ public class ModsUtils {
 		personRoleMap.put("arr", null);
 		personRoleMap.put("autor", "Author");
 		personRoleMap.put("aut", "Author");
+	    personRoleMap.put("author", "Author");
 		personRoleMap.put("autor literario", "Author");
 		personRoleMap.put("aut lit", "Author");
 		personRoleMap.put("colaborador", "Collaborator");
@@ -483,11 +485,22 @@ public class ModsUtils {
 										Element eleValue = (Element) objValue;
 										List<Element> subjectChildren = eleValue.getChildren();
 										String value = "";
-										for (Element element : subjectChildren) {
-											if (taxonomyFieldsList.contains(element.getName().toLowerCase())) {
-												value = value + separator + element.getValue();
-											}
-										}
+                                        for (Element element : subjectChildren) {
+                                            if (taxonomyFieldsList.contains(element.getName().toLowerCase())) {
+                                                List<Element> subElements = element.getChildren();
+                                                if(subElements != null && !subElements.isEmpty()) {
+                                                    String subValue = "";
+                                                    for (Element subElement : subElements) {
+                                                        if(subElement.getValue() != null && !subElement.getValue().trim().isEmpty()) {                                                          
+                                                            subValue = subValue + " " + subElement.getValue();
+                                                        }
+                                                    }
+                                                    value = value + separator + subValue.trim();
+                                                } else if(element.getValue() != null && !element.getValue().trim().isEmpty()) {                                                        
+                                                    value = value + separator + element.getValue();
+                                                }
+                                            }
+                                        }
 										if (value.length() > separator.length()) {
 											value = value.substring(separator.length()).trim();
 											values.add(value);
@@ -521,11 +534,13 @@ public class ModsUtils {
 
 					for (String value : values) {
 
-						if (mdType.getName().contentEquals("CurrentNoSorting")) {
-							value = correctCurrentNoSorting(value);
-						} else if (!writeAllMetadataToAnchor && mdType.getName().contentEquals("TitleDocParallel")) {
-							seriesTitle = value;
-						}
+                        if (mdType.getName().contentEquals("CurrentNoSorting")) {
+                            value = correctCurrentNoSorting(value);
+                        } else if(mdType.getName().contentEquals("CurrentNo")) {
+                            value = formatVolumeString(value, PREFIX_SERIES);
+                        } else if (!writeAllMetadataToAnchor && mdType.getName().contentEquals("TitleDocParallel")) {
+                            seriesTitle = value;
+                        }
 
 						// Add singleDigCollection to series also
 						if (!writeAllMetadataToAnchor && anchorMetadataList.contains(mdType.getName()) && dsAnchor != null) {
@@ -555,11 +570,11 @@ public class ModsUtils {
 
 									if (mdName.contentEquals("TitleDocMain")) {
 										if (suffix != null && !suffix.isEmpty() && (plugin.addVolumeNoToTitle || !writeAllMetadataToAnchor)) {
-											if(plugin.useSquareBracketsForVolume) {												
-												metadata.setValue(value + " [" + suffix + "]");
-											} else {
-												metadata.setValue(value + " (" + suffix + ")");
-											}
+                                            if(plugin.useSquareBracketsForVolume) {                                             
+                                                metadata.setValue(value + " [" + suffix + "]");
+                                            } else {
+                                                metadata.setValue(value + " (" + formatVolumeString(suffix, PREFIX_VOLUME) + ")");
+                                            }
 										}
 										try {
 											dsLogical.addMetadata(metadata);
@@ -701,13 +716,19 @@ public class ModsUtils {
 			if (!writeAllMetadataToAnchor || plugin.writeCurrentNoToMultiVolume) {
 				if ((mdCurrentNoList == null || mdCurrentNoList.isEmpty())) {
 					// No current Number, so we create one
-					try {
-						Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNo"));
-						md.setValue(suffix);
-						dsLogical.addMetadata(md);
-					} catch (MetadataTypeNotAllowedException e) {
-						logger.warn(e.toString());
-					}
+                    try {
+                        String value = null;
+                        Metadata md = new Metadata(prefs.getMetadataTypeByName("CurrentNo"));
+                        if(writeAllMetadataToAnchor) {
+                            value = formatVolumeString(suffix, PREFIX_VOLUME);
+                        } else {
+                            value = formatVolumeString(suffix, PREFIX_SERIES);
+                        }
+                        md.setValue(value);
+                        dsLogical.addMetadata(md);
+                    } catch (MetadataTypeNotAllowedException e) {
+                        logger.warn(e.toString());
+                    }
 				}
 			}
 
@@ -744,6 +765,19 @@ public class ModsUtils {
 			writeFile(seriesInfoFile, seriesInfo);
 		}
 	}
+	
+	   private static String formatVolumeString(String value, String prefix) {
+	        int startIndex=0;
+	        if(value.startsWith("V") || value.startsWith("0")) {
+	            startIndex = 1;
+	        } else if(value.startsWith("V0")) {
+	            startIndex = 2;
+	        }
+	        
+	        value = value.substring(startIndex);
+	        
+	        return prefix+value;
+	    }
 
 	/**
 	 * 
