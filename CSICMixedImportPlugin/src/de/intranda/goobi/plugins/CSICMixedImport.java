@@ -190,7 +190,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         projectsCollectionsMap.put("0008_PCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
         projectsCollectionsMap.put("0009_VCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
         projectsCollectionsMap.put("0010_CMTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0012_CIP", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
+        projectsCollectionsMap.put("0012_CIPP", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
         projectsCollectionsMap.put("0013_JAE", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
         projectsCollectionsMap.put("0014_FMTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
         projectsCollectionsMap.put("0015_FAG", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
@@ -674,6 +674,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     }
 
     private void addProject(Fileformat ff, String projectName) {
+    	projectName = getActualProjectName(projectName);
         try {
             DocStruct topStruct = ff.getDigitalDocument().getLogicalDocStruct();
             if (topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("ProjectIdentifier")) == null
@@ -1232,7 +1233,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         String processTitle = r.getId();
 
         // For imports with wrong processTitle, correct it
-        processTitle = processTitle.replace("000471130", "001100392");
+//        processTitle = processTitle.replace("000471130", "001100392");
         processTitle = processTitle.replace("001363255", "000884278");
         processTitle = processTitle.replace("00045898", "000045898");
         processTitle = processTitle.replace("0000045898", "000045898");
@@ -1744,7 +1745,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         return null;
     }
 
-    /**
+    private String getActualProjectName(String name) {
+		if(name.contentEquals("0006_PMSC_GR_EEA")) {
+			return "0006_PMSC";
+		}
+		return name;
+	}
+
+	/**
      * 
      * Copy the files in exportFolder corresponding to the current record into the importFolder
      * 
@@ -2565,10 +2573,5 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         }
     }
 
-    @Override
-    public String getId() {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
 }

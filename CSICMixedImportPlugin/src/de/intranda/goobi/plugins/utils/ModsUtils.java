@@ -70,7 +70,7 @@ public class ModsUtils {
 	private static HashMap<String, String> seriesInfo = new HashMap<String, String>(); // Name and identifier of related Item "series"
 	private static String seriesInfoFilename = "seriesInfo.ser";
 	private static ArrayList<String> anchorMetadataList = new ArrayList<String>(Arrays.asList("singleDigCollection"));
-	private static ArrayList<String> taxonomyFieldsList = new ArrayList<String>(Arrays.asList("topic", "genre", "geographic", "temporal", "name", "occupation"));
+	private static ArrayList<String> taxonomyFieldsList = new ArrayList<String>(Arrays.asList( "titleinfo", "topic", "genre", "geographic", "cartographics", "temporal", "name", "occupation"));
 	private static DecimalFormat volumeNumberFormat = new DecimalFormat("00");
 	private static HashMap<String, String> personRoleMap = new HashMap<String, String>();
 
@@ -190,6 +190,9 @@ public class ModsUtils {
 		personRoleMap.put("coord", null);
 		personRoleMap.put("corrector", null);
 		personRoleMap.put("corr", null);
+		personRoleMap.put("cwt", "Annotator");
+		personRoleMap.put("anot", "Annotator");
+		personRoleMap.put("ann", "Annotator");
 		personRoleMap.put("dibujante", "IllustratorArtist");
 		personRoleMap.put("dib", "IllustratorArtist");
 		personRoleMap.put("director", "Director");
@@ -417,12 +420,16 @@ public class ModsUtils {
 
 								// set metadata type to role
 								if (roleTerm != null && !roleTerm.isEmpty()) {
-									if (roleTerm.endsWith(".")) {
-										roleTerm = roleTerm.substring(0, roleTerm.length() - 1);
-									}
+									roleTerm = roleTerm.replaceAll("\\.", "");
 									typeName = personRoleMap.get(roleTerm.toLowerCase());
 									if (typeName == null) {
-										typeName = mdName;
+										String[] parts = roleTerm.split(" ");
+										if(parts != null && parts.length > 0) {
+											typeName = personRoleMap.get(parts[0].toLowerCase());
+										}
+										if(typeName == null) {											
+											typeName = mdName;
+										}
 									}
 								} else {
 									// with no role specified, assume it is an author
@@ -436,7 +443,10 @@ public class ModsUtils {
 										lastName = nameSplit[0].trim();
 									}
 									if (nameSplit.length > 1 && StringUtils.isEmpty(firstName)) {
-										firstName = nameSplit[1].trim();
+										for (int i = 1; i < nameSplit.length; i++) {											
+											firstName += nameSplit[i].trim() + ", ";
+										}
+										firstName = firstName.substring(0, firstName.length()-2);
 									}
 								} else {
 									lastName = name;
@@ -514,7 +524,8 @@ public class ModsUtils {
 									if (objValue instanceof Element) {
 										Element eleValue = (Element) objValue;
 										logger.debug("mdType: " + mdType.getName() + "; Value: " + eleValue.getTextTrim());
-										value = eleValue.getTextTrim();
+										value = getElementValue(eleValue, ", ");
+//										value = eleValue.getTextTrim();
 									} else if (objValue instanceof Attribute) {
 										Attribute atrValue = (Attribute) objValue;
 										logger.debug("mdType: " + mdType.getName() + "; Value: " + atrValue.getValue());
@@ -766,7 +777,27 @@ public class ModsUtils {
 		}
 	}
 	
-	   private static String formatVolumeString(String value, String prefix) {
+	   private static String getElementValue(Element eleValue, String separator) {
+		   if(separator == null) {
+			   separator = " ";
+		   }
+		   String value = eleValue.getTextTrim() == null ? "" : eleValue.getTextTrim();
+		   List<Element> namePartList = eleValue.getChildren("namePart", null);
+		   if(namePartList != null && !namePartList.isEmpty()) {
+			   for (Element element : namePartList) {
+				String namePart = element.getTextTrim();
+				if(namePart != null && !namePart.isEmpty()) {
+					value += separator + namePart;
+				}
+			}
+			   if(value.startsWith(separator)) {
+				   value = value.substring(separator.length());
+			   }
+		   }
+		   return value;
+	}
+
+	private static String formatVolumeString(String value, String prefix) {
 	        int startIndex=0;
 	        if(value.startsWith("V") || value.startsWith("0")) {
 	            startIndex = 1;
