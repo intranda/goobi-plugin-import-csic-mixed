@@ -4229,7 +4229,7 @@
 				</xsl:call-template>
 			</xsl:variable>
 			<xsl:choose>
-				<xsl:when test="@ind2&gt;0">
+				<xsl:when test="@ind2&gt;'0'">
 					<xsl:if test="@tag!='880'">
 						<nonSort>
 							<xsl:value-of select="substring($titleChop,1,@ind2)" />
