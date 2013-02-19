@@ -2573,5 +2573,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         }
     }
 
+    public String getId() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 
 }
