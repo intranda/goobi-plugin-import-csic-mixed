@@ -107,7 +107,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
     private static final String NAME = "CSICMixedImport";
-    private static final String VERSION = "1.0.20121122";
+    private static final String VERSION = "1.0.20130503";
     private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
     public static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
     private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
@@ -409,15 +409,17 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
         // remove physical structures
         DocStruct bookStruct = outerff.getDigitalDocument().getPhysicalDocStruct();
-
+        DocStruct collectionStruct = null;
+        
         while (bookStruct.getAllChildren() != null && !bookStruct.getAllChildren().get(0).getType().getName().contentEquals("page")) {
+            collectionStruct = bookStruct;
             bookStruct = bookStruct.getAllChildren().get(0);
         }
 
-        if (!bookStruct.getType().getName().contentEquals("BoundBook")) {
+        //remove superfluous books
+        if (collectionStruct != null) {
             ArrayList<DocStruct> invalidBooks = new ArrayList<DocStruct>();
-            DocStruct tempBookStruct = null;
-            List<DocStruct> physStructs = bookStruct.getAllChildren();
+            List<DocStruct> physStructs = collectionStruct.getAllChildren();
             Collections.sort(physStructs, new VolumeComparator());
             if (physStructs.size() > 1) {
                 for (int i = 1; i <= physStructs.size(); i++) {
@@ -425,17 +427,16 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                         invalidBooks.add(physStructs.get(i - 1));
                         // topStruct.removeChild(topStruct.getAllChildren().get(i-1));
                     } else {
-                        tempBookStruct = physStructs.get(i - 1);
+                        bookStruct = physStructs.get(i - 1);
                     }
                 }
                 for (DocStruct docStruct : invalidBooks) {
-                    bookStruct.removeChild(docStruct);
+                    collectionStruct.removeChild(docStruct);
                 }
-                bookStruct = tempBookStruct;
-            } else {
-                bookStruct = physStructs.get(0);
             }
         }
+        
+        //add metadata to bookStruct
         DocStruct origBook = outerff.getDigitalDocument().getPhysicalDocStruct();
         if (origBook != bookStruct && origBook.getAllMetadata() != null) {
             for (Metadata md : origBook.getAllMetadata()) {
@@ -1139,8 +1140,16 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
                 DocStruct dsBoundBook = dd.createDocStruct(prefs.getDocStrctTypeByName("BoundBook"));
                 dd.setPhysicalDocStruct(dsBoundBook);
+                
+                //get volume number of this item
+                Integer volumeNo = ModsUtils.getNumberFromString(this.getCurrentSuffix());
+                if(volumeNo == null) {
+                    volumeNo = currentVolume;
+                }
+                
+                
                 // Collect MODS metadata
-                ModsUtils.parseModsSection(this, dsVolume, dsAnchor, dsBoundBook, eleMods, currentVolume, currentPieceDesignation);
+                ModsUtils.parseModsSection(this, dsVolume, dsAnchor, dsBoundBook, eleMods, volumeNo, currentPieceDesignation);
                 currentIdentifier = ModsUtils.getIdentifier(prefs, dsVolume);
                 currentTitle = ModsUtils.getTitle(prefs, dsVolume);
                 currentAuthor = ModsUtils.getAuthor(prefs, dsVolume);
@@ -1192,9 +1201,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                         Metadata mdCollection = new Metadata(mdTypeCollection);
                         mdCollection.setValue(collection);
                         dsVolume.addMetadata(mdCollection);
-                        if (dsAnchor != null) {
-                            dsAnchor.addMetadata(mdCollection);
-                        }
+//                        if (dsAnchor != null) {
+//                            dsAnchor.addMetadata(mdCollection);
+//                        }
                     }
                 }
             }
@@ -1693,6 +1702,19 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                         if (volumeIdentifier == null || dir.getName().contains("_" + volumeIdentifier)) {
                             imageDirs.add(dir);
                         }
+                    }
+                }
+            }
+            
+            //if necessary, attempt to get volumeNumber from image dir
+            if(pieceDesignation != null && volumeIdentifier == null && imageDirs.size() == 1) {
+                String imageDirName = imageDirs.get(0).getName();
+                int pieceDesignationStartPos = imageDirName.lastIndexOf(pieceDesignation);
+                int pieceDesignationEndPos = pieceDesignationStartPos+pieceDesignation.length()+1;
+                if(pieceDesignationStartPos > 0 && pieceDesignationEndPos < imageDirName.length()) {
+                    String volumeString = imageDirName.substring(pieceDesignationEndPos);
+                    if(volumeString != null && !volumeString.isEmpty()) {
+                        volumeIdentifier = volumeString;
                     }
                 }
             }
