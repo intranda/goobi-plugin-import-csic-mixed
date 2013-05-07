@@ -29,6 +29,7 @@ import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +72,7 @@ public class ModsUtils {
 
     private static HashMap<String, String> seriesInfo = new HashMap<String, String>(); // Name and identifier of related Item "series"
     private static String seriesInfoFilename = "seriesInfo.ser";
+    private static String personRoleMapFilename = "person_role_map.xml";
     private static ArrayList<String> anchorMetadataList = new ArrayList<String>(Arrays.asList(""));
     private static ArrayList<String> volumeExclusiveMetadataList = new ArrayList<String>(Arrays.asList("Taxonomy"));
     private static ArrayList<String> taxonomyFieldsList = new ArrayList<String>(Arrays.asList("titleinfo", "topic", "genre", "geographic",
@@ -168,7 +170,7 @@ public class ModsUtils {
         return obj;
     }
 
-    public static void fillPersonRoleMap() {
+    private static void fillPersonRoleMap() {
         personRoleMap = new HashMap<String, String>();
 
         personRoleMap.put("adaptor", "Adapter");
@@ -211,11 +213,11 @@ public class ModsUtils {
         personRoleMap.put("coordinador", "Coordinator");
         personRoleMap.put("coord", "Coordinator");
         personRoleMap.put("coordinator", "Coordinator");
-        
+
         personRoleMap.put("copier", "Copier");
         personRoleMap.put("frg", "Copier");
-        personRoleMap.put("copiador", "Copier");
-        personRoleMap.put("cp", "Copier");
+        personRoleMap.put("copista", "Copier");
+        personRoleMap.put("cop", "Copier");
 
         personRoleMap.put("corrector", "Corrector");
         personRoleMap.put("corr", "Corrector");
@@ -267,7 +269,7 @@ public class ModsUtils {
 
         personRoleMap.put("recopilador", "Compiler");
         personRoleMap.put("rec", "Compiler");
-        
+
         personRoleMap.put("collector", "Collector");
         personRoleMap.put("col", "Collector");
 
@@ -283,7 +285,7 @@ public class ModsUtils {
 
         personRoleMap.put("seleccionador", "Coordinator");
         personRoleMap.put("sel", "Coordinator");
-        
+
         personRoleMap.put("teacher", "Teacher");
         personRoleMap.put("tch", "Teacher");
 
@@ -337,6 +339,7 @@ public class ModsUtils {
         Document mapDoc = new SAXBuilder().build(mappingFile);
         String seriesTitle = null;
         String seriesID = null;
+        List<String> publicationYears = new ArrayList<String>();
         for (Object obj : mapDoc.getRootElement().getChildren("metadata", null)) {
             Element eleMetadata = (Element) obj;
             String mdName = eleMetadata.getChildTextTrim("name", null);
@@ -632,23 +635,23 @@ public class ModsUtils {
                         }
 
                         // Add singleDigCollection to series also
-//                        if (!writeAllMetadataToAnchor && anchorMetadataList.contains(mdType.getName()) && dsAnchor != null) {
-//                            // if (mdType.getName().contentEquals("singleDigCollection") && dsSeries != null) {
-//                            try {
-//                                if (value.length() > 0) {
-//                                    Metadata metadata = new Metadata(mdType);
-//                                    metadata.setValue(value);
-//                                    logger.debug("Found metadata: " + metadata.getType().getName());
-//                                    if (eleMetadata.getAttribute("logical") != null
-//                                            && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-//                                        logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
-//                                        dsAnchor.addMetadata(metadata);
-//                                    }
-//                                }
-//                            } catch (MetadataTypeNotAllowedException e) {
-//                                logger.warn(e.getMessage());
-//                            }
-//                        }
+                        //                        if (!writeAllMetadataToAnchor && anchorMetadataList.contains(mdType.getName()) && dsAnchor != null) {
+                        //                            // if (mdType.getName().contentEquals("singleDigCollection") && dsSeries != null) {
+                        //                            try {
+                        //                                if (value.length() > 0) {
+                        //                                    Metadata metadata = new Metadata(mdType);
+                        //                                    metadata.setValue(value);
+                        //                                    logger.debug("Found metadata: " + metadata.getType().getName());
+                        //                                    if (eleMetadata.getAttribute("logical") != null
+                        //                                            && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+                        //                                        logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
+                        //                                        dsAnchor.addMetadata(metadata);
+                        //                                    }
+                        //                                }
+                        //                            } catch (MetadataTypeNotAllowedException e) {
+                        //                                logger.warn(e.getMessage());
+                        //                            }
+                        //                        }
                         try {
                             if (value.length() > 0) {
                                 Metadata metadata = new Metadata(mdType);
@@ -656,6 +659,11 @@ public class ModsUtils {
                                 // logger.debug("Found metadata: " + metadata.getType().getName());
                                 if (eleMetadata.getAttribute("logical") != null && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
                                     // logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
+
+                                    if (mdName.contentEquals("PublicationStart") || mdName.contentEquals("PublicationEnd")) {
+                                        publicationYears.add(value);
+                                        continue;
+                                    }
 
                                     if (mdName.contentEquals("TitleDocMain")) {
                                         if (suffix != null && !suffix.isEmpty() && (plugin.addVolumeNoToTitle || !writeAllMetadataToAnchor)) {
@@ -714,6 +722,44 @@ public class ModsUtils {
 
             } else {
                 logger.warn("Metadata '" + mdName + "' is not defined in the ruleset.");
+            }
+        }
+
+        //construct PublicationYear from Start and Enddate if necessary
+        List<? extends Metadata> mdPublicationList = dsLogical.getAllMetadataByType(prefs.getMetadataTypeByName("PublicationYear"));
+        if ((mdPublicationList == null || mdPublicationList.isEmpty()) && !publicationYears.isEmpty()) {
+            Collections.sort(publicationYears);
+            String value = publicationYears.get(0);
+            if (publicationYears.size() > 1) {
+                value += ("-" + publicationYears.get(publicationYears.size() - 1));
+            }
+            if (value != null && !value.trim().isEmpty()) {
+                try {
+                    Metadata mdPublicationYear = new Metadata(prefs.getMetadataTypeByName("PublicationYear"));
+                    mdPublicationYear.setValue(value);
+
+                    try {
+                        dsLogical.addMetadata(mdPublicationYear);
+                    } catch (MetadataTypeNotAllowedException e) {
+                        logger.error(e.getMessage());
+                    } catch (DocStructHasNoTypeException e) {
+                        logger.error(e.getMessage());
+                    }
+
+                    if (writeAllMetadataToAnchor) {
+                        try {
+                            dsAnchor.addMetadata(mdPublicationYear);
+                        } catch (MetadataTypeNotAllowedException e) {
+                            logger.warn(e.getMessage());
+                        } catch (DocStructHasNoTypeException e) {
+                            logger.warn(e.getMessage());
+                        }
+                    }
+
+                } catch (MetadataTypeNotAllowedException e) {
+                    logger.error(e.getMessage());
+                }
+
             }
         }
 
@@ -873,7 +919,7 @@ public class ModsUtils {
     }
 
     public static Integer getNumberFromString(String str) {
-        if(str == null || str.trim().isEmpty()) {
+        if (str == null || str.trim().isEmpty()) {
             return null;
         }
         Integer ret = null;
