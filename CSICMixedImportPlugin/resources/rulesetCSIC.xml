@@ -1189,6 +1189,120 @@
     <language name="de">Kommentator</language>
     <language name="en">Annotator</language>
   </MetadataType>
+  <MetadataType type="person">
+    <Name>Adapter</Name>
+    <language name="de">Bearbeiter</language>
+    <language name="en">Adapter</language>
+    <language name="es">Adaptor</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Arranger</Name>
+    <language name="de">Arrangierer</language>
+    <language name="en">Arranger</language>
+    <language name="es">Arreglista</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Commentator</Name>
+    <language name="de">Kommentator</language>
+    <language name="en">Commentator</language>
+    <language name="es">Comentarista</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Compiler</Name>
+    <language name="de">Kompilator</language>
+    <language name="en">Compiler</language>
+    <language name="es">Compilador</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>AuthorLit</Name>
+    <language name="de">Künstlerischer Leiter</language>
+    <language name="en">Artistic director</language>
+    <language name="es">Autor literario</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Continuator</Name>
+    <language name="de">Fortführer</language>
+    <language name="en">Continuator</language>
+    <language name="es">Continuador</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Coordinator</Name>
+    <language name="de">Koordinierer</language>
+    <language name="en">Coordinator</language>
+    <language name="es">Coordinador</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Corrector</Name>
+    <language name="de">Korrektor</language>
+    <language name="en">Corrector</language>
+    <language name="es">Corrector</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Binder</Name>
+    <language name="de">Buchbinder</language>
+    <language name="en">Bookbinder</language>
+    <language name="es">Encuadernado</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Interpreter</Name>
+    <language name="de">Interpret</language>
+    <language name="en">Interpreter</language>
+    <language name="es">Interprete</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>IntroductionAuthor</Name>
+    <language name="de">Author der Einleitung</language>
+    <language name="en">Author of introduction</language>
+    <language name="es">Prologuista</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Collector</Name>
+    <language name="de">Sammler</language>
+    <language name="en">Collector</language>
+    <language name="es">recopilador</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Redactor</Name>
+    <language name="de">Redakteur</language>
+    <language name="en">Redactor</language>
+    <language name="es">Redactor</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Revisor</Name>
+    <language name="de">Rezensent</language>
+    <language name="en">Reviewer</language>
+    <language name="es">Revisor</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Teacher</Name>
+    <language name="de">Lehrer/Trainer</language>
+    <language name="en">Teacher/Trainer</language>
+    <language name="es">Seleccionador</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Transcriber</Name>
+    <language name="de">Transkribierer</language>
+    <language name="en">Transcriber</language>
+    <language name="es">Transcriptor</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Refundidor</Name>
+    <language name="de">Bearbeiter</language>
+    <language name="en">Adapter</language>
+    <language name="es">Refundidor</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Actor</Name>
+    <language name="de">Darsteller</language>
+    <language name="en">Actor</language>
+    <language name="es">Interprete</language>
+  </MetadataType>
+  <MetadataType type="person">
+    <Name>Copier</Name>
+    <language name="de">Kopierer</language>
+    <language name="en">copier</language>
+    <language name="es">copista</language>
+  </MetadataType>
   <!-- ########################################################################## ## Logical document structure types ## ########################################################################## -->
   <DocStrctType>
     <Name>Binder</Name>
@@ -1770,6 +1884,8 @@
     <metadata num="*">Url</metadata>
     <metadata num="*">UrlLabel</metadata>
     <metadata num="*">UrlNote</metadata>
+    <metadata num="*">Actor</metadata>
+    <metadata num="*">Copier</metadata>
   </DocStrctType>
   <DocStrctType>
     <Name>Prepage</Name>
@@ -2219,6 +2335,7 @@
     <allowedchildtype>SerialVolume</allowedchildtype>
     <allowedchildtype>Manuscript</allowedchildtype>
     <allowedchildtype>Volume</allowedchildtype>
+    <allowedchildtype>Monograph</allowedchildtype>
     <metadata num="1o">CreatorsAllOrigin</metadata>
     <metadata num="1m" DefaultDisplay="true">TitleDocMain</metadata>
     <metadata num="*">Photographer</metadata>
@@ -2544,6 +2661,28 @@
     <metadata num="*">OtherPhysicalForm</metadata>
     <metadata num="*">NotePublication</metadata>
     <metadata num="*">Annotator</metadata>
+    <metadata num="*">Adapter</metadata>
+    <metadata num="*">Arranger</metadata>
+    <metadata num="*">AuthorLit</metadata>
+    <metadata num="*">Binder</metadata>
+    <metadata num="*">Collector</metadata>
+    <metadata num="*">Commentator</metadata>
+    <metadata num="*">Compiler</metadata>
+    <metadata num="*">Composer</metadata>
+    <metadata num="*">Continuator</metadata>
+    <metadata num="*">Coordinator</metadata>
+    <metadata num="*">Corrector</metadata>
+    <metadata num="*">HailedPerson</metadata>
+    <metadata num="*">Interpreter</metadata>
+    <metadata num="*">IntroductionAuthor</metadata>
+    <metadata num="*">Issuer</metadata>
+    <metadata num="*">Redactor</metadata>
+    <metadata num="*">Refundidor</metadata>
+    <metadata num="*">Revisor</metadata>
+    <metadata num="*">Teacher</metadata>
+    <metadata num="*">Transcriber</metadata>
+    <metadata num="*">Actor</metadata>
+    <metadata num="*">Copier</metadata>
   </DocStrctType>
   <DocStrctType>
     <Name>Miscella</Name>
@@ -2621,7 +2760,7 @@
     <metadata num="*">Translator</metadata>
     <metadata num="*">Description</metadata>
   </DocStrctType>
-  <DocStrctType>
+  <DocStrctType topStruct="true">
     <Name>Map</Name>
     <language name="de">Karte</language>
     <language name="en">Map</language>
@@ -2669,6 +2808,24 @@
     <metadata num="*">ParticipantOther</metadata>
     <metadata num="*">Corporation</metadata>
     <metadata num="*">BibliographicalNote</metadata>
+    <metadata num="*">Actor</metadata>
+    <metadata num="*">TitleDocAbbreviated</metadata>
+    <metadata num="*">TitleDocMainShort</metadata>
+    <metadata num="*">TitleDocParallel</metadata>
+    <metadata num="*">TitleDocUniform</metadata>
+    <metadata num="*">TitleRelatedWork</metadata>
+    <metadata num="*">VariantTitle</metadata>
+    <metadata num="*">TitleDocSub1</metadata>
+    <metadata num="*">SizeSourcePrint</metadata>
+    <metadata num="*">NotePublication</metadata>
+    <metadata num="*">PlaceOfPublication</metadata>
+    <metadata num="*">ProjectIdentifier</metadata>
+    <metadata num="*">AdditionalInformation</metadata>
+    <metadata num="*">StatementOfResponsibility</metadata>
+    <metadata num="*">CountryCode</metadata>
+    <metadata num="*">recordContentSource</metadata>
+    <metadata num="*">CatalogLanguage</metadata>
+    <metadata num="*">PublisherCorporate</metadata>
   </DocStrctType>
   <DocStrctType>
     <Name>Theses</Name>
@@ -3342,6 +3499,28 @@
     <metadata num="*">OtherPhysicalForm</metadata>
     <metadata num="*">NotePublication</metadata>
     <metadata num="*">Annotator</metadata>
+    <metadata num="*">Adapter</metadata>
+    <metadata num="*">Arranger</metadata>
+    <metadata num="*">AuthorLit</metadata>
+    <metadata num="*">Binder</metadata>
+    <metadata num="*">Collector</metadata>
+    <metadata num="*">Commentator</metadata>
+    <metadata num="*">Compiler</metadata>
+    <metadata num="*">Composer</metadata>
+    <metadata num="*">Continuator</metadata>
+    <metadata num="*">Coordinator</metadata>
+    <metadata num="*">Corrector</metadata>
+    <metadata num="*">HailedPerson</metadata>
+    <metadata num="*">Interpreter</metadata>
+    <metadata num="*">IntroductionAuthor</metadata>
+    <metadata num="*">Issuer</metadata>
+    <metadata num="*">Redactor</metadata>
+    <metadata num="*">Refundidor</metadata>
+    <metadata num="*">Revisor</metadata>
+    <metadata num="*">Teacher</metadata>
+    <metadata num="*">Transcriber</metadata>
+    <metadata num="*">Actor</metadata>
+    <metadata num="*">Copier</metadata>
   </DocStrctType>
   <DocStrctType topStruct="true">
     <Name>Monograph</Name>
@@ -3474,6 +3653,28 @@
     <metadata num="*">OtherPhysicalForm</metadata>
     <metadata num="*">NotePublication</metadata>
     <metadata num="*">Annotator</metadata>
+    <metadata num="*">Adapter</metadata>
+    <metadata num="*">Arranger</metadata>
+    <metadata num="*">AuthorLit</metadata>
+    <metadata num="*">Binder</metadata>
+    <metadata num="*">Collector</metadata>
+    <metadata num="*">Commentator</metadata>
+    <metadata num="*">Compiler</metadata>
+    <metadata num="*">Composer</metadata>
+    <metadata num="*">Continuator</metadata>
+    <metadata num="*">Coordinator</metadata>
+    <metadata num="*">Corrector</metadata>
+    <metadata num="*">HailedPerson</metadata>
+    <metadata num="*">Interpreter</metadata>
+    <metadata num="*">IntroductionAuthor</metadata>
+    <metadata num="*">Issuer</metadata>
+    <metadata num="*">Redactor</metadata>
+    <metadata num="*">Refundidor</metadata>
+    <metadata num="*">Revisor</metadata>
+    <metadata num="*">Teacher</metadata>
+    <metadata num="*">Transcriber</metadata>
+    <metadata num="*">Actor</metadata>
+    <metadata num="*">Copier</metadata>
   </DocStrctType>
   <DocStrctType topStruct="true">
     <Name>Volume</Name>
@@ -3606,6 +3807,28 @@
     <metadata num="*">OtherPhysicalForm</metadata>
     <metadata num="*">NotePublication</metadata>
     <metadata num="*">Annotator</metadata>
+    <metadata num="*">Adapter</metadata>
+    <metadata num="*">Arranger</metadata>
+    <metadata num="*">AuthorLit</metadata>
+    <metadata num="*">Binder</metadata>
+    <metadata num="*">Collector</metadata>
+    <metadata num="*">Commentator</metadata>
+    <metadata num="*">Compiler</metadata>
+    <metadata num="*">Composer</metadata>
+    <metadata num="*">Continuator</metadata>
+    <metadata num="*">Coordinator</metadata>
+    <metadata num="*">Corrector</metadata>
+    <metadata num="*">HailedPerson</metadata>
+    <metadata num="*">Interpreter</metadata>
+    <metadata num="*">IntroductionAuthor</metadata>
+    <metadata num="*">Issuer</metadata>
+    <metadata num="*">Redactor</metadata>
+    <metadata num="*">Refundidor</metadata>
+    <metadata num="*">Revisor</metadata>
+    <metadata num="*">Teacher</metadata>
+    <metadata num="*">Transcriber</metadata>
+    <metadata num="*">Actor</metadata>
+    <metadata num="*">Copier</metadata>
   </DocStrctType>
   <DocStrctType topStruct="true">
     <Name>PeriodicalVolume</Name>
@@ -3743,6 +3966,28 @@
     <metadata num="*">OtherPhysicalForm</metadata>
     <metadata num="*">NotePublication</metadata>
     <metadata num="*">Annotator</metadata>
+    <metadata num="*">Adapter</metadata>
+    <metadata num="*">Arranger</metadata>
+    <metadata num="*">AuthorLit</metadata>
+    <metadata num="*">Binder</metadata>
+    <metadata num="*">Collector</metadata>
+    <metadata num="*">Commentator</metadata>
+    <metadata num="*">Compiler</metadata>
+    <metadata num="*">Composer</metadata>
+    <metadata num="*">Continuator</metadata>
+    <metadata num="*">Coordinator</metadata>
+    <metadata num="*">Corrector</metadata>
+    <metadata num="*">HailedPerson</metadata>
+    <metadata num="*">Interpreter</metadata>
+    <metadata num="*">IntroductionAuthor</metadata>
+    <metadata num="*">Issuer</metadata>
+    <metadata num="*">Redactor</metadata>
+    <metadata num="*">Refundidor</metadata>
+    <metadata num="*">Revisor</metadata>
+    <metadata num="*">Teacher</metadata>
+    <metadata num="*">Transcriber</metadata>
+    <metadata num="*">Actor</metadata>
+    <metadata num="*">Copier</metadata>
   </DocStrctType>
   <DocStrctType topStruct="true">
     <Name>Manuscript</Name>
@@ -3875,6 +4120,28 @@
     <metadata num="*">OtherPhysicalForm</metadata>
     <metadata num="*">NotePublication</metadata>
     <metadata num="*">Annotator</metadata>
+    <metadata num="*">Adapter</metadata>
+    <metadata num="*">Arranger</metadata>
+    <metadata num="*">AuthorLit</metadata>
+    <metadata num="*">Binder</metadata>
+    <metadata num="*">Collector</metadata>
+    <metadata num="*">Commentator</metadata>
+    <metadata num="*">Compiler</metadata>
+    <metadata num="*">Composer</metadata>
+    <metadata num="*">Continuator</metadata>
+    <metadata num="*">Coordinator</metadata>
+    <metadata num="*">Corrector</metadata>
+    <metadata num="*">HailedPerson</metadata>
+    <metadata num="*">Interpreter</metadata>
+    <metadata num="*">IntroductionAuthor</metadata>
+    <metadata num="*">Issuer</metadata>
+    <metadata num="*">Redactor</metadata>
+    <metadata num="*">Refundidor</metadata>
+    <metadata num="*">Revisor</metadata>
+    <metadata num="*">Teacher</metadata>
+    <metadata num="*">Transcriber</metadata>
+    <metadata num="*">Actor</metadata>
+    <metadata num="*">Copier</metadata>
   </DocStrctType>
   <DocStrctType topStruct="true">
     <Name>SingleManuscript</Name>
@@ -4008,6 +4275,28 @@
     <metadata num="*">OtherPhysicalForm</metadata>
     <metadata num="*">NotePublication</metadata>
     <metadata num="*">Annotator</metadata>
+    <metadata num="*">Adapter</metadata>
+    <metadata num="*">Arranger</metadata>
+    <metadata num="*">AuthorLit</metadata>
+    <metadata num="*">Binder</metadata>
+    <metadata num="*">Collector</metadata>
+    <metadata num="*">Commentator</metadata>
+    <metadata num="*">Compiler</metadata>
+    <metadata num="*">Composer</metadata>
+    <metadata num="*">Continuator</metadata>
+    <metadata num="*">Coordinator</metadata>
+    <metadata num="*">Corrector</metadata>
+    <metadata num="*">HailedPerson</metadata>
+    <metadata num="*">Interpreter</metadata>
+    <metadata num="*">IntroductionAuthor</metadata>
+    <metadata num="*">Issuer</metadata>
+    <metadata num="*">Redactor</metadata>
+    <metadata num="*">Refundidor</metadata>
+    <metadata num="*">Revisor</metadata>
+    <metadata num="*">Teacher</metadata>
+    <metadata num="*">Transcriber</metadata>
+    <metadata num="*">Actor</metadata>
+    <metadata num="*">Copier</metadata>
   </DocStrctType>
   <DocStrctType>
     <Name>Collection</Name>
@@ -4761,6 +5050,10 @@
 				is needed for internal ## ## METS storing. ## ########################################################################## -->
       <AnchorIdentifierMetadataType>CatalogIDDigital</AnchorIdentifierMetadataType>
       <Metadata>
+        <InternalName>Compiler</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="com"]</WriteXPath>
+      </Metadata>
+      <Metadata>
         <InternalName>NoteLanguage</InternalName>
         <WriteXPath>./mods:mods/mods:note[@type='language']</WriteXPath>
       </Metadata>
@@ -5110,7 +5403,7 @@
       </Metadata>
       <Metadata>
         <InternalName>Collaborator</InternalName>
-        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="cor"[@authority='marcrelator'][@type='code']]</WriteXPath>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="clb"[@authority='marcrelator'][@type='code']]</WriteXPath>
         <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
         <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
         <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
@@ -5421,7 +5714,7 @@
       </Metadata>
       <Metadata>
         <InternalName>Printer</InternalName>
-        <WriteXPath>/mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="prt"][@authority='marcrelator'][@type='code']]</WriteXPath>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="prt"][@authority='marcrelator'][@type='code']]</WriteXPath>
         <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
         <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
         <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
@@ -5503,7 +5796,7 @@
       </Metadata>
       <Metadata>
         <InternalName>TitleDocUniform</InternalName>
-        <WriteXPath>./mods:mods/mods:titleInfo[@type='uniform']/#mods:title</WriteXPath>
+        <WriteXPath>./mods:mods/mods:titleInfo[@type='alternative']/#mods:title</WriteXPath>
       </Metadata>
       <Metadata>
         <InternalName>TimeNote</InternalName>
@@ -5515,7 +5808,11 @@
       </Metadata>
       <Metadata>
         <InternalName>Director</InternalName>
-        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="drt"[@authority='marcrelator'][@type='code']]</WriteXPath>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="edt"[@authority='marcrelator'][@type='code']]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
       </Metadata>
       <Metadata>
         <InternalName>OtherPhysicalForm</InternalName>
@@ -5531,6 +5828,151 @@
         <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
         <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
         <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Adapter</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="adp"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Arranger</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="arr"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Commentator</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="cmm"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>AuthorLit</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="ard"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Continuator</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="oth"[@authority='marcrelator'][@type='code']]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Coordinator</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="edt"[@authority='marcrelator'][@type='code']]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Corrector</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="oth"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Binder</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="bnd"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Interpreter</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="trl"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>IntroductionAuthor</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="oth"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Collector</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="com"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Redactor</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="red"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Revisor</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="rev"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Teacher</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="tch"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Transcriber</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="trc"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Refundidor</InternalName>
+        <WriteXPath>./mods:mods/mods:name[@type='personal'][mods:role/mods:roleTerm="adp"]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Actor</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="act"[@authority='marcrelator'][@type='code']]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Copier</InternalName>
+        <WriteXPath>./mods:mods/#mods:name[@type='personal'][mods:role/mods:roleTerm="frg"[@authority='marcrelator'][@type='code']]</WriteXPath>
+        <FirstnameXPath>./mods:namePart[@type='given']</FirstnameXPath>
+        <LastnameXPath>./mods:namePart[@type='family']</LastnameXPath>
+        <DisplayNameXPath>./mods:displayForm</DisplayNameXPath>
+        <IdentifierXPath>../mods:name[@authority='gbv'][@ID='']</IdentifierXPath>
       </Metadata>
       <DocStruct>
         <InternalName>Binder</InternalName>
@@ -5803,7 +6245,7 @@
       </DocStruct>
       <DocStruct>
         <InternalName>SerialVolume</InternalName>
-        <MetsType>SerialVolume</MetsType>
+        <MetsType>Monograph</MetsType>
       </DocStruct>
       <!-- DO NOT CHANGE!! -->
       <!-- ########################################################################## ## Logical structure entities ## ########################################################################## -->
@@ -5825,7 +6267,7 @@
       </DocStruct>
       <DocStruct>
         <InternalName>SingleManuscript</InternalName>
-        <MetsType>SingleManuscript</MetsType>
+        <MetsType>Manuscript</MetsType>
       </DocStruct>
       <DocStruct>
         <InternalName>Collection</InternalName>

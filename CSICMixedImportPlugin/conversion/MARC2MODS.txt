@@ -1,7 +1,0 @@
-040/ / $d (Modifying agency)                  ==> nicht so relevant
-245/1/0$c (Statement of responsibility, etc.) ==> nicht so relevant
-260/ / $f (Publication manufacturer)          ==> evtl. originInfo/publisher, wenn noch nichts da steht?
-500/ / $a (General Note)                      ==> note[@type="general"]
-852/ / $g (Non-coded location qualifier)      ==> ???
-852/ / $h (Classification part)               ==> location/shelfLocator
-866/ / $j (Textual Holdings)                  ==> location/holdingSimple/copyInformation/enumerationAndChronology[@unitType="1"]

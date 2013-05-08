@@ -107,7 +107,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
     private static final String NAME = "CSICMixedImport";
-    private static final String VERSION = "1.0.20130507";
+    private static final String VERSION = "1.0.20130508";
     private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
     public static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
     private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
@@ -154,6 +154,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     private final boolean copyImages = ConfigPlugins.getPluginConfig(this).getBoolean("copyImages", true);
     private final boolean copyPdfs = ConfigPlugins.getPluginConfig(this).getBoolean("copyPdfs", true);
     private final boolean updateExistingRecords = ConfigPlugins.getPluginConfig(this).getBoolean("updateExistingRecords", true);
+    private final boolean relatedSeriesIsAnchor = ConfigPlugins.getPluginConfig(this).getBoolean("relatedSeriesIsAnchor", false);
     public final File exportFolder = new File(ConfigPlugins.getPluginConfig(this).getString("importFolder", "/opt/digiverso/ftp-import/"));
     public final String projectIdentifierTitle = (ConfigPlugins.getPluginConfig(this).getString("projectIdentifier", "projectIdentifier"));
     public File sourceFolder = null;
@@ -184,8 +185,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
         projectsCollectionsMap.put("0001_POQ", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
         projectsCollectionsMap.put("0005_BETN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0006_PMSC", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0006_PMSC_G_EEA", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
+        projectsCollectionsMap.put("0006_PMSC_M_CCHS", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
+        projectsCollectionsMap.put("0006_PMSC_GR_EEA", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
         projectsCollectionsMap.put("0007_PCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
         projectsCollectionsMap.put("0008_PCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
         projectsCollectionsMap.put("0009_VCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
@@ -1060,7 +1061,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
                 // handle relatedSeries
                 List<Element> eleRelatedSeriesList = eleMods.getChildren("relatedItem", null);
-                if (eleRelatedSeriesList != null) {
+                if (relatedSeriesIsAnchor && eleRelatedSeriesList != null) {
                     for (Element eleRelatedSeries : eleRelatedSeriesList) {
 
                         if (eleRelatedSeries != null && eleRelatedSeries.getAttribute("type") != null
