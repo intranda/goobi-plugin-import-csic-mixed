@@ -73,7 +73,7 @@ public class ModsUtils {
     private static HashMap<String, String> seriesInfo = new HashMap<String, String>(); // Name and identifier of related Item "series"
     private static String seriesInfoFilename = "seriesInfo.ser";
     private static String personRoleMapFilename = "person_role_map.xml";
-    private static ArrayList<String> anchorMetadataList = new ArrayList<String>(Arrays.asList(""));
+    private static ArrayList<String> anchorMetadataList = new ArrayList<String>(Arrays.asList("Fonds", "FondsGroup"));
     private static ArrayList<String> volumeExclusiveMetadataList = new ArrayList<String>(Arrays.asList("Taxonomy"));
     private static ArrayList<String> taxonomyFieldsList = new ArrayList<String>(Arrays.asList("titleinfo", "topic", "genre", "geographic",
             "cartographics", "temporal", "name", "occupation"));
@@ -343,8 +343,7 @@ public class ModsUtils {
         for (Object obj : mapDoc.getRootElement().getChildren("metadata", null)) {
             Element eleMetadata = (Element) obj;
             String mdName = eleMetadata.getChildTextTrim("name", null);
-
-            if (mdName.contentEquals("location")) {
+            if ("location".equals(mdName)) {
                 // write location info
                 int counter = 0;
                 List<Element> eleXpathList = eleMetadata.getChildren("xpath", null);
@@ -353,9 +352,8 @@ public class ModsUtils {
                 }
 
                 String query = eleXpathList.get(0).getTextTrim();
-                XPath xpath = XPath.newInstance(query);
-                xpath.addNamespace(NS_MODS);
-                List<Element> eleValueList = xpath.selectNodes(doc);
+                XPath xpath;
+                List<Element> eleValueList = queryNodes(doc, query);
 
                 for (Element element : eleValueList) {
 
@@ -461,11 +459,8 @@ public class ModsUtils {
                     // Persons
                     for (Element eleXpath : eleXpathList) {
                         String query = eleXpath.getTextTrim();
-                        // logger.debug("XPath: " + query);
-                        XPath xpath = XPath.newInstance(query);
-                        xpath.addNamespace(NS_MODS);
-                        // Element eleValue = (Element) xpath.selectSingleNode(doc);
-                        List<Element> eleValueList = xpath.selectNodes(doc);
+                        XPath xpath;
+                        List<Element> eleValueList = queryNodes(doc, query);
                         if (eleValueList != null) {
                             for (Element eleValue : eleValueList) {
                                 String name = "";
@@ -634,24 +629,23 @@ public class ModsUtils {
                             seriesTitle = value;
                         }
 
-                        // Add singleDigCollection to series also
-                        //                        if (!writeAllMetadataToAnchor && anchorMetadataList.contains(mdType.getName()) && dsAnchor != null) {
-                        //                            // if (mdType.getName().contentEquals("singleDigCollection") && dsSeries != null) {
-                        //                            try {
-                        //                                if (value.length() > 0) {
-                        //                                    Metadata metadata = new Metadata(mdType);
-                        //                                    metadata.setValue(value);
-                        //                                    logger.debug("Found metadata: " + metadata.getType().getName());
-                        //                                    if (eleMetadata.getAttribute("logical") != null
-                        //                                            && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
-                        //                                        logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
-                        //                                        dsAnchor.addMetadata(metadata);
-                        //                                    }
-                        //                                }
-                        //                            } catch (MetadataTypeNotAllowedException e) {
-                        //                                logger.warn(e.getMessage());
-                        //                            }
-                        //                        }
+                        if (!writeAllMetadataToAnchor && anchorMetadataList.contains(mdType.getName()) && dsAnchor != null) {
+                            // if (mdType.getName().contentEquals("singleDigCollection") && dsSeries != null) {
+                            try {
+                                if (value.length() > 0) {
+                                    Metadata metadata = new Metadata(mdType);
+                                    metadata.setValue(value);
+                                    logger.debug("Found metadata: " + metadata.getType().getName());
+                                    if (eleMetadata.getAttribute("logical") != null
+                                            && eleMetadata.getAttributeValue("logical").equalsIgnoreCase("true")) {
+                                        logger.debug("Added metadata \"" + metadata.getValue() + "\" to logical structure");
+                                        dsAnchor.addMetadata(metadata);
+                                    }
+                                }
+                            } catch (MetadataTypeNotAllowedException e) {
+                                logger.warn(e.getMessage());
+                            }
+                        }
                         try {
                             if (value.length() > 0) {
                                 Metadata metadata = new Metadata(mdType);
@@ -765,33 +759,104 @@ public class ModsUtils {
 
         // Code to handle related works, e.g. series, but only if we are not working within a MultiVolume
         if (!writeAllMetadataToAnchor) {
-            String query = "/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[@type='uniform']";
-            XPath xpath = XPath.newInstance(query);
-            xpath.addNamespace(NS_MODS);
-            List<Element> eleValueList = xpath.selectNodes(doc);
+
+            String titleDocMain = null;
+            String titleDocPart = null;
             List<String> values = new ArrayList<String>();
-            if (eleValueList == null || eleValueList.isEmpty()) {
-                query = "/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[not(@type)]";
-                xpath = XPath.newInstance(query);
-                xpath.addNamespace(NS_MODS);
-                eleValueList = xpath.selectNodes(doc);
-            }
+
+            //Get main title
+            //for archivos
+            String query = "/mods:mods/mods:note[@type='fonds']";
+            List<Element> eleValueList = queryNodes(doc, query);
             if (eleValueList != null && !eleValueList.isEmpty()) {
+                titleDocMain = eleValueList.get(0).getValue();
+            } else {
+                //for libraries
+                query = "/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[not(@type)]/mods:title";
+                eleValueList = queryNodes(doc, query);
+                if (eleValueList != null && !eleValueList.isEmpty()) {
+                    titleDocMain = eleValueList.get(0).getValue();
+                } else {
+                    query = "/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[@type='uniform']/mods:title";
+                    eleValueList = queryNodes(doc, query);
+                    if (eleValueList != null && !eleValueList.isEmpty()) {
+                        titleDocMain = eleValueList.get(0).getValue();
+                    }
+                }
+            }
+            //add all finds to valueList
+            if (eleValueList != null) {
                 for (Element eleValue : eleValueList) {
                     if (eleValue.getText() != null && !eleValue.getText().isEmpty()) {
                         values.add(eleValue.getTextTrim());
                     }
-                    List<Element> eleSubList = eleValue.getChildren();
-                    if (eleSubList != null && !eleSubList.isEmpty()) {
-                        for (Element element : eleSubList) {
-                            if (element.getName().contentEquals("title")) {
-                                if (element.getText() != null && !element.getText().isEmpty()) {
-                                    values.add(element.getTextTrim());
-                                }
-                            }
-                        }
+                }
+            }
+
+            //Get part title
+            //for archivos
+            query = "/mods:mods/mods:note[@type='fondsGroup']";
+            eleValueList = queryNodes(doc, query);
+            if (eleValueList != null && !eleValueList.isEmpty()) {
+                titleDocPart = eleValueList.get(0).getValue();
+            } else {
+                //for libraries
+                query = "/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[not(@type)]/mods:partName";
+                eleValueList = queryNodes(doc, query);
+                if (eleValueList != null && !eleValueList.isEmpty()) {
+                    titleDocPart = eleValueList.get(0).getValue();
+                } else {
+                    query = "/mods:mods/mods:relatedItem[@type='series']/mods:titleInfo[@type='uniform']/mods:partName";
+                    eleValueList = queryNodes(doc, query);
+                    if (eleValueList != null && !eleValueList.isEmpty()) {
+                        titleDocPart = eleValueList.get(0).getValue();
                     }
                 }
+            }
+            //add all finds to valueList
+            if (eleValueList != null && !eleValueList.isEmpty()) {
+                //if the main title is already in the list, add a separator char
+                if (!values.isEmpty()) {
+                    values.add("/");
+                }
+                for (Element eleValue : eleValueList) {
+                    if (eleValue.getText() != null && !eleValue.getText().isEmpty()) {
+                        values.add(eleValue.getTextTrim());
+                        values.add("/");
+                    }
+                }
+                if (values.get(values.size() - 1).equals("/")) {
+                    values.remove(values.size() - 1);
+                }
+            }
+
+            logger.debug("anchor title = " + titleDocMain);
+            logger.debug("anchor part name = " + titleDocPart);
+
+            //            if (dsAnchor != null && titleDocMain != null) {
+            //                try {
+            //                    Metadata mdTitleDocMain = new Metadata(prefs.getMetadataTypeByName("TitleDocMain"));
+            //                    mdTitleDocMain.setValue(titleDocMain);
+            //                    dsAnchor.addMetadata(mdTitleDocMain);
+            //                } catch (MetadataTypeNotAllowedException e) {
+            //                    logger.warn(e.getMessage());
+            //                } catch (DocStructHasNoTypeException e) {
+            //                    logger.warn(e.getMessage());
+            //                }
+            //            }
+            //            if (dsAnchor != null && titleDocPart != null) {
+            //                try {
+            //                    Metadata mdTitleDocPart = new Metadata(prefs.getMetadataTypeByName("TitleDocPart"));
+            //                    mdTitleDocPart.setValue(titleDocPart);
+            //                    dsAnchor.addMetadata(mdTitleDocPart);
+            //                } catch (MetadataTypeNotAllowedException e) {
+            //                    logger.warn(e.getMessage());
+            //                } catch (DocStructHasNoTypeException e) {
+            //                    logger.warn(e.getMessage());
+            //                }
+            //            }
+
+            if (values != null && !values.isEmpty()) {
                 String value = "";
                 for (String s : values) {
                     if (StringUtils.isNotEmpty(s)) {
@@ -810,6 +875,19 @@ public class ModsUtils {
                 }
                 seriesTitle = seriesTitle.trim();
                 logger.debug("related Series = " + seriesTitle);
+
+                //write series title as
+                if (dsAnchor != null && !seriesTitle.isEmpty()) {
+                    try {
+                        Metadata mdTitle = new Metadata(prefs.getMetadataTypeByName("TitleDocMain"));
+                        mdTitle.setValue(value);
+                        dsAnchor.addMetadata(mdTitle);
+                    } catch (MetadataTypeNotAllowedException e) {
+                        logger.warn(e.getMessage());
+                    } catch (DocStructHasNoTypeException e) {
+                        logger.warn(e.getMessage());
+                    }
+                }
             }
         }
 
@@ -837,8 +915,8 @@ public class ModsUtils {
                 mdTitle.setValue(seriesTitle);
                 mdID.setValue(seriesID);
 
-                dsAnchor.addMetadata(mdTitle);
                 dsAnchor.addMetadata(mdID);
+                dsAnchor.addMetadata(mdTitle);
 
             } catch (MetadataTypeNotAllowedException e) {
                 logger.warn(e.getMessage());
@@ -900,6 +978,13 @@ public class ModsUtils {
             }
             writeFile(seriesInfoFile, seriesInfo);
         }
+    }
+
+    private static List<Element> queryNodes(Document doc, String query) throws JDOMException {
+        XPath xpath = XPath.newInstance(query);
+        xpath.addNamespace(NS_MODS);
+        List<Element> eleValueList = xpath.selectNodes(doc);
+        return eleValueList;
     }
 
     private static int getVolumeNumberFromLocation(Element element) {

@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+
+<project name="CSIC Mixed Import Plugin" basedir="." default="deploy">
+
+	<!-- ================================= 
+	          properties             
+	 ================================= -->
+	<property name="jarfile" value="CSICMixedImportPlugin.jar" />
+	<property name="pluginFolderWin" value="C:/Goobi/plugins/import/" />
+	<property name="pluginFolderMac" value="/opt/digiverso/goobi/plugins/import/" />
+
+	<!-- ================================= 
+         targets: compile and jar          
+	 ================================= -->
+	<target name="jar">
+		<echo>compile sources</echo>
+		<javac destdir="bin">
+			<src path="src" />
+		</javac>
+		<echo>generate jar file</echo>
+		<jar destfile="${jarfile}">
+			<fileset dir="bin" />
+			<fileset dir="lib" includes="*.jar"/>
+		</jar>
+	</target>
+
+	<!-- ================================= 
+          target: copyToPluginFolder, depending on OS    
+         ================================= -->
+	<target name="copyToPluginFolder" depends="linux,win32">
+		<echo>cleaning up</echo>
+		<delete file="${jarfile}" />
+		<echo>cleaned up successfully</echo>
+	</target>
+	<target name="linux" if="isUnix">
+		<echo>use Linux path: ${pluginFolderMac}</echo>
+		<copy tofile="${pluginFolderMac}${jarfile}" file="${jarfile}" overwrite="true" />
+	</target>
+	<target name="win32" if="isWindows">
+		<echo>use Windows path: ${pluginFolderWin}</echo>
+		<copy tofile="${pluginFolderWin}${jarfile}" file="${jarfile}" overwrite="true" />
+	</target>
+
+	<!-- ================================= 
+	          target: deploy 
+         ================================= -->
+	<target name="deploy" depends="jar">
+		<condition property="isWindows">
+			<os family="windows" />
+		</condition>
+		<condition property="isUnix">
+			<os family="unix" />
+		</condition>
+		<antcall target="copyToPluginFolder" />
+		<echo>intranda ... alles ist gut!</echo>
+	</target>
+
+</project>
+

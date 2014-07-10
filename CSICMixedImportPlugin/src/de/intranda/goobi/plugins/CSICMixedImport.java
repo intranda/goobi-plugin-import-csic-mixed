@@ -107,7 +107,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
     private static final String NAME = "CSICMixedImport";
-    private static final String VERSION = "1.0.20130508";
+    private static final String VERSION = "1.0.1.0.20140710";
     private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
     public static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
     private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
@@ -116,6 +116,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
             false));
     public final boolean useSquareBracketsForVolume = (ConfigPlugins.getPluginConfig(this).getBoolean("useSquareBracketsForVolume", false));
     public final boolean addVolumeNoToTitle = (ConfigPlugins.getPluginConfig(this).getBoolean("addVolumeNoToTitle", false));
+    public final boolean archiveImport = (ConfigPlugins.getPluginConfig(this).getBoolean("archiveImport", true));
 
     // Namespaces
     private Namespace mets;
@@ -144,6 +145,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     private Record currentRecord;
     private String dsAnchorType = null;
     private String dsType = null;
+    private List<String> itemTitleList = new ArrayList<String>();
 
     /**
      * Directory containing the image files (possibly in TIFF/JPEG subfolders)
@@ -183,23 +185,32 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         marcStructTypeMap.put("?software, multimedia", null);
         marcStructTypeMap.put("?mixed material", null);
 
-        projectsCollectionsMap.put("0001_POQ", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
-        projectsCollectionsMap.put("0005_BETN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0006_PMSC_M_CCHS", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0006_PMSC_GR_EEA", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
-        projectsCollectionsMap.put("0007_PCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0008_PCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0009_VCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0010_CMTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0012_CIPP", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
-        projectsCollectionsMap.put("0013_JAE", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
-        projectsCollectionsMap.put("0014_FMTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        projectsCollectionsMap.put("0015_FAG", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
-        projectsCollectionsMap.put("0016_FAAD", "BIBLIOTECAS#Estación Experimental Aula Dei (Biblioteca) ");
-        projectsCollectionsMap.put("0017_FACN", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
-        projectsCollectionsMap.put("0018_ACN_PC",
-                "ARCHIVOS#Museo Nacional de Ciencias Naturales (Archivo)#Fondo Personal Científico#Ignacio Bolivar y Urrutia");
-        projectsCollectionsMap.put("0030_CETN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
+        List<String> projectList = ConfigPlugins.getPluginConfig(this).getList("project[@name]");
+        List<String> collectionList = ConfigPlugins.getPluginConfig(this).getList("project[@collection]");
+
+        for (int i = 0; i < projectList.size(); i++) {
+            String projectName = projectList.get(i);
+            String collectionName = collectionList.get(i);
+            projectsCollectionsMap.put(projectName, collectionName);
+        }
+
+        //        projectsCollectionsMap.put("0001_POQ", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
+        //        projectsCollectionsMap.put("0005_BETN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
+        //        projectsCollectionsMap.put("0006_PMSC_M_CCHS", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
+        //        projectsCollectionsMap.put("0006_PMSC_GR_EEA", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
+        //        projectsCollectionsMap.put("0007_PCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
+        //        projectsCollectionsMap.put("0008_PCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
+        //        projectsCollectionsMap.put("0009_VCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
+        //        projectsCollectionsMap.put("0010_CMTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
+        //        projectsCollectionsMap.put("0012_CIPP", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
+        //        projectsCollectionsMap.put("0013_JAE", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
+        //        projectsCollectionsMap.put("0014_FMTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
+        //        projectsCollectionsMap.put("0015_FAG", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
+        //        projectsCollectionsMap.put("0016_FAAD", "BIBLIOTECAS#Estación Experimental Aula Dei (Biblioteca) ");
+        //        projectsCollectionsMap.put("0017_FACN", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
+        //        projectsCollectionsMap.put("0018_ACN_PC",
+        //                "ARCHIVOS#Museo Nacional de Ciencias Naturales (Archivo)#Fondo Personal Científico#Ignacio Bolivar y Urrutia");
+        //        projectsCollectionsMap.put("0030_CETN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
 
     }
 
@@ -232,63 +243,71 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
             int counter = 1;
             Collections.sort(imageDirs, new ProcessFileComparator());
             ArrayList<String> volumeList = new ArrayList<String>();
-            for (File imageDir : imageDirs) {
 
-                String mySuffix = null;
-                if (imageDir.getName().contains("_V")) {
-                    String volumeString = imageDir.getName().substring(imageDir.getName().lastIndexOf("_V"));
-                    mySuffix = volumeString.substring(1);
-                    // String volumeNoString = mySuffix.replaceAll("\\D", "");
-                    // if (volumeNoString != null && !volumeNoString.isEmpty()) {
-                    // counter = Integer.valueOf(volumeNoString);
-                    // }
-                    if (volumeList.contains(mySuffix)) {
-                        mySuffix = null;
-                    } else {
-                        volumeList.add(mySuffix);
-                    }
-                }
+            String idNumber = r.getId().split("_")[0].replaceAll("\\D", "");
+            if (idMap.get(idNumber) == null) {
+                idMap.put(idNumber, false);
+            } else {
+                idMap.put(idNumber, true);
+            }
 
-                // create one new record for each image directory
-                Record rec = new Record();
-                if (mySuffix == null) {
-                    mySuffix = "V" + volumeNumberFormat.format(counter);
-                    while (volumeList.contains(mySuffix)) {
-                        counter++;
-                        mySuffix = "V" + volumeNumberFormat.format(counter);
-                    }
-                    volumeList.add(mySuffix);
-                }
-                // get pdfDirectory
-                File pdfFile = null;
-                if (pdfFiles.size() == 1) {
-                    pdfFile = pdfFiles.get(0);
-                } else if (pdfFiles.size() > 1) {
-                    for (File file : pdfFiles) {
-                        if (file.getName().toUpperCase().endsWith(mySuffix + ".PDF")) {
-                            pdfFile = file;
-                            break;
+            if (archiveImport) {
+                VolumeInfo info = new VolumeInfo(idNumber, 1, 1, "", imageDirs, pdfFiles, "", projectName);
+                recordMap.put(r.getId(), info);
+                records.add(r);
+            } else {
+                for (File imageDir : imageDirs) {
+
+                    String mySuffix = null;
+                    if (imageDir.getName().contains("_V")) {
+                        String volumeString = imageDir.getName().substring(imageDir.getName().lastIndexOf("_V"));
+                        mySuffix = volumeString.substring(1);
+                        // String volumeNoString = mySuffix.replaceAll("\\D", "");
+                        // if (volumeNoString != null && !volumeNoString.isEmpty()) {
+                        // counter = Integer.valueOf(volumeNoString);
+                        // }
+                        if (volumeList.contains(mySuffix)) {
+                            mySuffix = null;
+                        } else {
+                            volumeList.add(mySuffix);
                         }
                     }
-                }
 
-                String idNumber = r.getId().split("_")[0].replaceAll("\\D", "");
-                if (idMap.get(idNumber) == null) {
-                    idMap.put(idNumber, false);
-                } else {
-                    idMap.put(idNumber, true);
+                    // create one new record for each image directory
+                    Record rec = new Record();
+                    if (mySuffix == null) {
+                        mySuffix = "V" + volumeNumberFormat.format(counter);
+                        while (volumeList.contains(mySuffix)) {
+                            counter++;
+                            mySuffix = "V" + volumeNumberFormat.format(counter);
+                        }
+                        volumeList.add(mySuffix);
+                    }
+                    // get pdfDirectory
+                    File pdfFile = null;
+                    if (pdfFiles.size() == 1) {
+                        pdfFile = pdfFiles.get(0);
+                    } else if (pdfFiles.size() > 1) {
+                        for (File file : pdfFiles) {
+                            if (file.getName().toUpperCase().endsWith(mySuffix + ".PDF")) {
+                                pdfFile = file;
+                                break;
+                            }
+                        }
+                    }
+
+                    String suffix = (identifierSuffix == null ? mySuffix : identifierSuffix + "_" + mySuffix);
+                    rec.setId(r.getId() + "_" + mySuffix);
+                    rec.setData(r.getData());
+                    records.add(rec);
+                    VolumeInfo info =
+                            new VolumeInfo(idNumber, counter, imageDirs.size(), getPieceDesignation(imageDir.getName()), imageDir, pdfFile, suffix,
+                                    projectName);
+                    recordMap.put(rec.getId(), info);
+                    logger.debug("Adding record " + rec.getId() + " to recordmap");
+                    // System.out.println("Volume " + counter + " = " + imageDir.getName());
+                    counter++;
                 }
-                String suffix = (identifierSuffix == null ? mySuffix : identifierSuffix + "_" + mySuffix);
-                rec.setId(r.getId() + "_" + mySuffix);
-                rec.setData(r.getData());
-                records.add(rec);
-                VolumeInfo info =
-                        new VolumeInfo(idNumber, counter, imageDirs.size(), getPieceDesignation(imageDir.getName()), imageDir, pdfFile, suffix,
-                                projectName);
-                recordMap.put(rec.getId(), info);
-                logger.debug("Adding record " + rec.getId() + " to recordmap");
-                // System.out.println("Volume " + counter + " = " + imageDir.getName());
-                counter++;
             }
         }
         return records;
@@ -323,6 +342,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
             return null;
         }
 
+        itemTitleList = new ArrayList<String>();
         Document marcDoc = null;
         Document doc = null;
         Fileformat innerff = null;
@@ -341,22 +361,53 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         }
 
         doc = swapStructData(doc);
-        doc = replaceStructData(doc);
+        if (archiveImport) {
+            doc = createArchiveStructData(doc);
+            try {
+                CommonUtils.getFileFromDocument(new File(sourceFolder, "metsDoc.xml"), doc);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else {
+            doc = replaceStructData(doc);
+            try {
+                CommonUtils.getFileFromDocument(new File(sourceFolder, "metsDoc.xml"), doc);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
 
         // CREAGE FILEFORMAT FROM MODS DOC
         Fileformat outerff = null;
         File tempFile = new File(TEMP_DIRECTORY, "temp.xml");
         try {
-            CommonUtils.getFileFromDocument(tempFile, doc);
-            outerff = new MetsMods(prefs);
-            outerff.read(tempFile.getAbsolutePath());
-            compareFileFormats(innerff, outerff);
-            removeOtherVolumes(outerff);
+            if (!archiveImport) {
+                CommonUtils.getFileFromDocument(tempFile, doc);
+                outerff = new MetsMods(prefs);
+                outerff.read(tempFile.getAbsolutePath());
+                compareFileFormats(innerff, outerff);
+                removeOtherVolumes(outerff);
+            } else {
+                innerff.write(tempFile.getAbsolutePath());
+                Document innerDoc = CommonUtils.getDocumentFromFile(tempFile);
+                doc = replaceXmlData(doc, innerDoc);
+                CommonUtils.getFileFromDocument(tempFile, doc);
+                outerff = new MetsMods(prefs);
+                outerff.read(tempFile.getAbsolutePath());
+                nameItems(outerff);
+                createPageLinks(outerff.getDigitalDocument().getLogicalDocStruct());
+            }
         } catch (PreferencesException e) {
             logger.error(e.toString());
         } catch (ReadException e) {
             logger.error(e.toString());
         } catch (IOException e) {
+            logger.error(e.toString());
+        } catch (WriteException e) {
+            logger.error(e.toString());
+        } catch (JDOMException e) {
             logger.error(e.toString());
         }
 
@@ -365,6 +416,67 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         }
 
         return outerff;
+    }
+
+    private void createPageLinks(DocStruct logicalDocStruct) {
+        if(logicalDocStruct.getType().isAnchor()) {
+            logicalDocStruct = logicalDocStruct.getAllChildren().get(0);
+        }
+        List<DocStruct> itemList = null;
+        itemList = getAllDescendants(logicalDocStruct, prefs.getDocStrctTypeByName("SimpleDocument"));
+        for (DocStruct docStruct : itemList) {
+            List<Reference> referenceList = docStruct.getAllToReferences();
+            for (Reference reference : referenceList) {
+                logicalDocStruct.addReferenceTo(reference.getTarget(), reference.getType());
+            }
+        }
+
+    }
+
+    private void nameItems(Fileformat ff) {
+        List<DocStruct> itemList;
+        try {
+            itemList = getAllDescendants(ff.getDigitalDocument().getLogicalDocStruct(), prefs.getDocStrctTypeByName("SimpleDocument"));
+        } catch (PreferencesException e1) {
+            logger.error("Logical topStruct has no children");
+            return;
+        }
+        int count = 0;
+        DecimalFormat formatter = new DecimalFormat("00");
+        for (DocStruct ds : itemList) {
+            try {
+                String title = itemTitleList.get(count);
+                Metadata md = new Metadata(prefs.getMetadataTypeByName("TitleDocMain"));
+                md.setValue(title);
+                ds.addMetadata(md);
+            } catch (MetadataTypeNotAllowedException e) {
+                logger.error("Failed to add title to item " + count);
+            }
+            try {
+                String idDitital = currentIdentifier + "_" + formatter.format(count + 1);
+                Metadata md = new Metadata(prefs.getMetadataTypeByName("CatalogIDDigital"));
+                md.setValue(idDitital);
+                ds.addMetadata(md);
+            } catch (MetadataTypeNotAllowedException e) {
+                logger.error("Failed to add id to item " + count);
+            }
+            count++;
+        }
+
+    }
+
+    private List<DocStruct> getAllDescendants(DocStruct logicalDocStruct, DocStructType dsType) {
+        List<DocStruct> dsList = new ArrayList<DocStruct>();
+        List<DocStruct> children = logicalDocStruct.getAllChildren();
+        if (children != null && !children.isEmpty()) {
+            for (DocStruct ds : children) {
+                if (dsType == null || ds.getType().equals(dsType)) {
+                    dsList.add(ds);
+                }
+                dsList.addAll(getAllDescendants(ds, dsType));
+            }
+        }
+        return dsList;
     }
 
     private void removeOtherVolumes(Fileformat outerff) throws PreferencesException {
@@ -411,7 +523,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         // remove physical structures
         DocStruct bookStruct = outerff.getDigitalDocument().getPhysicalDocStruct();
         DocStruct collectionStruct = null;
-        
+
         while (bookStruct.getAllChildren() != null && !bookStruct.getAllChildren().get(0).getType().getName().contentEquals("page")) {
             collectionStruct = bookStruct;
             bookStruct = bookStruct.getAllChildren().get(0);
@@ -436,7 +548,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                 }
             }
         }
-        
+
         //add metadata to bookStruct
         DocStruct origBook = outerff.getDigitalDocument().getPhysicalDocStruct();
         if (origBook != bookStruct && origBook.getAllMetadata() != null) {
@@ -466,49 +578,54 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
             List<DocStruct> innerChildren = innerLogStruct.getAllChildren();
             List<DocStruct> outerChildren = outerLogStruct.getAllChildren();
 
-            DocStructType innerAnchorType = null;
-            DocStructType innerTopStructType = null;
-            if (innerLogStruct.getType().isAnchor()) {
-                innerAnchorType = innerLogStruct.getType();
-                innerTopStructType = innerChildren.get(0).getType();
-            } else {
-                innerTopStructType = innerLogStruct.getType();
-            }
+            if (!archiveImport) {
+                DocStructType innerAnchorType = null;
+                DocStructType innerTopStructType = null;
+                if (innerLogStruct.getType().isAnchor()) {
+                    innerAnchorType = innerLogStruct.getType();
+                    innerTopStructType = innerChildren.get(0).getType();
+                } else {
+                    innerTopStructType = innerLogStruct.getType();
+                }
 
-            if (innerAnchorType != null) {
-                if (outerChildren == null || outerChildren.isEmpty()) {
-                    // We need to import the inner anchor
-                    outerChildren = new ArrayList<DocStruct>();
-                    DocStructType tempType = outerLogStruct.getType();
-                    outerChildren.add(outerLogStruct.copy(false, false));
-                    outerLogStruct = innerLogStruct.copy(false, false);
-                    outerLogStruct.setType(tempType);
-                    outerLogStruct.addChild(outerChildren.get(0));
-                    outerff.getDigitalDocument().setLogicalDocStruct(outerLogStruct);
-                }
-                outerLogStruct.setType(innerAnchorType);
-                // copy metadata to anchor
-                copyAllMetadata(innerLogStruct, outerLogStruct);
-                // copy metadata to children
-                for (DocStruct ds : outerChildren) {
-                    ds.setType(innerTopStructType);
-                    copyAllMetadata(innerChildren.get(0), ds);
-                }
-            } else {
-                // no inner anchor
-                if (outerChildren != null && !outerChildren.isEmpty()) {
-                    if (outerChildren.size() > 1) {
-                        // This shouldn't happen
-                        logger.error("More than one outer volume, but no inner anchor");
-                    } else {
-                        // Remove the outer anchor
-                        outerLogStruct = outerChildren.get(0).copy(false, false);
+                if (innerAnchorType != null) {
+                    if (outerChildren == null || outerChildren.isEmpty()) {
+                        // We need to import the inner anchor
+                        outerChildren = new ArrayList<DocStruct>();
+                        DocStructType tempType = outerLogStruct.getType();
+                        outerChildren.add(outerLogStruct.copy(false, false));
+                        outerLogStruct = innerLogStruct.copy(false, false);
+                        outerLogStruct.setType(tempType);
+                        outerLogStruct.addChild(outerChildren.get(0));
                         outerff.getDigitalDocument().setLogicalDocStruct(outerLogStruct);
                     }
+                    outerLogStruct.setType(innerAnchorType);
+                    // copy metadata to anchor
+                    copyAllMetadata(innerLogStruct, outerLogStruct);
+                    // copy metadata to children
+                    for (DocStruct ds : outerChildren) {
+                        ds.setType(innerTopStructType);
+                        copyAllMetadata(innerChildren.get(0), ds);
+                    }
+                } else {
+                    // no inner anchor
+                    if (outerChildren != null && !outerChildren.isEmpty()) {
+                        if (outerChildren.size() > 1) {
+                            // This shouldn't happen
+                            logger.error("More than one outer volume, but no inner anchor");
+                        } else {
+                            // Remove the outer anchor
+                            outerLogStruct = outerChildren.get(0).copy(false, false);
+                            outerff.getDigitalDocument().setLogicalDocStruct(outerLogStruct);
+                        }
+                    }
+                    outerLogStruct.setType(innerTopStructType);
+                    // now copy metadata
+                    copyAllMetadata(innerLogStruct, outerLogStruct);
                 }
-                outerLogStruct.setType(innerTopStructType);
-                // now copy metadata
-                copyAllMetadata(innerLogStruct, outerLogStruct);
+            } else {
+                //archive import
+
             }
 
             // Now copy the physical metadata
@@ -635,9 +752,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
                     logger.debug("Writing '" + fileName + "'...");
                     mm.write(fileName);
-                    logger.debug("copying image files from " + info.imageDir.getAbsolutePath() + "...");
-                    copyImageFiles(info.imageDir);
-                    copyPdfs(info.pdfFile);
+                    logger.debug("copying image files from image directories...");
+                    copyImageFiles(info.imageDirs);
+                    copyPdfs(info.pdfFiles);
                     io.setProcessTitle(getProcessTitle().replace(".xml", ""));
                     io.setMetsFilename(fileName);
                     io.setImportReturnValue(ImportReturnValue.ExportFinished);
@@ -676,7 +793,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     }
 
     private void addProject(Fileformat ff, String projectName) {
-    	projectName = getActualProjectName(projectName);
+        projectName = getActualProjectName(projectName);
         try {
             DocStruct topStruct = ff.getDigitalDocument().getLogicalDocStruct();
             if (topStruct.getAllMetadataByType(prefs.getMetadataTypeByName("ProjectIdentifier")) == null
@@ -1017,104 +1134,111 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                     eleMods = eleMods.getChild("mods", null);
                 }
 
-                // Determine the root docstruct type
-                dsType = null;
-                dsAnchorType = null;
-                boolean belongsToPeriodical = false;
-                boolean belongsToSeries = false;
-                boolean isManuscript = false;
-                boolean belongsToMultiVolume = false;
+                if (!archiveImport) {
+                    // Determine the root docstruct type
+                    dsType = null;
+                    dsAnchorType = null;
+                    boolean belongsToPeriodical = false;
+                    boolean belongsToSeries = false;
+                    boolean isManuscript = false;
+                    boolean belongsToMultiVolume = false;
 
-                // handle TypeOfResource
-                List<Element> eleTypeOfResourceList = eleMods.getChildren("typeOfResource", null);
-                if (eleTypeOfResourceList != null) {
-                    for (Element eleTypeOfResource : eleTypeOfResourceList) {
-                        String resourceLabel = eleTypeOfResource.getAttributeValue("displayLabel");
-                        if (resourceLabel != null && resourceLabel.contentEquals("SE")) {
-                            belongsToPeriodical = true;
-                        }
-                        if ("yes".equals(eleTypeOfResource.getAttributeValue("manuscript"))) {
-                            isManuscript = true;
-                        }
-                        if (marcStructTypeMap.get("?" + eleTypeOfResource.getTextTrim()) != null) {
-                            dsType = marcStructTypeMap.get("?" + eleTypeOfResource.getTextTrim());
-                        } else {
-                            dsType = "Monograph";
+                    // handle TypeOfResource
+                    List<Element> eleTypeOfResourceList = eleMods.getChildren("typeOfResource", null);
+                    if (eleTypeOfResourceList != null) {
+                        for (Element eleTypeOfResource : eleTypeOfResourceList) {
+                            String resourceLabel = eleTypeOfResource.getAttributeValue("displayLabel");
+                            if (resourceLabel != null && resourceLabel.contains("SE")) {
+                                belongsToPeriodical = true;
+                            }
+                            if ("yes".equals(eleTypeOfResource.getAttributeValue("manuscript"))) {
+                                isManuscript = true;
+                            }
+                            if (marcStructTypeMap.get("?" + eleTypeOfResource.getTextTrim()) != null) {
+                                dsType = marcStructTypeMap.get("?" + eleTypeOfResource.getTextTrim());
+                            } else {
+                                dsType = "Monograph";
+                            }
                         }
                     }
-                }
 
-                // handle physicalDescription
-                List<Element> physicalDescriptionList = eleMods.getChildren("physicalDescription", null);
-                if (physicalDescriptionList != null) {
-                    for (Element physDescr : physicalDescriptionList) {
-                        List<Element> eleFormList = physDescr.getChildren("form", null);
-                        if (eleFormList != null) {
-                            for (Element eleForm : eleFormList) {
-                                if (eleForm.getAttribute("authority") != null && eleForm.getValue().contentEquals("Manuscrito")) {
-                                    isManuscript = true;
+                    // handle physicalDescription
+                    List<Element> physicalDescriptionList = eleMods.getChildren("physicalDescription", null);
+                    if (physicalDescriptionList != null) {
+                        for (Element physDescr : physicalDescriptionList) {
+                            List<Element> eleFormList = physDescr.getChildren("form", null);
+                            if (eleFormList != null) {
+                                for (Element eleForm : eleFormList) {
+                                    if (eleForm.getAttribute("authority") != null && eleForm.getValue().contentEquals("Manuscrito")) {
+                                        isManuscript = true;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // handle relatedSeries
-                List<Element> eleRelatedSeriesList = eleMods.getChildren("relatedItem", null);
-                if (relatedSeriesIsAnchor && eleRelatedSeriesList != null) {
-                    for (Element eleRelatedSeries : eleRelatedSeriesList) {
+                    // handle relatedSeries
+                    List<Element> eleRelatedSeriesList = eleMods.getChildren("relatedItem", null);
+                    if (relatedSeriesIsAnchor && eleRelatedSeriesList != null) {
+                        for (Element eleRelatedSeries : eleRelatedSeriesList) {
 
-                        if (eleRelatedSeries != null && eleRelatedSeries.getAttribute("type") != null
-                                && eleRelatedSeries.getAttribute("type").getValue().contentEquals("series")) {
-                            belongsToSeries = true;
+                            if (eleRelatedSeries != null && eleRelatedSeries.getAttribute("type") != null
+                                    && eleRelatedSeries.getAttribute("type").getValue().contentEquals("series")) {
+                                belongsToSeries = true;
+                            }
                         }
                     }
-                }
 
-                if (idMap.get(currentIdentifier.replaceAll("\\D", "")) != null) {
+                    if (idMap.get(currentIdentifier.replaceAll("\\D", "")) != null) {
 
-                    if (idMap.get(currentIdentifier.replaceAll("\\D", "")) == true) {
-                        belongsToMultiVolume = true;
-                    } else if ((identifierSuffix != null && identifierSuffix.startsWith("V")) && ((!belongsToPeriodical && !belongsToSeries))) {
-                        belongsToMultiVolume = true;
+                        if (idMap.get(currentIdentifier.replaceAll("\\D", "")) == true) {
+                            belongsToMultiVolume = true;
+                        } else if ((identifierSuffix != null && identifierSuffix.startsWith("V")) && ((!belongsToPeriodical && !belongsToSeries))) {
+                            belongsToMultiVolume = true;
+                        }
+                        // This volume is part of a Series/Multivolume work
+                        // if (!belongsToPeriodical && !belongsToSeries) {
+                        // }
                     }
-                    // This volume is part of a Series/Multivolume work
-                    // if (!belongsToPeriodical && !belongsToSeries) {
-                    // }
-                }
 
-                if (belongsToPeriodical) {
-                    dsAnchorType = "Periodical";
-                    dsType = "PeriodicalVolume";
-                } else if (belongsToSeries) {
-                    dsAnchorType = "Series";
-                    if (isManuscript) {
-                        dsType = "Manuscript";
-                    } else {
-                        dsType = "SerialVolume";
+                    if (belongsToPeriodical) {
+                        dsAnchorType = "Periodical";
+                        if (dsType == "Monograph" || dsType == null) {
+                            dsType = "PeriodicalVolume";
+                        }
+                    } else if (belongsToSeries) {
+                        dsAnchorType = "Series";
+                        if (isManuscript) {
+                            dsType = "Manuscript";
+                        } else if (dsType == "Monograph" || dsType == null) {
+                            dsType = "SerialVolume";
+                        }
+                    } else if (isManuscript) {
+                        dsType = "SingleManuscript";
                     }
-                } else if (isManuscript) {
-                    dsType = "SingleManuscript";
-                }
-                // Multivolume may be part of a Series or Periodical. In that case, attach teh volumes to the Series/Periodical
-                if (belongsToMultiVolume) {
-                    if (!belongsToPeriodical && !belongsToSeries) {
-                        dsAnchorType = "MultiVolumeWork";
+                    // Multivolume may be part of a Series or Periodical. In that case, attach the volumes to the Series/Periodical
+                    if (belongsToMultiVolume) {
+                        if (!belongsToPeriodical && !belongsToSeries) {
+                            dsAnchorType = "MultiVolumeWork";
+                        }
+                        if (isManuscript) {
+                            dsType = "Manuscript";
+                        } else if (!belongsToPeriodical && (dsType == "Monograph" || dsType == null)) {
+                            dsType = "Volume";
+                        }
                     }
-                    if (isManuscript) {
-                        dsType = "Manuscript";
-                    } else {
-                        dsType = "Volume";
-                    }
-                }
 
-                // remove unnecessary suffixes for everything but multivolumes
-                if (!belongsToMultiVolume) {
-                    if (idMap.get(currentIdentifier.replaceAll("\\D", "")) != null && idMap.get(currentIdentifier.replaceAll("\\D", "")) == true) {
-                        // need suffix
-                    } else {
-                        identifierSuffix = null;
+                    // remove unnecessary suffixes for everything but multivolumes
+                    if (!belongsToMultiVolume) {
+                        if (idMap.get(currentIdentifier.replaceAll("\\D", "")) != null && idMap.get(currentIdentifier.replaceAll("\\D", "")) == true) {
+                            // need suffix
+                        } else {
+                            identifierSuffix = null;
+                        }
                     }
+                } else {
+                    dsType = "CompoundDocument";
+                    dsAnchorType = "ArchiveDocument";
                 }
 
                 logger.debug("Docstruct type: " + dsType);
@@ -1132,7 +1256,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                     try {
                         dsAnchor.addChild(dsVolume);
                     } catch (TypeNotAllowedAsChildException e) {
-                        logger.error("Could not atach " + dsAnchorType + " to anchor " + dsType);
+                        logger.error("Could not attach " + dsAnchorType + " to anchor " + dsType);
                     }
                     dd.setLogicalDocStruct(dsAnchor);
                 } else {
@@ -1141,14 +1265,13 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
                 DocStruct dsBoundBook = dd.createDocStruct(prefs.getDocStrctTypeByName("BoundBook"));
                 dd.setPhysicalDocStruct(dsBoundBook);
-                
+
                 //get volume number of this item
                 Integer volumeNo = ModsUtils.getNumberFromString(this.getCurrentSuffix());
-                if(volumeNo == null) {
+                if (volumeNo == null) {
                     volumeNo = currentVolume;
                 }
-                
-                
+
                 // Collect MODS metadata
                 ModsUtils.parseModsSection(this, dsVolume, dsAnchor, dsBoundBook, eleMods, volumeNo, currentPieceDesignation);
                 currentIdentifier = ModsUtils.getIdentifier(prefs, dsVolume);
@@ -1202,9 +1325,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                         Metadata mdCollection = new Metadata(mdTypeCollection);
                         mdCollection.setValue(collection);
                         dsVolume.addMetadata(mdCollection);
-//                        if (dsAnchor != null) {
-//                            dsAnchor.addMetadata(mdCollection);
-//                        }
+                        //                        if (dsAnchor != null) {
+                        //                            dsAnchor.addMetadata(mdCollection);
+                        //                        }
                     }
                 }
             }
@@ -1243,7 +1366,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         String processTitle = r.getId();
 
         // For imports with wrong processTitle, correct it
-//        processTitle = processTitle.replace("000471130", "001100392");
+        //        processTitle = processTitle.replace("000471130", "001100392");
         processTitle = processTitle.replace("001363255", "000884278");
         processTitle = processTitle.replace("00045898", "000045898");
         processTitle = processTitle.replace("0000045898", "000045898");
@@ -1429,8 +1552,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
             // mm.setDigitalDocument(ff.getDigitalDocument());
 
             ff.write(fileName);
-            copyImageFiles(info.imageDir);
-            copyPdfs(info.pdfFile);
+            copyImageFiles(info.imageDirs);
+            copyPdfs(info.pdfFiles);
             // getting anchor file
             File importDir = new File(importFolder);
             if (!importDir.isDirectory()) {
@@ -1706,15 +1829,15 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                     }
                 }
             }
-            
+
             //if necessary, attempt to get volumeNumber from image dir
-            if(pieceDesignation != null && volumeIdentifier == null && imageDirs.size() == 1) {
+            if (pieceDesignation != null && volumeIdentifier == null && imageDirs.size() == 1) {
                 String imageDirName = imageDirs.get(0).getName();
                 int pieceDesignationStartPos = imageDirName.lastIndexOf(pieceDesignation);
-                int pieceDesignationEndPos = pieceDesignationStartPos+pieceDesignation.length()+1;
-                if(pieceDesignationStartPos > 0 && pieceDesignationEndPos < imageDirName.length()) {
+                int pieceDesignationEndPos = pieceDesignationStartPos + pieceDesignation.length() + 1;
+                if (pieceDesignationStartPos > 0 && pieceDesignationEndPos < imageDirName.length()) {
                     String volumeString = imageDirName.substring(pieceDesignationEndPos);
-                    if(volumeString != null && !volumeString.isEmpty()) {
+                    if (volumeString != null && !volumeString.isEmpty()) {
                         volumeIdentifier = volumeString;
                     }
                 }
@@ -1769,24 +1892,26 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     }
 
     private String getActualProjectName(String name) {
-		if(name.contentEquals("0006_PMSC_GR_EEA")) {
-			return "0006_PMSC";
-		}
-		return name;
-	}
+        if (name.contentEquals("0006_PMSC_GR_EEA")) {
+            return "0006_PMSC";
+        }
+        return name;
+    }
 
-	/**
+    /**
      * 
      * Copy the files in exportFolder corresponding to the current record into the importFolder
      * 
      * @param exportFolder
      */
-    private void copyImageFiles(File imageDir) {
+    private void copyImageFiles(List<File> imageDirs) {
 
-        if (!copyImages || imageDir == null || imageDir.listFiles(ImageFilter) == null || imageDir.listFiles(ImageFilter).length == 0) {
+        if (!copyImages || imageDirs == null || imageDirs.isEmpty()) {
             logger.debug("No images to copy");
             return;
         }
+
+        Collections.sort(imageDirs);
 
         // get temp dir
         File tempDir = new File(importFolder, getProcessTitle().replace(".xml", ""));
@@ -1797,7 +1922,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
 
         // parse all image Files and write them into new Files in the import
         // directory
-        List<File> images = Arrays.asList(imageDir.listFiles(ImageFilter));
+        List<File> images = new ArrayList<File>();
+        //        Collections.sort(imageDirs);
+        for (File dir : imageDirs) {
+            images.addAll(Arrays.asList(dir.listFiles(ImageFilter)));
+        }
+
         for (File imageFile : images) {
             try {
                 String filename = imageFile.getName();
@@ -1832,27 +1962,128 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         bis.close();
     }
 
-    private void copyPdfs(File pdfFile) {
+    private void copyPdfs(List<File> pdfFiles) {
 
-        if (!copyPdfs || pdfFile == null) {
+        if (!copyPdfs || pdfFiles == null || pdfFiles.isEmpty()) {
             logger.debug("No pdf to copy");
             return;
         }
+
+        Collections.sort(pdfFiles);
 
         // get temp dir
         File tempDir = new File(importFolder, getProcessTitle().replace(".xml", ""));
         File tempOcrDir = new File(tempDir, "ocr");
         File tempPdfDir = new File(tempOcrDir, getProcessTitle().replace(".xml", "") + "_pdf");
         tempPdfDir.mkdirs();
-
-        try {
-            splitPdf(pdfFile, tempPdfDir);
-            if (deleteOriginalImages) {
-                pdfFile.delete();
+        PdfExtractor extractor = new PdfExtractor();
+        for (File pdfFile : pdfFiles) {
+            try {
+                splitPdf(pdfFile, tempPdfDir, extractor);
+                if (deleteOriginalImages) {
+                    pdfFile.delete();
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Document createArchiveStructData(Document doc) {
+
+        mets = doc.getRootElement().getNamespace("mets");
+
+        Element physStruct = null;
+        Element logStruct = null;
+        List<Element> structMaps = doc.getRootElement().getChildren("structMap", mets);
+
+        for (Element element : structMaps) {
+            if (element.getAttributeValue("TYPE").contentEquals("PHYSICAL")) {
+                physStruct = element;
+            } else if (element.getAttributeValue("TYPE").contentEquals("LOGICAL")) {
+                logStruct = element;
+            }
+        }
+
+        List<Element> origLogStructs = ((Element) logStruct.getChildren().get(0)).getChildren();
+        if (origLogStructs == null || origLogStructs.isEmpty()) {
+            origLogStructs = new ArrayList<Element>();
+            origLogStructs.add((Element) logStruct.getChildren().get(0));
+        }
+        logStruct.removeContent();
+        List<Element> pages = getPhysicalPages(physStruct, true);
+        List documentStruct = physStruct.removeContent();
+        if (dsAnchorType == null) {
+            int count = 0;
+            while (!(documentStruct.get(count) instanceof Element)) {
+                count++;
+            }
+            documentStruct = ((Element) documentStruct.get(count)).removeContent();
+        }
+        //        physStruct.removeContent();
+
+        //create new Physical DocStruct
+        Element boundBook = new Element("div", mets);
+        boundBook.setAttribute("ID", "PHYS_0000");
+//        boundBook.setAttribute("DMDID", "DMDPHYS_0000");
+        boundBook.setAttribute("TYPE", "BoundBook");
+        int pageCount = 1;
+        for (Element page : pages) {
+            page.setAttribute("TYPE", "page");
+            String labelString = page.getAttributeValue("LABEL");
+            String orderlabelString = page.getAttributeValue("ORDERLABEL");
+            page.setAttribute("LABEL", orderlabelString);
+            page.setAttribute("ORDERLABEL", labelString);
+            page.setAttribute("ORDER", "" + pageCount);
+            boundBook.addContent(page.detach());
+            pageCount++;
+        }
+        physStruct.addContent(boundBook);
+
+        //create new Logical DocStruct
+        logStruct.setContent(documentStruct);
+        Element eleDocument = (Element) logStruct.getChildren().get(0);
+        if(dsAnchorType != null) {
+            eleDocument.setAttribute("TYPE", "ArchiveDocument");
+            eleDocument = (Element) eleDocument.getChildren().get(0);
+        }
+        eleDocument.setAttribute("TYPE", "CompoundDocument");
+        eleDocument.setAttribute("DMDID", origLogStructs.get(0).getAttributeValue("DMDID"));
+        eleDocument.setAttribute("ADMID", origLogStructs.get(0).getAttributeValue("ADMID"));
+
+        Iterator<Element> itemIterator = origLogStructs.iterator();
+
+        for (Object obj : ((Element) logStruct.getChildren().get(0)).getChildren()) {
+            if (obj instanceof Element) {
+                correctArchiveDocStruct((Element) obj, itemIterator);
+            }
+        }
+
+        return doc;
+
+    }
+
+    private void correctArchiveDocStruct(Element ele, Iterator<Element> itemIterator) {
+        List<Element> children = ele.getChildren();
+        if (children != null && !children.isEmpty()) {
+            //This is a compount item
+            ele.setAttribute("TYPE", "CompoundDocument");
+            for (Element child : children) {
+                correctArchiveDocStruct(child, itemIterator);
+            }
+        } else {
+            //This is a simple item: retrieve ids from the corresponding logical item
+            ele.setAttribute("TYPE", "SimpleDocument");
+            if (itemIterator.hasNext()) {
+                Element origEle = itemIterator.next();
+                itemTitleList.add(origEle.getAttributeValue("LABEL"));
+                ele.setAttribute("ID", origEle.getAttributeValue("ID"));
+            } else {
+                logger.error("Found a simple document in phys struct, but no corresponding element in log struct");
+            }
+        }
+
     }
 
     /**
@@ -1860,8 +2091,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
      * makes the physical and logical structMap of doc compatible with goobi
      * 
      * @param doc
-     * @param anchorElement
-     *            the document's anchor as jDom Element. must be inserted into the ff afterwards
+     * @param anchorElement the document's anchor as jDom Element. must be inserted into the ff afterwards
      * @return
      */
     @SuppressWarnings("unchecked")
@@ -1918,12 +2148,12 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         physRoot.setAttribute("TYPE", "Collection");
         List<Element> books = new ArrayList<Element>();
         books.add(physRoot);
-        List<Element> pages = getPhysicalPages(books.get(0));
+        List<Element> pages = getPhysicalPages(books.get(0), false);
         while (pages.size() == 0) {
             books = books.get(0).getChildren();
             for (Element book : books) {
                 book.setAttribute("TYPE", "Collection");
-                pages.addAll(getPhysicalPages(book));
+                pages.addAll(getPhysicalPages(book, false));
             }
         }
         for (Element book : books) {
@@ -1941,7 +2171,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         return doc;
     }
 
-    private ArrayList<Element> getPhysicalPages(Element parent) {
+    private ArrayList<Element> getPhysicalPages(Element parent, boolean recursive) {
 
         ArrayList<Element> pages = new ArrayList<Element>();
 
@@ -1970,7 +2200,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                     }
 
                 } else {
-                    // pages.addAll(getPhysicalPages(child));
+                    if (recursive) {
+                        pages.addAll(getPhysicalPages(child, true));
+                    }
                 }
             }
         }
@@ -2019,11 +2251,19 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     @SuppressWarnings("unchecked")
     private Document replaceXmlData(Document doc, Document marcDoc) {
 
-        String dmdID = " ";
-
         // get old and new Dmd sections
         List<Element> newDmdSecs = marcDoc.getRootElement().getChildren("dmdSec", mets);
 
+        String dmdID1 = ((Element) newDmdSecs.get(0)).getAttributeValue("ID");
+        String dmdIDpyhs = null;
+        String dmdID2 = null;
+        if (newDmdSecs.size() > 1) {
+            dmdIDpyhs = ((Element) newDmdSecs.get(newDmdSecs.size()-1)).getAttributeValue("ID");
+        }
+        if(newDmdSecs.size() > 2) {            
+            dmdID2 = ((Element) newDmdSecs.get(1)).getAttributeValue("ID");
+        }
+        
         // remove all Children of rootElement and save them as list
         List<Content> objects = doc.getRootElement().removeContent();
         List<Element> elements = new ArrayList<Element>();
@@ -2038,24 +2278,41 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         for (Element element : elements) {
             if (element.getName().contentEquals("dmdSec")) {
                 // get child of first dmdSec
+                dmdID1 = element.getAttributeValue("ID");
                 Element dmdChild = (Element) newDmdSecs.get(0).getChild("mdWrap", mets).clone();
                 element.setContent(dmdChild);
                 doc.getRootElement().addContent(element);
 
                 if (newDmdSecs.size() > 1) // check if we have indeed two dmdSecs
                 {
-                    Element newDmdSec2 = (Element) newDmdSecs.get(1).clone();
-                    dmdID = newDmdSec2.getAttributeValue("ID");
-                    doc.getRootElement().addContent(newDmdSec2);
+                    for (int i = 1; i <newDmdSecs.size(); i++) {                        
+                        Element newDmdSec2 = (Element) newDmdSecs.get(i).clone();
+//                        dmdIDpyhs = newDmdSec2.getAttributeValue("ID");
+                        doc.getRootElement().addContent(newDmdSec2);
+                    }
                 }
             } else {
                 // all other elements, just reattach
                 doc.getRootElement().addContent(element);
-                // and set imagepath id for first child in physStructMap
-                if (element.getName().contentEquals("structMap") && element.getAttributeValue("TYPE").contentEquals("PHYSICAL")) {
-                    logger.debug("adding reference DMDID=" + dmdID + " to physical structMap");
+                // set dmdid for boundbook
+                if (dmdIDpyhs != null && element.getName().contentEquals("structMap") && element.getAttributeValue("TYPE").contentEquals("PHYSICAL")) {
+                    logger.debug("adding reference DMDID=" + dmdIDpyhs + " to physical structMap");
                     Element book = element.getChild("div", mets);
-                    book.setAttribute("DMDID", dmdID);
+                    book.setAttribute("DMDID", dmdIDpyhs);
+                }
+                //set dmdid for second logical struct
+                if (element.getName().contentEquals("structMap") && element.getAttributeValue("TYPE").contentEquals("LOGICAL")) {
+                    logger.debug("adding reference DMDID=" + dmdID1 + " to top logical struct");
+                    Element logical1 = element.getChild("div", mets);
+                    Element logical2 = logical1.getChild("div", mets);
+                    
+                    if(dmdID2 != null) {
+                        logger.debug("adding reference DMDID=" + dmdID2 + " to second logical struct");
+                        logical1.setAttribute("DMDID", dmdID1);
+                        logical2.setAttribute("DMDID", dmdID2);
+                    } else {
+                        logical2.setAttribute("DMDID", dmdID1);
+                    }
                 }
             }
         }
@@ -2346,9 +2603,8 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
             String fileName = parts[1].trim();
             File projectDir = new File(exportFolder, projectName);
             if (projectDir.isDirectory()) {
-                File[] subDirs = projectDir.listFiles(MetsDirFilter);
                 File sourceFile = new File(projectDir, fileName);
-                File tempFile = new File(TEMP_DIRECTORY, fileName);
+                File tempFile = new File(TEMP_DIRECTORY, sourceFile.getName());
                 try {
                     CommonUtils.copyFile(sourceFile, tempFile);
                 } catch (IOException e) {
@@ -2362,7 +2618,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                 }
             }
         }
-        
+
         recordList = generateRecordsForImport(recordList);
 
         return recordList;
@@ -2377,16 +2633,29 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     public List<String> getAllFilenames() {
         ArrayList<String> projectList = new ArrayList<String>(projectsCollectionsMap.keySet());
         ArrayList<String> filenameList = new ArrayList<String>();
+        String metsDirName = "";
         try {
             for (String project : projectList) {
                 File projectDir = new File(exportFolder, project);
                 if (projectDir.isDirectory()) {
                     File[] subDirs = projectDir.listFiles(MetsDirFilter);
-                    File[] fileList = projectDir.listFiles(MetsFilter);
+                    File[] fileList = null;
+                    if (subDirs != null) {
+                        for (File metsDir : subDirs) {
+                            fileList = metsDir.listFiles(MetsFilter);
+                            if (fileList != null && fileList.length > 0) {
+                                metsDirName = metsDir.getName() + File.separator;
+                                break;
+                            }
+                        }
+                    }
+                    if (fileList == null || fileList.length == 0) {
+                        fileList = projectDir.listFiles(MetsFilter);
+                    }
                     if (fileList != null && fileList.length > 0) {
                         for (File file : fileList) {
                             // if(updateExistingRecords) {
-                            filenameList.add(project + "::\t" + file.getName());
+                            filenameList.add(project + "::\t" + metsDirName + file.getName());
                         }
                     }
                 }
@@ -2402,7 +2671,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         return filenameList;
     }
 
-    private boolean splitPdf(File pdfFile, File destDir) {
+    private boolean splitPdf(File pdfFile, File destDir, PdfExtractor extractor) {
 
         if (pdfFile == null || !pdfFile.isFile()) {
             return false;
@@ -2412,7 +2681,9 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
             destDir.mkdirs();
         }
 
-        PdfExtractor extractor = new PdfExtractor();
+        if (extractor == null) {
+            extractor = new PdfExtractor();
+        }
 
         return extractor.extractPdfs(pdfFile, destDir, null);
 
@@ -2600,6 +2871,5 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
         // TODO Auto-generated method stub
         return null;
     }
-
 
 }
