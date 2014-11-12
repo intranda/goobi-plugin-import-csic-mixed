@@ -107,7 +107,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
     private static final String NAME = "CSICMixedImport";
-    private static final String VERSION = "1.0.1.0.20140710";
+    private static final String VERSION = "1.0.1.0.20141112";
     private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
     public static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
     private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
@@ -165,25 +165,15 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     // private File exportFolder = new File("example");
 
     public CSICMixedImport() {
-        marcStructTypeMap.put("?monographic", "Monograph");
-        // map.put("?continuing", "Periodical");
-        marcStructTypeMap.put("?continuing", "PeriodicalVolume");
-        // map.put("?multipart monograph", "MultiVolumeWork");
-        marcStructTypeMap.put("?multipart monograph", "Volume");
-        marcStructTypeMap.put("?single unit", "Monograph");
-        // map.put("?integrating resource", "MultiVolumeWork");
-        marcStructTypeMap.put("?integrating resource", "Volume");
-        // map.put("?serial", "Periodical");
-        marcStructTypeMap.put("?serial", "SerialVolume");
-        marcStructTypeMap.put("?cartographic", "Map");
-        marcStructTypeMap.put("?notated music", "SheetMusic");
-        marcStructTypeMap.put("?sound recording-nonmusical", null);
-        marcStructTypeMap.put("?sound recording-musical", null);
-        marcStructTypeMap.put("?moving image", null);
-        marcStructTypeMap.put("?moving image", null);
-        marcStructTypeMap.put("?three dimensional object", null);
-        marcStructTypeMap.put("?software, multimedia", null);
-        marcStructTypeMap.put("?mixed material", null);
+        
+        List<String> docTypesMarc = ConfigPlugins.getPluginConfig(this).getList("DocTypeConfig.DocType[@typeOfResource]");
+        List<String> docTypesGoobi = ConfigPlugins.getPluginConfig(this).getList("DocTypeConfig.DocType[@goobiName]");
+        
+        for (int i = 0; i < docTypesMarc.size(); i++) {
+            String marcName = docTypesMarc.get(i);
+            String goobiName = docTypesGoobi.get(i);
+            marcStructTypeMap.put("?" + marcName, goobiName);
+        }
 
         List<String> projectList = ConfigPlugins.getPluginConfig(this).getList("project[@name]");
         List<String> collectionList = ConfigPlugins.getPluginConfig(this).getList("project[@collection]");
@@ -193,24 +183,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
             String collectionName = collectionList.get(i);
             projectsCollectionsMap.put(projectName, collectionName);
         }
-
-        //        projectsCollectionsMap.put("0001_POQ", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
-        //        projectsCollectionsMap.put("0005_BETN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        //        projectsCollectionsMap.put("0006_PMSC_M_CCHS", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        //        projectsCollectionsMap.put("0006_PMSC_GR_EEA", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
-        //        projectsCollectionsMap.put("0007_PCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        //        projectsCollectionsMap.put("0008_PCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        //        projectsCollectionsMap.put("0009_VCTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        //        projectsCollectionsMap.put("0010_CMTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        //        projectsCollectionsMap.put("0012_CIPP", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
-        //        projectsCollectionsMap.put("0013_JAE", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
-        //        projectsCollectionsMap.put("0014_FMTN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
-        //        projectsCollectionsMap.put("0015_FAG", "BIBLIOTECAS#Centro de Estudios árabes GR-EEA");
-        //        projectsCollectionsMap.put("0016_FAAD", "BIBLIOTECAS#Estación Experimental Aula Dei (Biblioteca) ");
-        //        projectsCollectionsMap.put("0017_FACN", "BIBLIOTECAS#Museo Nacional de Ciencias Naturales (Biblioteca)");
-        //        projectsCollectionsMap.put("0018_ACN_PC",
-        //                "ARCHIVOS#Museo Nacional de Ciencias Naturales (Archivo)#Fondo Personal Científico#Ignacio Bolivar y Urrutia");
-        //        projectsCollectionsMap.put("0030_CETN", "BIBLIOTECAS#Centro de Ciencias Humanas y Sociales (Biblioteca Tomás Navarro Tomás)");
 
     }
 
@@ -1211,10 +1183,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                         if (isManuscript) {
                             dsType = "Manuscript";
                         } else if (dsType == "Monograph" || dsType == null) {
-                            dsType = "SerialVolume";
+                            dsType = "Monograph";
                         }
                     } else if (isManuscript) {
-                        dsType = "SingleManuscript";
+                        dsType = "Manuscript";
                     }
                     // Multivolume may be part of a Series or Periodical. In that case, attach the volumes to the Series/Periodical
                     if (belongsToMultiVolume) {
