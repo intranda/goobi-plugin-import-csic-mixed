@@ -88,6 +88,7 @@ import ugh.exceptions.TypeNotAllowedAsChildException;
 import ugh.exceptions.TypeNotAllowedForParentException;
 import ugh.exceptions.WriteException;
 import ugh.fileformats.mets.MetsMods;
+import de.intranda.goobi.plugins.utils.DocTypeConfiguration;
 import de.intranda.goobi.plugins.utils.ModsUtils;
 import de.intranda.utils.CommonUtils;
 import de.sub.goobi.Beans.Prozess;
@@ -107,7 +108,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     private static final Logger logger = Logger.getLogger(CSICMixedImport.class);
 
     private static final String NAME = "CSICMixedImport";
-    private static final String VERSION = "1.0.1.0.20141112";
+    private static final String VERSION = "1.1.20141121";
     private static final String XSLT_PATH = ConfigMain.getParameter("xsltFolder") + "MARC21slim2MODS3.xsl";
     public static final String MODS_MAPPING_FILE = ConfigMain.getParameter("xsltFolder") + "mods_map.xml";
     private static final String TEMP_DIRECTORY = ConfigMain.getParameter("tempfolder");
@@ -116,7 +117,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
             false));
     public final boolean useSquareBracketsForVolume = (ConfigPlugins.getPluginConfig(this).getBoolean("useSquareBracketsForVolume", false));
     public final boolean addVolumeNoToTitle = (ConfigPlugins.getPluginConfig(this).getBoolean("addVolumeNoToTitle", false));
-    public final boolean archiveImport = (ConfigPlugins.getPluginConfig(this).getBoolean("archiveImport", true));
 
     // Namespaces
     private Namespace mets;
@@ -125,7 +125,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     private String data = "";
     private File importFile = null;
     private String importFolder = "/output";
-    private Map<String, String> marcStructTypeMap = new HashMap<String, String>();
+    private DocTypeConfiguration docTypeConfig;
     private Map<String, VolumeInfo> recordMap = new HashMap<String, VolumeInfo>();
     private Map<String, String> projectsCollectionsMap = new HashMap<String, String>();
     private Map<String, Integer> pageVolumeMap = new HashMap<String, Integer>();
@@ -161,19 +161,14 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
     public final String projectIdentifierTitle = (ConfigPlugins.getPluginConfig(this).getString("projectIdentifier", "projectIdentifier"));
     public File sourceFolder = null;
     public File logFolder = new File("/opt/digiverso/logs/CSIC");
+    public boolean archiveImport = false;
+
 
     // private File exportFolder = new File("example");
 
     public CSICMixedImport() {
         
-        List<String> docTypesMarc = ConfigPlugins.getPluginConfig(this).getList("DocTypeConfig.DocType[@typeOfResource]");
-        List<String> docTypesGoobi = ConfigPlugins.getPluginConfig(this).getList("DocTypeConfig.DocType[@goobiName]");
-        
-        for (int i = 0; i < docTypesMarc.size(); i++) {
-            String marcName = docTypesMarc.get(i);
-            String goobiName = docTypesGoobi.get(i);
-            marcStructTypeMap.put("?" + marcName, goobiName);
-        }
+        docTypeConfig = new DocTypeConfiguration(ConfigPlugins.getPluginConfig(this), null);
 
         List<String> projectList = ConfigPlugins.getPluginConfig(this).getList("project[@name]");
         List<String> collectionList = ConfigPlugins.getPluginConfig(this).getList("project[@collection]");
@@ -199,6 +194,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                 if (pdfFiles != null && pdfFiles.size() > 0) {
                     pdfFile = pdfFiles.get(0);
                 }
+                archiveImport = r.getId().startsWith("CSICAR");
                 String idNumber = r.getId().split("_")[0].replaceAll("\\D", "");
                 VolumeInfo info =
                         new VolumeInfo(idNumber, 1, 1, getPieceDesignation(imageDirs.get(0).getName()), imageDirs.get(0), pdfFile, identifierSuffix,
@@ -1106,10 +1102,10 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                     eleMods = eleMods.getChild("mods", null);
                 }
 
-                if (!archiveImport) {
                     // Determine the root docstruct type
                     dsType = null;
                     dsAnchorType = null;
+                    String typeOfResource = null;
                     boolean belongsToPeriodical = false;
                     boolean belongsToSeries = false;
                     boolean isManuscript = false;
@@ -1126,11 +1122,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                             if ("yes".equals(eleTypeOfResource.getAttributeValue("manuscript"))) {
                                 isManuscript = true;
                             }
-                            if (marcStructTypeMap.get("?" + eleTypeOfResource.getTextTrim()) != null) {
-                                dsType = marcStructTypeMap.get("?" + eleTypeOfResource.getTextTrim());
-                            } else {
-                                dsType = "Monograph";
-                            }
+                            typeOfResource = eleTypeOfResource.getTextTrim();
                         }
                     }
 
@@ -1143,6 +1135,22 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                                 for (Element eleForm : eleFormList) {
                                     if (eleForm.getAttribute("authority") != null && eleForm.getValue().contentEquals("Manuscrito")) {
                                         isManuscript = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // handle archive
+                    List<Element> recordInfoList = eleMods.getChildren("recordInfo", null);
+                    if (physicalDescriptionList != null) {
+                        for (Element recordInfo : recordInfoList) {
+                            List<Element> eleIdList = recordInfo.getChildren("recordIdentifier", null);
+                            if (eleIdList != null) {
+                                for (Element eleId : eleIdList) {
+                                    String id = eleId.getTextTrim();
+                                    if(id != null && id.startsWith("CSICAR")) {
+                                        archiveImport = true;
                                     }
                                 }
                             }
@@ -1172,33 +1180,11 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                         // if (!belongsToPeriodical && !belongsToSeries) {
                         // }
                     }
+                    
+                    boolean multipart = belongsToMultiVolume || belongsToPeriodical || belongsToSeries;
 
-                    if (belongsToPeriodical) {
-                        dsAnchorType = "Periodical";
-                        if (dsType == "Monograph" || dsType == null) {
-                            dsType = "PeriodicalVolume";
-                        }
-                    } else if (belongsToSeries) {
-                        dsAnchorType = "Series";
-                        if (isManuscript) {
-                            dsType = "Manuscript";
-                        } else if (dsType == "Monograph" || dsType == null) {
-                            dsType = "Monograph";
-                        }
-                    } else if (isManuscript) {
-                        dsType = "Manuscript";
-                    }
-                    // Multivolume may be part of a Series or Periodical. In that case, attach the volumes to the Series/Periodical
-                    if (belongsToMultiVolume) {
-                        if (!belongsToPeriodical && !belongsToSeries) {
-                            dsAnchorType = "MultiVolumeWork";
-                        }
-                        if (isManuscript) {
-                            dsType = "Manuscript";
-                        } else if (!belongsToPeriodical && (dsType == "Monograph" || dsType == null)) {
-                            dsType = "Volume";
-                        }
-                    }
+                    dsType = docTypeConfig.getDocType(typeOfResource, multipart, archiveImport);
+                    dsAnchorType = docTypeConfig.getAnchorType(typeOfResource, multipart, archiveImport);
 
                     // remove unnecessary suffixes for everything but multivolumes
                     if (!belongsToMultiVolume) {
@@ -1208,10 +1194,6 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                             identifierSuffix = null;
                         }
                     }
-                } else {
-                    dsType = "CompoundDocument";
-                    dsAnchorType = "ArchiveDocument";
-                }
 
                 logger.debug("Docstruct type: " + dsType);
                 DocStruct dsVolume = dd.createDocStruct(prefs.getDocStrctTypeByName(dsType));
@@ -1221,6 +1203,7 @@ public class CSICMixedImport implements IImportPlugin, IPlugin {
                 }
                 DocStruct dsAnchor = null;
                 if (dsAnchorType != null) {
+                    logger.debug("Anchor type: " + dsAnchorType);
                     dsAnchor = dd.createDocStruct(prefs.getDocStrctTypeByName(dsAnchorType));
                     if (dsAnchor == null) {
                         logger.error("Could not create DocStructType " + dsAnchorType);
